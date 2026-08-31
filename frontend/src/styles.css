@@ -550,3 +550,6 @@ select {
 .toggle-on { background: var(--primary); }
 .toggle-on .toggle-knob { transform: translateX(1.15rem); }
 .toggle:hover:not(:disabled) { border: none; }
+
+.btn-danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 35%, var(--line)); }
+.btn-danger:hover:not(:disabled) { background: var(--bad); border-color: var(--bad); color: #fff; }

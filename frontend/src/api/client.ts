@@ -100,4 +100,7 @@ export const api = {
     request('/settings/reset', settings, { method: 'POST', body: '{}' }),
 
   availableModels: () => request('/settings/models', availableModels),
+
+  resetLearner: (): Promise<LearnerSnapshot> =>
+    request('/learner', learnerSnapshot, { method: 'DELETE' }),
 }

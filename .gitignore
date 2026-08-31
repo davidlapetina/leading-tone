@@ -11,3 +11,5 @@ dist/
 test-results/
 playwright-report/
 backend/data/
+backend/target/
+frontend/dist/

@@ -29,6 +29,14 @@ export function SettingsView() {
     },
   }
   const save = useMutation({ mutationFn: api.saveSettings, ...afterSave })
+
+  const startOver = async () => {
+    if (!window.confirm('Delete everything the tutor has learned about you? This cannot be undone.')) {
+      return
+    }
+    await api.resetLearner()
+    void queryClient.invalidateQueries()
+  }
   const reset = useMutation({ mutationFn: api.resetSettings, ...afterSave })
 
   if (!draft) {
@@ -153,6 +161,26 @@ export function SettingsView() {
         <h2>You</h2>
         <Field label="What to call you" hint="Used when the tutor addresses you.">
           <input value={draft.learnerName} onChange={(event) => set('learnerName', event.target.value)} />
+        </Field>
+      </section>
+
+      <section className="panel-card">
+        <h2>Your progress</h2>
+        <Field
+          label="Take a copy"
+          hint="Everything the tutor knows about you, in one file: concepts, evidence and mistakes."
+        >
+          <a className="btn-ghost" href="/api/learner/export" download="leading-tone.json">
+            Export
+          </a>
+        </Field>
+        <Field
+          label="Start over"
+          hint="Deletes everything it has learned about you. There is no undo, so export first."
+        >
+          <button type="button" className="btn-danger" onClick={() => void startOver()}>
+            Start over
+          </button>
         </Field>
       </section>
     </div>
