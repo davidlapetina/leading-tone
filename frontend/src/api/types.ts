@@ -133,6 +133,25 @@ export const evidenceRow = z.object({
   createdAt: z.string(),
 })
 
+export const settings = z.object({
+  llmEnabled: z.boolean(),
+  toolsEnabled: z.boolean(),
+  model: z.string(),
+  baseUrl: z.string(),
+  temperature: z.number(),
+  numCtx: z.number(),
+  think: z.boolean(),
+  timeoutSeconds: z.number(),
+  cooldownSeconds: z.number(),
+  memoryMessages: z.number(),
+  learnerName: z.string(),
+})
+
+export const availableModels = z.object({
+  reachable: z.boolean(),
+  models: z.array(z.string()),
+})
+
 export const tutorStatus = z.object({
   narrator: z.string(),
   languageModelAvailable: z.boolean(),
@@ -152,3 +171,4 @@ export type Lesson = z.infer<typeof lesson>
 export type LessonSection = z.infer<typeof lessonSection>
 export type TeachingDecision = z.infer<typeof teachingDecision>
 export type EvidenceRow = z.infer<typeof evidenceRow>
+export type Settings = z.infer<typeof settings>

@@ -3,8 +3,6 @@ package fr.lapetina.music.llm;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
-import io.quarkiverse.langchain4j.RegisterAiService;
-import jakarta.enterprise.context.ApplicationScoped;
 import java.util.UUID;
 
 /**
@@ -16,8 +14,6 @@ import java.util.UUID;
  * answer — is computed in Java and handed over in the prompt, so removing tools costs
  * accuracy nowhere; it only removes the model's ability to look things up mid-sentence.
  */
-@ApplicationScoped
-@RegisterAiService
 public interface PlainTutorAiService {
 
     @SystemMessage(TutorPrompts.SYSTEM)

@@ -125,11 +125,16 @@ button, input { font-family: inherit; }
 .nav-item:hover { background: var(--card-soft); color: var(--ink); }
 .nav-glyph { font-size: 1.05rem; line-height: 1; opacity: 0.85; }
 
-.nav-item-on, .nav-item-on:hover {
+/* Scoped to .sidebar so it out-specifies the global button:hover rule further down.
+   Without that, hovering the selected item paints its label blue on blue. */
+.sidebar .nav-item-on,
+.sidebar .nav-item-on:hover {
   background: var(--primary);
   color: #fff;
   box-shadow: var(--shadow-sm);
 }
+
+.sidebar .nav-item:hover { border-color: transparent; }
 
 .sidebar-foot {
   margin-top: auto;
@@ -506,3 +511,42 @@ input:focus { outline: none; border-color: var(--primary); }
 }
 
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ---------------------------------------------------------------- settings */
+
+.view-settings { max-width: 46rem; }
+.settings-actions { display: flex; gap: 0.6rem; }
+
+.setting {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.panel-card .setting:first-of-type { border-top: none; }
+
+.setting-label { display: flex; flex-direction: column; gap: 0.15rem; font-weight: 500; }
+.setting-hint { font-weight: 400; font-size: 0.79rem; color: var(--ink-dim); max-width: 30rem; }
+.setting-control { display: flex; justify-content: flex-end; }
+.setting-control input, .setting-control select { width: 13rem; }
+
+select {
+  background: var(--card); border: 1px solid var(--line); border-radius: 9px;
+  color: var(--ink); font-size: 0.92rem; padding: 0.5rem 0.7rem; font-family: var(--mono);
+}
+.setting-control input[type='number'] { width: 7rem; font-family: var(--mono); text-align: right; }
+
+.toggle {
+  width: 2.7rem; height: 1.55rem; border-radius: 999px; padding: 0;
+  background: var(--line); border: none; position: relative; transition: background 140ms ease;
+}
+.toggle-knob {
+  position: absolute; top: 0.2rem; left: 0.2rem; width: 1.15rem; height: 1.15rem;
+  border-radius: 50%; background: #fff; box-shadow: var(--shadow-sm); transition: transform 140ms ease;
+}
+.toggle-on { background: var(--primary); }
+.toggle-on .toggle-knob { transform: translateX(1.15rem); }
+.toggle:hover:not(:disabled) { border: none; }

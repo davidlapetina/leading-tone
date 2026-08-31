@@ -30,8 +30,10 @@ identical pedagogy. That is the point, and it is how the tests run.
 
 ## 1. Install the dependencies
 
-You need: **Java 21**, **Maven** (the wrapper is included), **Node 20+**, **pnpm**,
-**Docker**, and optionally **Ollama** for the language model.
+You need: **Java 21**, **Maven** (the wrapper is included), **Node 20+** and **pnpm**.
+**Ollama** is optional — without it the tutor still teaches, just more plainly.
+
+Docker is not required.
 
 ### macOS
 
@@ -40,7 +42,6 @@ You need: **Java 21**, **Maven** (the wrapper is included), **Node 20+**, **pnpm
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 brew install openjdk@21 node git jq
-brew install --cask docker        # then launch Docker Desktop once, so the daemon runs
 npm install -g pnpm
 
 export JAVA_HOME=$(/usr/libexec/java_home -v 21)
@@ -55,8 +56,7 @@ Maven itself is not required: `backend/mvnw` downloads the version this project 
 
 ```bash
 sudo apt update
-sudo apt install -y openjdk-21-jdk git curl jq docker.io docker-compose-v2
-sudo usermod -aG docker "$USER"   # log out and back in for this to take effect
+sudo apt install -y openjdk-21-jdk git curl jq
 
 # Node 20+ via nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
@@ -72,7 +72,6 @@ curl -fsSL https://ollama.com/install.sh | sh    # optional
 java -version     # 21.x
 node --version    # 20+
 pnpm --version
-docker info       # the daemon must be running
 ```
 
 ## 2. Get the code and its packages
@@ -87,21 +86,18 @@ The backend downloads its own dependencies on first build; nothing to do by hand
 ## 3. Run it
 
 ```bash
-make db          # PostgreSQL 17 in Docker, on port 5433
 make backend     # the API on port 8088
 make frontend    # the interface on port 5173
 ```
 
-Each in its own terminal. Then open <http://localhost:5173>.
+Two terminals. Then open <http://localhost:5173>.
 
-Flyway creates the schema on first start and the concept graph is seeded automatically.
-There is no manual database setup and no SQL to run by hand.
+**There is no database to install.** Progress is kept in an H2 file under `backend/data/`:
+no server, no container, nothing running in the background. Flyway creates the schema on
+first start and the concept graph is seeded automatically.
 
-### Ports
-
-**5433** for Postgres and **8088** for the API, both deliberately off the usual
-5432/8080 so this can run beside another stack. Override with `MUSIC_DB_PORT` and
-`MUSIC_HTTP_PORT`.
+The API listens on **8088**, deliberately off the usual 8080 so it can run beside another
+stack. Override with `MUSIC_HTTP_PORT`.
 
 ## 4. The language model (optional)
 
@@ -160,22 +156,27 @@ either in words ("let me play these") or with the **Mixed / Play / Write** contr
 
 ## 6. Configuration
 
-Every setting has a working default. Nothing below is required.
+**In the application, under Settings** — not in environment variables or a `.env` file.
+Everything is kept in the database, survives restarts, and takes effect on the next turn:
+changing the model rebuilds it rather than requiring a restart.
 
-| Variable | Default | |
+| Setting | Default | |
 |---|---|---|
-| `MUSIC_HTTP_PORT` | `8088` | API port |
-| `MUSIC_DB_PORT` | `5433` | Postgres port, host side |
-| `MUSIC_LLM_ENABLED` | `true` | `false` runs the tutor on templates only |
-| `MUSIC_LLM_TOOLS` | `true` | gives the model the theory engine as tools |
-| `MUSIC_LLM_COOLDOWN` | `PT2M` | how long to stop calling a model that failed |
-| `MUSIC_LEARNER_NAME` | `Student` | what the tutor calls you |
-| `OLLAMA_MODEL` | `qwen3:8b` | any Ollama model |
-| `OLLAMA_URL` | `http://localhost:11434` | |
-| `OLLAMA_TIMEOUT` | `60s` | per model call |
-| `DB_URL`, `DB_USER`, `DB_PASSWORD` | local Postgres | production profile only |
+| Use a language model | on | off gives short, deterministic teaching with no wait |
+| Model | `qwen3:8b` | chosen from what Ollama actually has installed |
+| Ollama address | `http://localhost:11434` | |
+| Theory tools | on | lets the model look chords up |
+| Reasoning | off | Qwen3 thinks before answering: three times slower here, and worse |
+| Temperature | 0.8 | |
+| Context window | 8192 | too small and each turn is slower than the last |
+| Conversation kept | 10 messages | |
+| Timeout | 60s | |
+| Cooldown after failure | 120s | how long to stop calling a model that failed |
+| What to call you | `Student` | |
 
-No secrets are needed for the default setup, and none are committed.
+*Restore defaults* puts everything back. The only environment variable left is
+`MUSIC_HTTP_PORT` (default `8088`), because the port has to be known before the database
+is open. No secrets are needed, and none are committed.
 
 ## 7. Tests
 
@@ -185,11 +186,12 @@ make test-e2e    # Playwright, against the running stack
 make check       # the above, plus typecheck and production build
 ```
 
-`make test` needs Docker running: the backend integration tests get a throwaway Postgres
-from Quarkus Dev Services (Testcontainers underneath). No test needs a language model.
+No test needs Docker, a database server, or a language model: the backend suite runs
+against an in-memory database and the deterministic tutor.
 
-For `make test-e2e`, start `make db` and a backend with `MUSIC_LLM_ENABLED=false` first —
-the Makefile target reminds you. Playwright downloads Chromium on first use:
+For `make test-e2e`, start a backend first; the specs switch the language model off through
+the settings API so they test the tutor rather than a model's wording. Playwright downloads
+Chromium on first use:
 
 ```bash
 cd frontend && pnpm exec playwright install chromium

@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 public class LearnerService {
@@ -26,8 +25,12 @@ public class LearnerService {
     @Inject
     MasteryService masteryService;
 
-    @ConfigProperty(name = "music.learner.default-name", defaultValue = "Student")
-    String defaultName;
+    @Inject
+    fr.lapetina.music.settings.SettingsService settingsService;
+
+    private String defaultName() {
+        return settingsService.current().learnerName;
+    }
 
     /**
      * The learner this installation teaches, at a fixed identity so that two concurrent
@@ -36,14 +39,14 @@ public class LearnerService {
     @Transactional
     public Learner current() {
         Learner existing = Learner.findById(Learner.SINGLETON_ID);
-        return existing != null ? existing : Learner.createSingleton(defaultName);
+        return existing != null ? existing : Learner.createSingleton(defaultName());
     }
 
     /** Wipes everything known about the learner and starts them again from nothing. */
     @Transactional
     public Learner reset() {
         Learner.deleteAll();
-        return Learner.createSingleton(defaultName);
+        return Learner.createSingleton(defaultName());
     }
 
     public Optional<Learner> find(UUID id) {

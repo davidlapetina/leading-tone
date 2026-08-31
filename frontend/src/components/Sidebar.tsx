@@ -1,9 +1,10 @@
-export type View = 'learn' | 'practise' | 'progress'
+export type View = 'learn' | 'practise' | 'progress' | 'settings'
 
 const ITEMS: { id: View; label: string; glyph: string; hint: string }[] = [
   { id: 'learn', label: 'Learn', glyph: '◳', hint: 'Read a topic before you are asked about it' },
   { id: 'practise', label: 'Practise', glyph: '◑', hint: 'Work with the tutor' },
   { id: 'progress', label: 'Progress', glyph: '◔', hint: 'What the tutor believes you know' },
+  { id: 'settings', label: 'Settings', glyph: '⚙', hint: 'The model, and how it is tuned' },
 ]
 
 export function Sidebar({ view, onChange }: { view: View; onChange: (view: View) => void }) {

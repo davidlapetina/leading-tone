@@ -1,8 +1,8 @@
 package fr.lapetina.music.llm;
 
-import jakarta.annotation.PostConstruct;
+import fr.lapetina.music.settings.Settings;
+import fr.lapetina.music.settings.SettingsService;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import java.time.Duration;
 import java.time.Instant;
@@ -26,50 +26,27 @@ public class RoutingTutorModel implements TutorModel {
     private final TemplateTutor fallback = new TemplateTutor();
 
     @Inject
-    Instance<TutorAiService> withTools;
+    TutorAiFactory factory;
 
     @Inject
-    Instance<PlainTutorAiService> withoutTools;
+    SettingsService settingsService;
 
     @Inject
     TutorPromptBuilder promptBuilder;
 
-    @ConfigProperty(name = "music.llm.enabled", defaultValue = "true")
-    boolean llmEnabled;
-
-    /**
-     * Off by default: the default model is a small local one, and small models tend to
-     * type tool calls out as text rather than call them. Turn it on for a model that
-     * handles tools properly.
-     */
-    @ConfigProperty(name = "music.llm.tools-enabled", defaultValue = "false")
-    boolean toolsEnabled;
-
-    @ConfigProperty(name = "quarkus.langchain4j.ollama.chat-model.model-id", defaultValue = "unknown")
-    String modelId;
-
-    /**
-     * How long to stop calling the model after it fails. Local models fail slowly, and
-     * paying that on every turn is worse than the templates.
-     */
-    @ConfigProperty(name = "music.llm.failure-cooldown", defaultValue = "PT2M")
-    Duration failureCooldown;
-
-    private FailureWindow failures;
-
-    @PostConstruct
-    void init() {
-        failures = new FailureWindow(failureCooldown);
-    }
+    private volatile FailureWindow failures = new FailureWindow(Duration.ofMinutes(2));
+    private volatile long cooldownSeconds = 120;
 
     @Override
     public String respond(TutorRequest request) {
+        Settings settings = settingsService.current();
+        useCooldown(settings.cooldownSeconds);
         Instant now = Instant.now();
-        if (!llmEnabled || !available() || failures.isOpen(now)) {
+        if (!settings.llmEnabled || failures.isOpen(now)) {
             return fallback.respond(request);
         }
         try {
-            String answer = call(request);
+            String answer = call(request, settings);
             failures.recordSuccess();
 
             if (answer == null || answer.isBlank()) {
@@ -85,24 +62,32 @@ public class RoutingTutorModel implements TutorModel {
             return trimmed;
         } catch (RuntimeException modelFailure) {
             failures.recordFailure(Instant.now(), modelFailure.getMessage());
-            LOG.warnf("Language model unavailable; using templates for the next %s: %s",
-                    failureCooldown, modelFailure.getMessage());
+            LOG.warnf("Language model unavailable; using templates for the next %ds: %s",
+                    cooldownSeconds, modelFailure.getMessage());
             return fallback.respond(request);
         }
     }
 
-    private String call(TutorRequest request) {
+    private String call(TutorRequest request, Settings settings) {
         String learnerState = promptBuilder.learnerState(request.snapshot());
         String instruction = promptBuilder.instruction(request.decision());
         String exerciseBlock = exerciseBlock(request);
         String learnerMessage = learnerMessage(request);
 
-        if (toolsEnabled && withTools.isResolvable()) {
-            return withTools.get().teach(request.sessionId(), learnerState, instruction, exerciseBlock,
-                    learnerMessage);
+        Object service = factory.current(settings);
+        if (service instanceof TutorAiService withTools) {
+            return withTools.teach(request.sessionId(), learnerState, instruction, exerciseBlock, learnerMessage);
         }
-        return withoutTools.get().teach(request.sessionId(), learnerState, instruction, exerciseBlock,
-                learnerMessage);
+        return ((PlainTutorAiService) service)
+                .teach(request.sessionId(), learnerState, instruction, exerciseBlock, learnerMessage);
+    }
+
+    /** The cooldown is a setting, so the window follows it without a restart. */
+    private void useCooldown(int seconds) {
+        if (seconds != cooldownSeconds) {
+            cooldownSeconds = seconds;
+            failures = new FailureWindow(Duration.ofSeconds(seconds));
+        }
     }
 
     /**
@@ -118,10 +103,6 @@ public class RoutingTutorModel implements TutorModel {
             return true;
         }
         return answer.contains("\"parameters\":") || answer.contains("\"arguments\":");
-    }
-
-    private boolean available() {
-        return toolsEnabled ? withTools.isResolvable() : withoutTools.isResolvable();
     }
 
     private String exerciseBlock(TutorRequest request) {
@@ -148,21 +129,13 @@ public class RoutingTutorModel implements TutorModel {
 
     @Override
     public boolean isAvailable() {
-        return llmEnabled && available() && !failures.isOpen(Instant.now());
-    }
-
-    /** Which model is actually configured, so the interface can say so. */
-    public String modelId() {
-        return modelId;
-    }
-
-    public boolean toolsEnabled() {
-        return toolsEnabled;
+        return settingsService.current().llmEnabled && !failures.isOpen(Instant.now());
     }
 
     @Override
     public String describe() {
-        if (!llmEnabled) {
+        Settings settings = settingsService.current();
+        if (!settings.llmEnabled) {
             return "template (language model disabled)";
         }
         Instant now = Instant.now();
@@ -170,6 +143,6 @@ public class RoutingTutorModel implements TutorModel {
             return "template (model unreachable, retrying in %ds: %s)"
                     .formatted(failures.remaining(now).toSeconds(), failures.lastFailure());
         }
-        return toolsEnabled ? "language model with theory tools" : "language model";
+        return settings.toolsEnabled ? "language model with theory tools" : "language model";
     }
 }

@@ -45,7 +45,7 @@ public class TutorResource {
     TutorModel tutorModel;
 
     @Inject
-    fr.lapetina.music.llm.RoutingTutorModel routingModel;
+    fr.lapetina.music.settings.SettingsService settingsService;
 
     @Inject
     ConceptGraph conceptGraph;
@@ -121,11 +121,12 @@ public class TutorResource {
     @GET
     @Path("/status")
     public Views.TutorStatusView status() {
+        var settings = settingsService.current();
         return new Views.TutorStatusView(
                 tutorModel.describe(),
                 tutorModel.isAvailable(),
-                routingModel.modelId(),
-                routingModel.toolsEnabled(),
+                settings.model,
+                settings.toolsEnabled,
                 conceptGraph.size());
     }
 

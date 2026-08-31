@@ -2,8 +2,16 @@ import { expect, test, type Page } from '@playwright/test'
 
 const API = 'http://localhost:8088/api'
 
-/** Starts every scenario from an empty learner model, so the tutor really is starting cold. */
+/**
+ * Starts every scenario from an empty learner model, with the language model switched off.
+ *
+ * These test the tutor's behaviour, not a model's wording, so they run against the
+ * deterministic teacher — which is also instant, and keeps the suite honest about what it
+ * is actually checking.
+ */
 async function resetLearner(page: Page) {
+  const off = await page.request.put(`${API}/settings`, { data: { llmEnabled: false } })
+  expect(off.ok(), 'settings should be editable').toBeTruthy()
   const response = await page.request.delete(`${API}/learner`)
   expect(response.ok(), 'the learner reset endpoint should be available in dev').toBeTruthy()
 }
@@ -128,6 +136,23 @@ test.describe('the tutor', () => {
   test('says that answers can be played on screen when no instrument is attached', async ({ page }) => {
     await openTutor(page)
     await expect(page.locator('.pill').last()).toHaveText(/on-screen piano/i)
+  })
+
+  test('the model can be changed from the interface, without a restart', async ({ page }) => {
+    await resetLearner(page)
+    await page.goto('/')
+    await page.getByTitle('The model, and how it is tuned').click()
+    await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible()
+
+    // Configuration is persisted, so what is on screen is what the application will use.
+    const stored = await (await page.request.get(`${API}/settings`)).json()
+    expect(stored.llmEnabled).toBe(false)
+
+    await page.getByRole('button', { name: 'Restore defaults' }).click()
+    await expect(page.getByRole('button', { name: 'Saved' })).toBeVisible()
+    const afterReset = await (await page.request.get(`${API}/settings`)).json()
+    expect(afterReset.model).toBe('qwen3:8b')
+    expect(afterReset.numCtx).toBe(8192)
   })
 
   test('teaches a topic before asking about it', async ({ page }) => {

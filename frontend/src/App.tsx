@@ -8,6 +8,7 @@ import { LearnView } from './views/LearnView'
 import { LessonView } from './views/LessonView'
 import { PractiseView } from './views/PractiseView'
 import { ProgressView } from './views/ProgressView'
+import { SettingsView } from './views/SettingsView'
 
 export default function App() {
   const { sessionId, entries, current, busy, error, start, send, play, clearError } = useTutorStore()
@@ -82,7 +83,15 @@ export default function App() {
       <div className="app-body">
         <header className="topbar">
           <span className="topbar-title">
-            {view === 'learn' && lessonId ? 'Lesson' : view === 'learn' ? 'Topics' : view === 'practise' ? 'With the tutor' : 'Your progress'}
+            {view === 'learn' && lessonId
+              ? 'Lesson'
+              : view === 'learn'
+                ? 'Topics'
+                : view === 'practise'
+                  ? 'With the tutor'
+                  : view === 'progress'
+                    ? 'Your progress'
+                    : 'Settings'}
           </span>
           <div className="topbar-right">
             {status && (
@@ -131,6 +140,7 @@ export default function App() {
             />
           )}
           {view === 'progress' && <ProgressView onOpen={openLesson} />}
+          {view === 'settings' && <SettingsView />}
         </main>
       </div>
     </div>

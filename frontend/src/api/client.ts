@@ -1,13 +1,16 @@
 import { z } from 'zod'
 import {
+  availableModels,
   evidenceRow,
   learnerSnapshot,
   lesson,
+  settings,
   teachingDecision,
   tutorStatus,
   tutorTurn,
   type EvidenceRow,
   type LearnerSnapshot,
+  type Settings,
   type Lesson,
   type TeachingDecision,
   type TutorStatus,
@@ -87,4 +90,14 @@ export const api = {
 
   evidence: (limit = 25): Promise<EvidenceRow[]> =>
     request(`/learner/evidence?limit=${limit}`, z.array(evidenceRow)),
+
+  settings: (): Promise<Settings> => request('/settings', settings),
+
+  saveSettings: (change: Partial<Settings>): Promise<Settings> =>
+    request('/settings', settings, { method: 'PUT', body: JSON.stringify(change) }),
+
+  resetSettings: (): Promise<Settings> =>
+    request('/settings/reset', settings, { method: 'POST', body: '{}' }),
+
+  availableModels: () => request('/settings/models', availableModels),
 }
