@@ -34,6 +34,14 @@ async function send(page: Page, text: string) {
   await page.getByRole('button', { name: /^Send$/ }).click()
 }
 
+// Running the suite must not quietly leave the application configured differently from
+// how it was found — switching the model off is a test fixture, not a preference.
+test.afterAll(async ({ playwright }) => {
+  const request = await playwright.request.newContext()
+  await request.put(`${API}/settings`, { data: { llmEnabled: true } })
+  await request.dispose()
+})
+
 test.describe('the tutor', () => {
   test('opens by finding out what the learner knows, not by announcing a lesson', async ({ page }) => {
     await openTutor(page)
