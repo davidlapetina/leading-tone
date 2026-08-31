@@ -1,0 +1,178 @@
+[
+  {
+    "id": "note",
+    "name": "Notes and the keyboard",
+    "description": "Letter names, sharps and flats, enharmonic spelling, and where each note sits on the keyboard.",
+    "prerequisites": [],
+    "category": "FUNDAMENTALS",
+    "intrinsicDifficulty": 0.10
+  },
+  {
+    "id": "interval",
+    "name": "Intervals",
+    "description": "Distance between two notes measured as a number plus a quality: M3, m3, P5, A4, d5.",
+    "prerequisites": ["note"],
+    "category": "FUNDAMENTALS",
+    "intrinsicDifficulty": 0.30
+  },
+  {
+    "id": "major-scale",
+    "name": "The major scale",
+    "description": "The whole-and-half-step pattern that generates every major key, and its spelling rule of one note per letter.",
+    "prerequisites": ["interval"],
+    "category": "SCALES",
+    "intrinsicDifficulty": 0.25
+  },
+  {
+    "id": "key-signature",
+    "name": "Key signatures",
+    "description": "The circle of fifths, how many sharps or flats each key carries, and how to name a key from its signature.",
+    "prerequisites": ["major-scale"],
+    "category": "SCALES",
+    "intrinsicDifficulty": 0.35
+  },
+  {
+    "id": "scale-degree",
+    "name": "Scale degrees",
+    "description": "Numbering notes within a key and naming them: tonic, supertonic, mediant, subdominant, dominant, submediant, leading tone.",
+    "prerequisites": ["major-scale"],
+    "category": "SCALES",
+    "intrinsicDifficulty": 0.30
+  },
+  {
+    "id": "minor-scale",
+    "name": "Minor scales",
+    "description": "Natural, harmonic and melodic minor, and why the seventh degree gets raised.",
+    "prerequisites": ["major-scale", "interval"],
+    "category": "SCALES",
+    "intrinsicDifficulty": 0.40
+  },
+  {
+    "id": "mode",
+    "name": "Modes",
+    "description": "Dorian through Locrian as rotations of the major scale, and the single note that gives each its colour.",
+    "prerequisites": ["major-scale", "scale-degree"],
+    "category": "SCALES",
+    "intrinsicDifficulty": 0.50
+  },
+  {
+    "id": "triad",
+    "name": "Triads",
+    "description": "Stacking two thirds to build major, minor, diminished and augmented triads.",
+    "prerequisites": ["interval"],
+    "category": "CHORDS",
+    "intrinsicDifficulty": 0.30
+  },
+  {
+    "id": "chord-inversion",
+    "name": "Inversions",
+    "description": "Which chord tone sits in the bass, and why that changes the sound without changing the chord.",
+    "prerequisites": ["triad"],
+    "category": "CHORDS",
+    "intrinsicDifficulty": 0.45
+  },
+  {
+    "id": "diatonic-triads",
+    "name": "Diatonic triads",
+    "description": "The seven triads a key produces, and the fixed pattern of qualities they follow.",
+    "prerequisites": ["major-scale", "triad"],
+    "category": "CHORDS",
+    "intrinsicDifficulty": 0.40
+  },
+  {
+    "id": "seventh-chord",
+    "name": "Seventh chords",
+    "description": "Adding a seventh above the root: major, minor, dominant, half-diminished and fully diminished.",
+    "prerequisites": ["triad", "interval"],
+    "category": "CHORDS",
+    "intrinsicDifficulty": 0.50
+  },
+  {
+    "id": "roman-numeral",
+    "name": "Roman numerals",
+    "description": "Naming chords by their scale degree and quality so that harmony transposes to any key.",
+    "prerequisites": ["diatonic-triads", "scale-degree"],
+    "category": "HARMONY",
+    "intrinsicDifficulty": 0.45
+  },
+  {
+    "id": "figured-bass",
+    "name": "Figured bass",
+    "description": "The 6, 6/4, 6/5, 4/3 and 4/2 figures that show inversion under a Roman numeral.",
+    "prerequisites": ["chord-inversion", "roman-numeral"],
+    "category": "HARMONY",
+    "intrinsicDifficulty": 0.55
+  },
+  {
+    "id": "harmonic-function",
+    "name": "Harmonic function",
+    "description": "Chords grouped by the job they do: tonic, predominant, dominant.",
+    "prerequisites": ["roman-numeral"],
+    "category": "HARMONY",
+    "intrinsicDifficulty": 0.50
+  },
+  {
+    "id": "tonic-function",
+    "name": "Tonic function",
+    "description": "I, vi and iii as places of rest, and what makes a chord sound like home.",
+    "prerequisites": ["harmonic-function"],
+    "category": "HARMONY",
+    "intrinsicDifficulty": 0.45
+  },
+  {
+    "id": "predominant-function",
+    "name": "Predominant function",
+    "description": "IV and ii as the approach to the dominant.",
+    "prerequisites": ["harmonic-function"],
+    "category": "HARMONY",
+    "intrinsicDifficulty": 0.50
+  },
+  {
+    "id": "dominant-function",
+    "name": "Dominant function",
+    "description": "V and vii° as tension, and the leading tone that pulls back to the tonic.",
+    "prerequisites": ["harmonic-function", "scale-degree"],
+    "category": "HARMONY",
+    "intrinsicDifficulty": 0.55
+  },
+  {
+    "id": "dominant-seventh",
+    "name": "The dominant seventh",
+    "description": "V7 and the tritone between its third and seventh, which is what actually demands resolution.",
+    "prerequisites": ["seventh-chord", "dominant-function"],
+    "category": "HARMONY",
+    "intrinsicDifficulty": 0.60
+  },
+  {
+    "id": "cadence",
+    "name": "Cadences",
+    "description": "Authentic, half, plagal and deceptive: how a phrase closes, and how strongly.",
+    "prerequisites": ["dominant-function", "tonic-function"],
+    "category": "FORM",
+    "intrinsicDifficulty": 0.55
+  },
+  {
+    "id": "voice-leading",
+    "name": "Voice leading",
+    "description": "Moving each voice as little as possible, resolving tendency tones, and avoiding parallel fifths and octaves.",
+    "prerequisites": ["chord-inversion", "dominant-seventh"],
+    "category": "VOICE_LEADING",
+    "intrinsicDifficulty": 0.70
+  },
+  {
+    "id": "secondary-dominant",
+    "name": "Secondary dominants",
+    "description": "Borrowing a dominant from another key to tonicise a chord: V7/V, V/vi, vii°7/ii.",
+    "prerequisites": ["dominant-seventh", "roman-numeral", "key-signature"],
+    "category": "HARMONY",
+    "intrinsicDifficulty": 0.75
+  },
+  {
+    "id": "modulation",
+    "name": "Modulation",
+    "description": "Changing key for real: pivot chords, direct modulation, and confirming the new key with a cadence.",
+    "prerequisites": ["secondary-dominant", "cadence", "key-signature"],
+    "category": "FORM",
+    "intrinsicDifficulty": 0.85
+  }
+]

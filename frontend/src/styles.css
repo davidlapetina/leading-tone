@@ -1,0 +1,533 @@
+:root {
+  --bg: #12100f;
+  --panel: #1a1817;
+  --line: #2c2927;
+  --ink: #e8e3dd;
+  --ink-dim: #8f8880;
+  --accent: #d8a657;
+  --correct: #89b482;
+  --partial: #d8a657;
+  --wrong: #d16d6a;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #faf7f2;
+    --panel: #f2ede4;
+    --line: #ddd5c8;
+    --ink: #23201c;
+    --ink-dim: #6d665d;
+    --accent: #9a6b1e;
+    --correct: #3f7d3a;
+    --partial: #9a6b1e;
+    --wrong: #b03a36;
+    color-scheme: light;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.55 ui-serif, Georgia, 'Times New Roman', serif;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.7rem 1.2rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.app-header h1 {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* The natural sign, because the name is a note and the mark says so quietly. */
+.wordmark-note {
+  color: var(--accent);
+  margin-left: 0.35rem;
+  font-size: 1.15em;
+  line-height: 1;
+}
+
+.header-right {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.72rem;
+}
+
+.narrator,
+.midi {
+  color: var(--ink-dim);
+}
+
+.midi-on {
+  color: var(--correct);
+}
+
+.app-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.column-conversation {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--line);
+}
+
+.conversation {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.6rem 2rem;
+}
+
+.turn {
+  margin: 0 0 1.6rem;
+  max-width: 40rem;
+}
+
+.turn-learner .turn-text {
+  color: var(--ink-dim);
+  font-style: italic;
+}
+
+.turn-learner .turn-text::before {
+  content: '› ';
+}
+
+.turn-text {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.turn-meta {
+  display: flex;
+  gap: 0.55rem;
+  align-items: baseline;
+  margin: 0.5rem 0 0;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  cursor: help;
+}
+
+/* What the question wants of you, next to why it was asked. */
+.turn-kind {
+  color: var(--accent);
+}
+
+.turn-kind::before {
+  content: '· ';
+  color: var(--ink-dim);
+}
+
+.verdict {
+  margin: 0 0 0.5rem;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.74rem;
+}
+
+.verdict-correct {
+  color: var(--correct);
+}
+
+.verdict-partially_correct,
+.verdict-skipped {
+  color: var(--partial);
+}
+
+.verdict-incorrect {
+  color: var(--wrong);
+}
+
+/* The generated question, set apart from the tutor's prose. It is the thing actually
+   being marked, so it is never left implicit in the wording. */
+.ask {
+  margin: 0.7rem 0 0;
+  padding: 0.55rem 0 0.55rem 0.85rem;
+  border-left: 2px solid var(--accent);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ask-text {
+  margin: 0;
+  color: var(--accent);
+}
+
+.score {
+  margin: 0.7rem 0;
+  background: #fbf9f5;
+  border-radius: 3px;
+  padding: 0.3rem 0.6rem;
+  max-width: 32rem;
+  overflow-x: auto;
+}
+
+.thinking {
+  color: var(--ink-dim);
+  letter-spacing: 0.3em;
+}
+
+.composer {
+  border-top: 1px solid var(--line);
+  padding: 0.9rem 2rem 1.1rem;
+}
+
+.keyboard-prompt {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 0.7rem;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.75rem;
+  color: var(--ink-dim);
+}
+
+.played {
+  color: var(--accent);
+  min-width: 8rem;
+}
+
+.composer-row {
+  display: flex;
+  gap: 0.6rem;
+}
+
+input {
+  flex: 1;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink);
+  font: inherit;
+  padding: 0.55rem 0.75rem;
+}
+
+input:focus {
+  outline: 1px solid var(--accent);
+}
+
+button {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 0.5rem 0.9rem;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+button:disabled {
+  color: var(--ink-dim);
+  cursor: not-allowed;
+}
+
+.panel {
+  overflow-y: auto;
+  padding: 1.6rem 1.3rem 2.5rem;
+  background: var(--panel);
+  font-size: 0.82rem;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.9rem;
+}
+
+.panel-block { display: flex; flex-direction: column; gap: 0.7rem; }
+
+.panel h2 {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin: 0;
+  font-weight: 600;
+}
+
+.panel h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+}
+
+.category { margin-bottom: 0.9rem; }
+
+.count {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.62rem;
+  color: var(--ink-dim);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.rationale {
+  font-size: 0.84rem;
+  color: var(--ink-mid, var(--ink-dim));
+  font-style: italic;
+  line-height: 1.45;
+}
+
+/* A three-way control: the tutor chooses what to teach, the learner chooses the form. */
+.practice-menu { display: flex; gap: 0; }
+
+.practice-menu button {
+  flex: 1;
+  border-radius: 0;
+  font-size: 0.76rem;
+  padding: 0.35rem 0.4rem;
+  border-right-width: 0;
+}
+
+.practice-menu button:first-child { border-radius: 3px 0 0 3px; }
+.practice-menu button:last-child { border-radius: 0 3px 3px 0; border-right-width: 1px; }
+
+.practice-menu button.chosen {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
+.practice-menu button.chosen:hover { color: var(--bg); }
+
+.concepts,
+.plain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.concepts li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin-bottom: 0.3rem;
+  font-size: 0.8rem;
+}
+
+/* Concepts not yet met stay legible but recede, so the eye lands on what is in play. */
+.concepts li.state-unknown { opacity: 0.42; }
+
+.concept-state {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+.state-needs_review .concept-state { color: var(--wrong); }
+.state-mastered .concept-state { color: var(--correct); }
+
+.concept-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plain li {
+  color: var(--ink-dim);
+  margin-bottom: 0.35rem;
+}
+
+.bar {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.6rem;
+  letter-spacing: -0.05em;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.bar-mastered {
+  color: var(--correct);
+}
+
+.bar-needs_review {
+  color: var(--wrong);
+}
+
+.muted {
+  color: var(--ink-dim);
+}
+
+.banner {
+  background: var(--wrong);
+  color: #fff;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.82rem;
+}
+
+.banner button {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+  padding: 0.1rem 0.6rem;
+}
+
+@media (max-width: 780px) {
+  .app-main {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------- on-screen piano */
+
+/* So a learner with no instrument can still answer the keyboard questions. It submits
+   exactly what a real keyboard submits, so nothing downstream knows the difference. */
+.virtual-keyboard {
+  --key-w: 2.1rem;
+  margin: 0.6rem 0 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.vk-readout {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+}
+
+.vk-label {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.vk-notes {
+  flex: 1;
+  color: var(--accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vk-readout button {
+  font-size: 0.72rem;
+  padding: 0.28rem 0.6rem;
+}
+
+.vk-send {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.vk-keys {
+  position: relative;
+  width: calc(var(--key-count) * var(--key-w));
+  max-width: 100%;
+  overflow-x: auto;
+  height: 6.5rem;
+}
+
+.vk-whites {
+  display: flex;
+  height: 100%;
+}
+
+.vk-blacks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.vk-blacks .key {
+  pointer-events: auto;
+}
+
+.key {
+  padding: 0;
+  border-radius: 0 0 3px 3px;
+  cursor: pointer;
+  transition: background 90ms ease;
+}
+
+.key-white {
+  width: var(--key-w);
+  min-width: var(--key-w);
+  height: 100%;
+  background: #fbf9f5;
+  border: 1px solid #c9c0b2;
+  border-top: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0.3rem;
+}
+
+.key-black {
+  position: absolute;
+  top: 0;
+  width: calc(var(--key-w) * 0.62);
+  height: 62%;
+  background: #24211d;
+  border: 1px solid #14120f;
+  border-top: none;
+  z-index: 2;
+}
+
+.key-name {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.55rem;
+  color: #8a8177;
+  letter-spacing: -0.02em;
+}
+
+.key-white:hover:not(:disabled) { background: #f2ece0; }
+.key-black:hover:not(:disabled) { background: #35302a; }
+
+.key-white.key-struck { background: var(--accent); border-color: var(--accent); }
+.key-white.key-struck .key-name { color: #fff; }
+.key-black.key-struck { background: var(--accent); border-color: var(--accent); }
+
+.key:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; z-index: 3; }
+.key:disabled { cursor: not-allowed; opacity: 0.55; }
