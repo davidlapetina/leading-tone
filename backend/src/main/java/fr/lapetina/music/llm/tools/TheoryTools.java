@@ -144,7 +144,7 @@ public class TheoryTools {
         try {
             Key parsedKey = key == null || key.isBlank() ? Key.major("C") : parseKey(key);
             return switch (kind.trim().toLowerCase()) {
-                case "chord" -> AbcNotation.chord(ChordAnalyzer.parse(content.trim()), 3, parsedKey);
+                case "chord" -> AbcNotation.chord(ChordAnalyzer.parse(content.trim()), AbcNotation.CHORD_OCTAVE, parsedKey);
                 case "scale" -> {
                     String[] parts = content.trim().split("\\s+");
                     yield AbcNotation.scale(new Scale(PitchClass.parse(parts[0]),
@@ -165,8 +165,6 @@ public class TheoryTools {
     }
 
     static Key parseKey(String key) {
-        String[] parts = key.trim().split("\\s+");
-        Mode mode = parts.length > 1 && parts[1].toLowerCase().startsWith("min") ? Mode.MINOR : Mode.MAJOR;
-        return new Key(PitchClass.parse(parts[0]), mode);
+        return Key.parse(key);
     }
 }

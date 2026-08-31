@@ -83,7 +83,17 @@ public record Chord(PitchClass root, ChordQuality quality, Inversion inversion) 
     }
 
     /** Lead-sheet symbol, with a slash bass when inverted: {@code G/B}. */
+    /** The same chord, moved. Spelling follows the letters, so Dm7 up a fourth is Gm7. */
+    public Chord transpose(Interval interval) {
+        return new Chord(root.transpose(interval), quality, inversion);
+    }
+
     public String symbol() {
+        if (quality == ChordQuality.ITALIAN_SIXTH || quality == ChordQuality.FRENCH_SIXTH
+                || quality == ChordQuality.GERMAN_SIXTH) {
+            // Written the way a textbook writes it: Ab(Ger+6), not AbGer+6.
+            return root.name() + "(" + quality.symbol() + ")";
+        }
         String base = root.name() + quality.symbol();
         return inversion == Inversion.ROOT_POSITION ? base : base + "/" + bass().name();
     }

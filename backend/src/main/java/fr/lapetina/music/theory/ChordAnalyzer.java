@@ -157,14 +157,45 @@ public final class ChordAnalyzer {
     }
 
     /** Parses lead-sheet symbols such as {@code C}, {@code Cmaj7}, {@code F#m7b5} or {@code G/B}. */
+    /**
+     * Folds the ways the same chord gets written before parsing: the signs publishers use,
+     * and the brackets players use. G7(b9) and G7b9 are the same chord, and only one of
+     * them used to parse.
+     */
+    static String normalise(String symbol) {
+        if (symbol == null) {
+            return "";
+        }
+        return symbol.trim()
+                .replace('\u266d', 'b')
+                .replace('\u266f', '#')
+                .replace('\u0394', '\u0394')
+                .replace("(", "")
+                .replace(")", "")
+                .replace(",", "")
+                .replace(" ", "");
+    }
+
+    private static boolean parsesAsPitchClass(String text) {
+        try {
+            PitchClass.parse(text);
+            return true;
+        } catch (IllegalArgumentException notAPitchClass) {
+            return false;
+        }
+    }
+
     public static Chord parse(String symbol) {
-        String trimmed = symbol.trim();
+        String trimmed = normalise(symbol);
         if (trimmed.isEmpty()) {
             throw new IllegalArgumentException("Empty chord symbol");
         }
+        // The last slash, and only when what follows is actually a note. Taking the first
+        // slash turns C6/9 into a C6 chord over a bass note called "9"; requiring a note
+        // keeps C6/9 whole while G/B still reads as a first inversion.
         String bassPart = null;
-        int slash = trimmed.indexOf('/');
-        if (slash >= 0) {
+        int slash = trimmed.lastIndexOf('/');
+        if (slash > 0 && slash < trimmed.length() - 1 && parsesAsPitchClass(trimmed.substring(slash + 1).trim())) {
             bassPart = trimmed.substring(slash + 1).trim();
             trimmed = trimmed.substring(0, slash).trim();
         }

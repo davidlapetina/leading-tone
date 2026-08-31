@@ -7,7 +7,13 @@ A music-theory tutor that teaches you, rather than testing you against a fixed s
 It keeps a model of what you actually know, decides what to teach from that, explains it,
 sets the question, and marks the answer — including one you play on a keyboard. It covers
 notes through to species counterpoint, by way of Roman numerals, cadences, extended
-chords, the ii-V-I and tritone substitution.
+chords, the ii-V-I and tritone substitution, with a route through jazz harmony for anyone
+who came for that.
+
+It can also read. Bring in Open Music Theory and twelve corpora of annotated scores, and
+explanations come with a citation and examples come from real music — Beethoven's actual
+bars, engraved, with the harmony marked. When no real example exists it says so rather than
+inventing one.
 
 ---
 
@@ -21,8 +27,18 @@ java -jar leading-tone-runner.jar
 
 Then open **http://localhost:8088**.
 
-That is the whole installation. No database to install, no Docker, no configuration file.
-Your progress is kept in a `data/` folder next to the jar.
+That is the whole installation. No database to install, no Docker, no configuration file,
+no Python, and no vector database — the search index and the embedding model both run
+inside the same process. Your progress is kept in a `data/` folder next to the jar.
+
+### Bring in the sources (optional)
+
+Under **Settings → Published sources**, choose what to read. Open Music Theory takes about
+three minutes; the score corpora a few seconds each. Nothing downloads until you ask, and
+each source shows its licence before you choose it.
+
+Afterwards the tutor cites what it quotes, and shows real passages in notation. Everything
+downloaded is kept locally, so rebuilding never goes back to the publisher.
 
 ### Add a teacher's voice (optional)
 
@@ -78,7 +94,7 @@ Java 21, Node 20+ and pnpm.
 git clone git@github.com:davidlapetina/leading-tone.git
 cd leading-tone
 make package
-java -jar backend/target/leading-tone-runner.jar
+cd backend && java -jar target/leading-tone-runner.jar
 ```
 
 `make run` does both. The jar carries the interface, the API and the database driver.
@@ -101,9 +117,10 @@ make test-e2e    # browser, against a running backend
 make check       # all of the above, plus lint, typecheck and the jar
 ```
 
-**237 tests, and none of them need Docker, a database or a language model.** The backend
-runs against an in-memory database; the browser tests switch the model off so they test the
-tutor rather than a model's wording.
+**369 tests, and none of them need Docker, a database, a network or a language model.** The
+backend runs against an in-memory database; ingestion is tested against recorded copies of
+the real publisher responses; the browser tests switch the model off so they test the tutor
+rather than a model's wording.
 
 ---
 
@@ -135,6 +152,9 @@ More in [docs/](docs/): the [architecture](docs/architecture.md), the
 [learner model](docs/learner-model.md), the [teaching policy](docs/tutoring-policy.md), the
 [concept graph](docs/concept-model.md) and the [plan](docs/v2-plan.md).
 
+The knowledge layer — published sources, licensing, retrieval and the theory engine — has
+its own notes in [docs/knowledge/](docs/knowledge/README.md).
+
 ## Your data
 
 It is yours, and it is one file. **Settings → Export** takes everything away as JSON:
@@ -143,4 +163,12 @@ terminal.
 
 ## Licence
 
-MIT. See [LICENSE](LICENSE).
+The application is MIT. See [LICENSE](LICENSE).
+
+The published sources it can quote are **not** MIT. Open Music Theory is CC BY-SA 4.0; the
+annotated score corpora and the Jazz Harmony Treebank are CC BY-NC-SA 4.0. Ingesting,
+chunking, embedding or indexing that material does not relicense it, and does not remove
+an attribution, ShareAlike or NonCommercial obligation. See
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), and `licenses/` for the full texts.
+
+Nothing is downloaded until you ask for it, in Settings.

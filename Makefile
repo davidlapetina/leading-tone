@@ -55,11 +55,16 @@ package:
 	cd backend && ./mvnw package -DskipTests
 	@echo
 	@echo "  backend/target/leading-tone-runner.jar"
-	@echo "  java -jar backend/target/leading-tone-runner.jar   →  http://localhost:8088"
+	@echo "  cd backend && java -jar target/leading-tone-runner.jar   →  http://localhost:8088"
+	@echo "  (progress and ingested sources live in the data/ directory beside where you run it)"
 
 # Runs the packaged jar the way someone given the file would.
+#
+# From backend/, not backend/target/, so the jar and the development server share one data
+# directory. Run from the wrong place and the application starts perfectly against an empty
+# database, which looks like having lost everything you had ingested.
 run: package
-	cd backend/target && java -jar leading-tone-runner.jar
+	cd backend && java -jar target/leading-tone-runner.jar
 
 build: package
 

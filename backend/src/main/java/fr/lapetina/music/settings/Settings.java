@@ -56,6 +56,21 @@ public class Settings extends PanacheEntityBase {
     @Column(name = "memory_messages", nullable = false)
     public int memoryMessages = 10;
 
+    /**
+     * Whether the tutor grounds explanations in ingested published sources. Separate from
+     * llmEnabled: quoting a source and asking a model to phrase something are two
+     * different decisions, and either can be off without the other.
+     */
+    @Column(name = "knowledge_enabled", nullable = false)
+    public boolean knowledgeEnabled = true;
+
+    /**
+     * Whether this deployment is commercial. Decides what its NonCommercial sources
+     * permit, so it is enforced at retrieval rather than merely displayed.
+     */
+    @Column(name = "runtime_mode", nullable = false)
+    public String runtimeMode = "NON_COMMERCIAL";
+
     @Column(name = "learner_name", nullable = false)
     public String learnerName = "Student";
 

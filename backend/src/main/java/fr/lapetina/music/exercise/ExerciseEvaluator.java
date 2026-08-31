@@ -180,14 +180,12 @@ public class ExerciseEvaluator {
         if (keyContext == null || keyContext.isBlank()) {
             return null;
         }
-        String[] parts = keyContext.trim().split("\\s+");
-        if (parts.length < 2) {
+        // Deliberately stricter than Key.parse: this reads a key stored with an exercise,
+        // which is always written in full ("C major"), and a half-recognised key here would
+        // mark an answer against the wrong scale. Nothing beats null for that.
+        if (keyContext.trim().split("\\s+").length < 2) {
             return null;
         }
-        try {
-            return new Key(PitchClass.parse(parts[0]), Mode.valueOf(parts[1].toUpperCase()));
-        } catch (IllegalArgumentException notAKey) {
-            return null;
-        }
+        return Key.tryParse(keyContext).orElse(null);
     }
 }

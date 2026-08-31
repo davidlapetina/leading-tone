@@ -26,6 +26,8 @@
         <quarkus.package.jar.type>uber-jar</quarkus.package.jar.type>
         <quarkus.package.output-name>leading-tone</quarkus.package.output-name>
         <surefire-plugin.version>3.5.6</surefire-plugin.version>
+        <!-- Lucene is not managed by the Quarkus BOMs, so it is pinned here. -->
+        <lucene.version>10.4.0</lucene.version>
     </properties>
 
     <dependencyManagement>
@@ -89,6 +91,35 @@
             <groupId>io.quarkiverse.langchain4j</groupId>
             <artifactId>quarkus-langchain4j-ollama</artifactId>
         </dependency>
+        <!-- Knowledge layer: the search index and the embedding model both run in this JVM.
+             There is no vector database, no embedding server and no Python. -->
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>${lucene.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analysis-common</artifactId>
+            <version>${lucene.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-queryparser</artifactId>
+            <version>${lucene.version}</version>
+        </dependency>
+        <!-- The quantized bge-small-en-v1.5 model ships inside this jar and runs on
+             ONNX Runtime in process. This is what makes the jar large and self-contained. -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-embeddings-bge-small-en-v15-q</artifactId>
+        </dependency>
+        <!-- knowledge-sources.yaml -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit</artifactId>

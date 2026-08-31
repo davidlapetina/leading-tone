@@ -14,5 +14,16 @@ public record Concept(
         String description,
         List<String> prerequisites,
         ConceptCategory category,
-        double intrinsicDifficulty) {
+        double intrinsicDifficulty,
+        Tradition tradition) {
+
+    public Concept {
+        // Most theory is shared. Marking a concept as belonging to one practice is a claim,
+        // and the default is the honest one: this is not specific to any style.
+        tradition = tradition == null ? Tradition.GENERAL : tradition;
+    }
+
+    public boolean isJazz() {
+        return tradition == Tradition.JAZZ;
+    }
 }

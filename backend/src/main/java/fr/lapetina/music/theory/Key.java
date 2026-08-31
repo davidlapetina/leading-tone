@@ -20,6 +20,53 @@ public record Key(PitchClass tonic, Mode mode) {
         return of(tonic, Mode.MINOR);
     }
 
+    /**
+     * Reads a key the way people write one: {@code C}, {@code C major}, {@code f# minor},
+     * {@code Bbm}, {@code Eb_major}.
+     *
+     * <p>Deliberately lenient about the second word. Anything that is not recognisably
+     * minor is read as major, because this is fed by a language model and by URL segments,
+     * and answering "C ionian" with C major is more useful than answering with an error.
+     * The tonic is not lenient: an unreadable tonic throws.
+     */
+    public static Key parse(String text) {
+        if (text == null || text.isBlank()) {
+            throw new IllegalArgumentException("Unreadable key: " + text);
+        }
+        String[] parts = text.trim().replace('_', ' ').split("\\s+");
+        String tonic = parts[0];
+        Mode mode = parts.length > 1 && parts[1].toLowerCase().startsWith("min") ? Mode.MINOR : Mode.MAJOR;
+        if (parts.length == 1 && tonic.length() > 1 && tonic.endsWith("m") && !tonic.endsWith("dim")) {
+            String withoutSuffix = tonic.substring(0, tonic.length() - 1);
+            if (parsesAsPitchClass(withoutSuffix)) {
+                return new Key(PitchClass.parse(withoutSuffix), Mode.MINOR);
+            }
+        }
+        return new Key(PitchClass.parse(tonic), mode);
+    }
+
+    /** The same, for callers that would rather have nothing than an exception. */
+    public static Optional<Key> tryParse(String text) {
+        try {
+            return Optional.of(parse(text));
+        } catch (IllegalArgumentException notAKey) {
+            return Optional.empty();
+        }
+    }
+
+    private static boolean parsesAsPitchClass(String text) {
+        try {
+            PitchClass.parse(text);
+            return true;
+        } catch (IllegalArgumentException notAPitchClass) {
+            return false;
+        }
+    }
+
+    public Key transpose(Interval interval) {
+        return new Key(tonic.transpose(interval), mode);
+    }
+
     public Scale scale() {
         return new Scale(tonic, mode.scaleType());
     }

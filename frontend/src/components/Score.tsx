@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react'
 
 interface ScoreProps {
   abc: string
+  /** Wider for a two-staff excerpt from a real score than for a single-line example. */
+  staffwidth?: number
 }
 
 /**
@@ -10,7 +12,7 @@ interface ScoreProps {
  * <p>abcjs carries a synthesiser and is by far the largest thing the page loads, so it is
  * imported on first use rather than in the main bundle.
  */
-export function Score({ abc }: ScoreProps) {
+export function Score({ abc, staffwidth = 420 }: ScoreProps) {
   const host = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -21,7 +23,7 @@ export function Score({ abc }: ScoreProps) {
       }
       abcjs.default.renderAbc(host.current, abc, {
         responsive: 'resize',
-        staffwidth: 420,
+        staffwidth,
         paddingtop: 4,
         paddingbottom: 4,
         paddingleft: 0,
@@ -31,7 +33,7 @@ export function Score({ abc }: ScoreProps) {
     return () => {
       cancelled = true
     }
-  }, [abc])
+  }, [abc, staffwidth])
 
   return <div className="score" ref={host} aria-label="notation" />
 }

@@ -55,6 +55,7 @@ const snapshot: LearnerSnapshot = {
       conceptId: 'note',
       name: 'Notes and the keyboard',
       category: 'FUNDAMENTALS',
+      tradition: 'GENERAL',
       mastery: 0.42,
       confidence: 0.5,
       state: 'LEARNING',

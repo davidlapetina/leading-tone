@@ -45,7 +45,7 @@ class TeachingPolicyTest {
         List<ConceptMastery> dueList = new ArrayList<>();
         for (Concept concept : graph.all()) {
             double mastery = masteries.getOrDefault(concept.id(), 0.0);
-            ConceptMastery view = new ConceptMastery(concept.id(), concept.name(), concept.category().name(),
+            ConceptMastery view = new ConceptMastery(concept.id(), concept.name(), concept.category().name(), concept.tradition().name(),
                     mastery, mastery > 0 ? 0.9 : 0.0, stateFor(mastery), mastery > 0 ? 5 : 0, 0, 0,
                     mastery > 0 ? Instant.now() : null, null);
             concepts.add(view);
@@ -63,7 +63,7 @@ class TeachingPolicyTest {
         List<ConceptMastery> dueList = new ArrayList<>();
         for (Concept concept : graph.all()) {
             double mastery = masteries.getOrDefault(concept.id(), 0.0);
-            ConceptMastery view = new ConceptMastery(concept.id(), concept.name(), concept.category().name(),
+            ConceptMastery view = new ConceptMastery(concept.id(), concept.name(), concept.category().name(), concept.tradition().name(),
                     mastery, mastery > 0 ? 0.9 : 0.0, stateFor(mastery), mastery > 0 ? 5 : 0, 0, 0,
                     mastery > 0 ? Instant.now() : null, null);
             concepts.add(view);

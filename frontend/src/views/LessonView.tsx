@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../api/client'
 import { Score } from '../components/Score'
+import { CorpusExample } from '../components/CorpusExample'
 
 interface LessonViewProps {
   conceptId: string
@@ -81,6 +82,15 @@ export function LessonView({ conceptId, onBack, onPractise, onAsk, onOpen }: Les
           )}
         </section>
       ))}
+
+      <section className="lesson-examples">
+        <h2>In real music</h2>
+        <p className="hint">
+          Passages from annotated scores, cited so you can look them up. Nothing here is
+          written by the tutor.
+        </p>
+        <CorpusExample conceptId={data.conceptId} />
+      </section>
 
       <section className="lesson-next">
         <h2>Now try it</h2>

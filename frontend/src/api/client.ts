@@ -2,6 +2,10 @@ import { z } from 'zod'
 import {
   availableModels,
   evidenceRow,
+  exampleSet,
+  ingestReport,
+  knowledgeSource,
+  knowledgeStatus,
   learnerSnapshot,
   lesson,
   settings,
@@ -9,6 +13,10 @@ import {
   tutorStatus,
   tutorTurn,
   type EvidenceRow,
+  type ExampleSet,
+  type IngestReport,
+  type KnowledgeSource,
+  type KnowledgeStatus,
   type LearnerSnapshot,
   type Settings,
   type Lesson,
@@ -103,4 +111,19 @@ export const api = {
 
   resetLearner: (): Promise<LearnerSnapshot> =>
     request('/learner', learnerSnapshot, { method: 'DELETE' }),
+
+  knowledgeStatus: (): Promise<KnowledgeStatus> => request('/knowledge/status', knowledgeStatus),
+
+  knowledgeSources: (): Promise<KnowledgeSource[]> =>
+    request('/knowledge/sources', z.array(knowledgeSource)),
+
+  // Reaches the network and takes minutes, so it is always something a person asked for,
+  // never something that happens on its own at startup.
+  ingestSource: (id: string): Promise<IngestReport> =>
+    request(`/knowledge/sources/${id}/ingest`, ingestReport, { method: 'POST' }),
+
+  // Real examples from annotated scores. An empty list is a real answer, and the UI says so
+  // rather than hiding it: nothing is generated to fill the gap.
+  examplesForConcept: (conceptId: string, limit = 2): Promise<ExampleSet> =>
+    request(`/knowledge/examples/for-concept/${conceptId}?limit=${limit}`, exampleSet),
 }

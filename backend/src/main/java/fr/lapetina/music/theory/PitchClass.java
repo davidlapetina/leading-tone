@@ -31,6 +31,15 @@ public record PitchClass(NoteLetter letter, Accidental accidental) {
         return letter.name() + accidental.symbol();
     }
 
+    /**
+     * The same letter, moved by semitones. Used for numerals measured from the major scale:
+     * flat-six in C is A flat, which is A altered down, not the key's own sixth degree
+     * lowered again.
+     */
+    public PitchClass alter(int semitones) {
+        return new PitchClass(letter, Accidental.ofOffset(accidental.offset() + semitones));
+    }
+
     public boolean isEnharmonicWith(PitchClass other) {
         return semitone() == other.semitone();
     }

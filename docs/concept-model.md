@@ -1,6 +1,6 @@
 # The concept model
 
-`concepts.json` holds 22 concepts of functional harmony and their prerequisites. It is the
+`concepts.json` holds 36 concepts of functional harmony and their prerequisites. It is the
 source of truth; the `concept` and `concept_prerequisite` tables are a mirror, rebuilt at
 every start by `ConceptSeeder` so that the graph can be joined against learner data in SQL.
 

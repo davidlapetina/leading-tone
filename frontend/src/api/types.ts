@@ -47,6 +47,7 @@ export const conceptMastery = z.object({
   conceptId: z.string(),
   name: z.string(),
   category: z.string(),
+  tradition: z.enum(['GENERAL', 'CLASSICAL', 'JAZZ']),
   mastery: z.number(),
   confidence: z.number(),
   state: z.enum([
@@ -136,6 +137,8 @@ export const evidenceRow = z.object({
 export const settings = z.object({
   llmEnabled: z.boolean(),
   toolsEnabled: z.boolean(),
+  knowledgeEnabled: z.boolean(),
+  runtimeMode: z.enum(['NON_COMMERCIAL', 'COMMERCIAL']),
   model: z.string(),
   baseUrl: z.string(),
   temperature: z.number(),
@@ -172,3 +175,94 @@ export type LessonSection = z.infer<typeof lessonSection>
 export type TeachingDecision = z.infer<typeof teachingDecision>
 export type EvidenceRow = z.infer<typeof evidenceRow>
 export type Settings = z.infer<typeof settings>
+
+/**
+ * A knowledge source and what has happened to it here. The licence fields are not
+ * decoration: this application is MIT, and none of these sources are, so the terms travel
+ * with the material and are shown at the point where someone chooses to bring it in.
+ */
+export const knowledgeSource = z.object({
+  id: z.string(),
+  name: z.string(),
+  url: z.string().nullable(),
+  ingestionMode: z.enum(['TEXT_RAG', 'STRUCTURED_HARMONY']),
+  tradition: z.string().nullable(),
+  enabled: z.boolean(),
+  license: z.string(),
+  licenseName: z.string(),
+  licenseUrl: z.string().nullable(),
+  licenseStatus: z.enum(['VERIFIED', 'RESTRICTED', 'UNKNOWN', 'REJECTED']),
+  attributionRequired: z.boolean(),
+  shareAlikeRequired: z.boolean(),
+  commercialUseAllowed: z.boolean(),
+  citation: z.string().nullable(),
+  state: z.string(),
+  retrievable: z.boolean(),
+  documents: z.number(),
+  chunks: z.number(),
+  lastIngestedAt: z.string().nullable(),
+  lastError: z.string().nullable(),
+})
+
+export const knowledgeStatus = z.object({
+  indexOpen: z.boolean(),
+  indexGeneration: z.number(),
+  embeddingModel: z.string(),
+  vectorSearch: z.boolean(),
+  documents: z.number(),
+  chunks: z.number(),
+  harmonyEvents: z.number(),
+  declaredSources: z.number(),
+  activeSources: z.number(),
+  unavailable: z.string().optional(),
+})
+
+export const ingestReport = z.object({
+  sourceId: z.string(),
+  state: z.string(),
+  skipped: z.boolean(),
+  documentsSeen: z.number(),
+  documentsIngested: z.number(),
+  documentsSkippedLicense: z.number(),
+  documentsSkippedEmpty: z.number(),
+  chunksWritten: z.number(),
+  skippedForLicense: z.array(z.string()),
+  message: z.string().nullable(),
+  success: z.boolean(),
+})
+
+export type KnowledgeSource = z.infer<typeof knowledgeSource>
+export type KnowledgeStatus = z.infer<typeof knowledgeStatus>
+export type IngestReport = z.infer<typeof ingestReport>
+
+/**
+ * A musical example, and where it came from.
+ *
+ * <p>{@code origin} is the field that matters. A generated example is a good teaching
+ * device; one presented as Beethoven's when it is not is a lie a learner cannot catch.
+ */
+export const musicalExample = z.object({
+  eventId: z.string().nullable(),
+  sourceId: z.string(),
+  origin: z.enum(['VERIFIED_CORPUS', 'GENERATED', 'USER_PROVIDED']),
+  composer: z.string().nullable(),
+  work: z.string().nullable(),
+  movement: z.string().nullable(),
+  measure: z.number().nullable(),
+  citation: z.string(),
+  romanNumeral: z.string().nullable(),
+  globalKey: z.string().nullable(),
+  abc: z.string().nullable(),
+  attribution: z.string().nullable(),
+  licenseId: z.string().nullable(),
+})
+
+export const exampleSet = z.object({
+  conceptId: z.string().nullable(),
+  found: z.number(),
+  examples: z.array(musicalExample),
+  note: z.string().nullable(),
+})
+
+export type MusicalExample = z.infer<typeof musicalExample>
+export type ExampleSet = z.infer<typeof exampleSet>

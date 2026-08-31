@@ -1,0 +1,251 @@
+# The authoritative declaration of every external knowledge source.
+#
+# Nothing is downloadable unless it is declared here: the ingester refuses any URL whose
+# host is not on a source in this file. Source URLs and licence terms live here and only
+# here, so they cannot drift apart across the codebase.
+#
+# LICENCE BOUNDARY. The application's own source code is MIT (see /LICENSE). Nothing in
+# this file is MIT. Each source keeps its own upstream licence, and that licence travels
+# with every document, chunk, embedding, harmony record and export derived from it.
+# Ingesting, normalising, chunking, embedding or indexing material does not relicense it.
+#
+# Every licence below was verified against the authoritative upstream source on
+# 2026-08-31. Where a corpus states its own licence, that statement wins over any
+# assumption inherited from a parent repository.
+
+sources:
+
+  - id: open-music-theory
+    name: Open Music Theory
+    version: "2"
+    description: >-
+      An open music theory textbook and workbook covering fundamentals, diatonic and
+      chromatic harmony, form, counterpoint, jazz, popular music and 20th-century
+      techniques.
+    sourceUrl: https://viva.pressbooks.pub/openmusictheory/
+    apiBase: https://viva.pressbooks.pub/openmusictheory/wp-json/pressbooks/v2
+    publisher: Pressbooks (VIVA)
+    authors:
+      - Mark Gotham
+      - Kyle Gullings
+      - Chelsey Hamm
+      - Bryn Hughes
+      - Brian Jarvis
+      - Megan Lavengood
+      - John Peterson
+    editors:
+      - Erin K. Maher
+    citation: >-
+      Gotham, M., Gullings, K., Hamm, C., Hughes, B., Jarvis, B., Lavengood, M., &
+      Peterson, J. (2023). Open Music Theory (Version 2), ed. E. K. Maher. VIVA
+      Pressbooks. https://viva.pressbooks.pub/openmusictheory/
+    license: CC-BY-SA-4.0
+    ingestionMode: TEXT_RAG
+    tradition: GENERAL
+    enabled: true
+    # The book-level licence is CC BY-SA 4.0, but individual chapters are NOT all under
+    # it: one is CC BY-NC-SA 4.0 and one is All Rights Reserved. Chapter licences come
+    # from the Pressbooks API per chapter and are checked individually before ingest.
+    perResourceLicense: true
+
+  # ------------------------------------------------------------------ DCML corpora
+  # Structured harmonic annotations, ingested as data rather than as prose.
+  # Every corpus below states CC BY-NC-SA 4.0 in its own LICENSE file.
+
+  - id: dcml-beethoven-string-quartets
+    name: Annotated Beethoven Corpus (string quartets)
+    repository: https://github.com/DCMLab/ABC
+    branch: main
+    composer: Ludwig van Beethoven
+    citation: >-
+      Neuwirth, M., Harasim, D., Moss, F. C., & Rohrmeier, M. (2018). The Annotated
+      Beethoven Corpus (ABC): A Dataset of Harmonic Analyses of All Beethoven String
+      Quartets. Frontiers in Digital Humanities, 5(July), 1-5.
+      https://doi.org/10.3389/fdigh.2018.00016
+    license: CC-BY-NC-SA-4.0
+    ingestionMode: STRUCTURED_HARMONY
+    tradition: CLASSICAL
+    enabled: true
+
+  - id: dcml-mozart-piano-sonatas
+    name: The Annotated Mozart Sonatas
+    repository: https://github.com/DCMLab/mozart_piano_sonatas
+    branch: main
+    composer: Wolfgang Amadeus Mozart
+    citation: >-
+      Hentschel, J., Neuwirth, M., & Rohrmeier, M. (2021). The Annotated Mozart Sonatas:
+      Score, harmony, and cadence. Transactions of the International Society for Music
+      Information Retrieval, 4(1), 67-80. https://doi.org/10.5334/tismir.63
+    license: CC-BY-NC-SA-4.0
+    ingestionMode: STRUCTURED_HARMONY
+    tradition: CLASSICAL
+    enabled: true
+
+  - id: dcml-corelli
+    name: Corelli Trio Sonatas
+    repository: https://github.com/DCMLab/corelli
+    branch: main
+    composer: Arcangelo Corelli
+    citation: >-
+      Hentschel, J., Moss, F. C., Neuwirth, M., & Rohrmeier, M. A. (2021). A
+      semi-automated workflow paradigm for the distributed creation and curation of
+      expert annotations. Proceedings of the 22nd International Society for Music
+      Information Retrieval Conference, 262-269.
+      https://doi.org/10.5281/ZENODO.5624417
+    license: CC-BY-NC-SA-4.0
+    ingestionMode: STRUCTURED_HARMONY
+    tradition: CLASSICAL
+    enabled: true
+
+  # The nine corpora below share one citation: they were published together as an
+  # annotated corpus of tonal piano music from the long 19th century.
+  - id: dcml-beethoven-piano-sonatas
+    name: Beethoven Piano Sonatas
+    repository: https://github.com/DCMLab/beethoven_piano_sonatas
+    branch: main
+    composer: Ludwig van Beethoven
+    citation: &longNineteenth >-
+      Hentschel, J., Rammos, Y., Neuwirth, M., Moss, F. C., & Rohrmeier, M. (2024). An
+      annotated corpus of tonal piano music from the long 19th century. Empirical
+      Musicology Review, 18(1), 84-95. https://doi.org/10.18061/emr.v18i1.8903
+    license: CC-BY-NC-SA-4.0
+    ingestionMode: STRUCTURED_HARMONY
+    tradition: CLASSICAL
+    enabled: true
+
+  - id: dcml-chopin-mazurkas
+    name: Chopin Mazurkas
+    repository: https://github.com/DCMLab/chopin_mazurkas
+    branch: main
+    composer: Frederic Chopin
+    citation: *longNineteenth
+    license: CC-BY-NC-SA-4.0
+    ingestionMode: STRUCTURED_HARMONY
+    tradition: CLASSICAL
+    enabled: true
+
+  - id: dcml-debussy-suite-bergamasque
+    name: Debussy Suite Bergamasque
+    repository: https://github.com/DCMLab/debussy_suite_bergamasque
+    branch: main
+    composer: Claude Debussy
+    citation: *longNineteenth
+    license: CC-BY-NC-SA-4.0
+    ingestionMode: STRUCTURED_HARMONY
+    tradition: CLASSICAL
+    enabled: true
+
+  - id: dcml-dvorak-silhouettes
+    name: Dvorak Silhouettes
+    repository: https://github.com/DCMLab/dvorak_silhouettes
+    branch: main
+    composer: Antonin Dvorak
+    citation: *longNineteenth
+    license: CC-BY-NC-SA-4.0
+    ingestionMode: STRUCTURED_HARMONY
+    tradition: CLASSICAL
+    enabled: true
+
+  - id: dcml-grieg-lyric-pieces
+    name: Grieg Lyric Pieces
+    repository: https://github.com/DCMLab/grieg_lyric_pieces
+    branch: main
+    composer: Edvard Grieg
+    citation: *longNineteenth
+    license: CC-BY-NC-SA-4.0
+    ingestionMode: STRUCTURED_HARMONY
+    tradition: CLASSICAL
+    enabled: true
+
+  - id: dcml-liszt-pelerinage
+    name: Liszt Annees de Pelerinage
+    repository: https://github.com/DCMLab/liszt_pelerinage
+    branch: main
+    composer: Franz Liszt
+    citation: *longNineteenth
+    license: CC-BY-NC-SA-4.0
+    ingestionMode: STRUCTURED_HARMONY
+    tradition: CLASSICAL
+    enabled: true
+
+  - id: dcml-medtner-tales
+    name: Medtner Skazki
+    repository: https://github.com/DCMLab/medtner_tales
+    branch: main
+    composer: Nikolai Medtner
+    citation: *longNineteenth
+    license: CC-BY-NC-SA-4.0
+    ingestionMode: STRUCTURED_HARMONY
+    tradition: CLASSICAL
+    enabled: true
+
+  - id: dcml-schumann-kinderszenen
+    name: Schumann Kinderszenen
+    repository: https://github.com/DCMLab/schumann_kinderszenen
+    branch: main
+    composer: Robert Schumann
+    citation: *longNineteenth
+    license: CC-BY-NC-SA-4.0
+    ingestionMode: STRUCTURED_HARMONY
+    tradition: CLASSICAL
+    enabled: true
+
+  - id: dcml-tchaikovsky-seasons
+    name: Tchaikovsky The Seasons
+    repository: https://github.com/DCMLab/tchaikovsky_seasons
+    branch: main
+    composer: Pyotr Ilyich Tchaikovsky
+    citation: *longNineteenth
+    license: CC-BY-NC-SA-4.0
+    ingestionMode: STRUCTURED_HARMONY
+    tradition: CLASSICAL
+    enabled: true
+
+  # ------------------------------------------------------------------ jazz
+  - id: jazz-harmony-treebank
+    name: Jazz Harmony Treebank
+    repository: https://github.com/DCMLab/JazzHarmonyTreebank
+    branch: master
+    dataFile: treebank.json
+    description: >-
+      Hierarchical harmonic analyses of jazz standards. 1170 tunes carry chords,
+      measures, beats, key and meter; 150 of them additionally carry constituent trees
+      and 241 carry turnaround annotations.
+    citation: >-
+      Harasim, D., Finkensiep, C., Ericson, P., O'Donnell, T. J., & Rohrmeier, M. (2020).
+      The Jazz Harmony Treebank. Proceedings of the 21st International Society for Music
+      Information Retrieval Conference, 207-215. https://doi.org/10.5281/zenodo.4245406
+    license: CC-BY-NC-SA-4.0
+    ingestionMode: STRUCTURED_HARMONY
+    tradition: JAZZ
+    enabled: true
+
+# The licence vocabulary. A source may only name a licence defined here; an unknown
+# licence identifier makes the source UNKNOWN, and unknown sources are never ingested.
+licenses:
+  - id: CC-BY-SA-4.0
+    name: Creative Commons Attribution-ShareAlike 4.0 International
+    url: https://creativecommons.org/licenses/by-sa/4.0/
+    text: licenses/CC-BY-SA-4.0.txt
+    attributionRequired: true
+    shareAlikeRequired: true
+    derivativesAllowed: true
+    commercialUseAllowed: true
+
+  - id: CC-BY-NC-SA-4.0
+    name: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+    url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    text: licenses/CC-BY-NC-SA-4.0.txt
+    attributionRequired: true
+    shareAlikeRequired: true
+    derivativesAllowed: true
+    commercialUseAllowed: false
+
+  - id: ALL-RIGHTS-RESERVED
+    name: All Rights Reserved
+    url: https://choosealicense.com/no-license/
+    attributionRequired: true
+    shareAlikeRequired: false
+    derivativesAllowed: false
+    commercialUseAllowed: false
+    ingestible: false

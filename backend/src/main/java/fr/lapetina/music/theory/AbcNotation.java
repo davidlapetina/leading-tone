@@ -9,6 +9,16 @@ import java.util.List;
  */
 public final class AbcNotation {
 
+    /**
+     * The octave a chord is written in when it is shown on its own.
+     *
+     * <p>Chords are engraved around middle C, which puts a root-position seventh chord on
+     * and just below the treble staff where it can be read at a glance. An octave lower
+     * pushes every note onto ledger lines, which is legible only in the sense that a
+     * musician can work it out.
+     */
+    public static final int CHORD_OCTAVE = 4;
+
     private AbcNotation() {
     }
 
@@ -68,7 +78,12 @@ public final class AbcNotation {
 
     /** An ascending scale, one note per beat, barred every four notes. */
     public static String scale(Scale scale, int octave) {
-        Key key = new Key(scale.tonic(), scale.type() == ScaleType.MAJOR ? Mode.MAJOR : Mode.MINOR);
+        // Only a seven-note scale has a key signature. A whole-tone or blues scale written
+        // under "K:Cm" would be engraved with flats it does not contain, so those are
+        // written in C with every accidental spelled out instead.
+        Key key = scale.type().isHeptatonic()
+                ? new Key(scale.tonic(), scale.type() == ScaleType.MAJOR ? Mode.MAJOR : Mode.MINOR)
+                : Key.major("C");
         StringBuilder body = new StringBuilder();
         List<Note> notes = scale.notes(octave);
         for (int i = 0; i < notes.size(); i++) {

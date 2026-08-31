@@ -33,7 +33,50 @@ public final class ProgressionAnalyzer {
         if (applied.isPresent()) {
             return new ChordAnalysis(chord, applied.get(), HarmonicFunction.APPLIED_DOMINANT, false);
         }
+        Optional<RomanNumeral> chromatic = chromaticChord(chord, key);
+        if (chromatic.isPresent()) {
+            return new ChordAnalysis(chord, chromatic.get(), HarmonicFunction.PREDOMINANT, false);
+        }
         return new ChordAnalysis(chord, null, HarmonicFunction.CHROMATIC, false);
+    }
+
+    /**
+     * The chromatic chords worth naming: the augmented sixths, the Neapolitan, and the
+     * triads borrowed from the parallel minor.
+     *
+     * <p>Deliberately a closed list. The alternative -- calling any chromatic root by a
+     * numeral -- would let the analyser put a confident label on something it has not
+     * actually understood, and a wrong label is worse than a question mark. E flat minor in
+     * C major is left unexplained, because no rule here honestly claims it.
+     */
+    private static Optional<RomanNumeral> chromaticChord(Chord chord, Key key) {
+        Scale major = new Scale(key.tonic(), ScaleType.MAJOR);
+        int root = chord.root().semitone();
+        int flatTwo = major.degree(2).alter(-1).semitone();
+        int flatThree = major.degree(3).alter(-1).semitone();
+        int flatSix = major.degree(6).alter(-1).semitone();
+        int flatSeven = major.degree(7).alter(-1).semitone();
+
+        if (root == flatSix && chord.quality().isAugmentedSixth()) {
+            return Optional.of(RomanNumeral.of(Accidental.FLAT, 6, chord.quality(), Inversion.ROOT_POSITION));
+        }
+        if (root == flatTwo && chord.quality() == ChordQuality.MAJOR) {
+            return Optional.of(RomanNumeral.of(Accidental.FLAT, 2, ChordQuality.MAJOR, chord.inversion()));
+        }
+        // Borrowed from the parallel minor. Major quality is the whole guard here: E flat
+        // MINOR on flat-three is not a borrowing anyone writes, and must stay unexplained.
+        if (key.mode() == Mode.MAJOR && chord.quality() == ChordQuality.MAJOR) {
+            if (root == flatThree) {
+                return Optional.of(RomanNumeral.of(Accidental.FLAT, 3, ChordQuality.MAJOR, chord.inversion()));
+            }
+            if (root == flatSix) {
+                return Optional.of(RomanNumeral.of(Accidental.FLAT, 6, ChordQuality.MAJOR, chord.inversion()));
+            }
+            if (root == flatSeven) {
+                return Optional.of(RomanNumeral.of(Accidental.FLAT, 7, ChordQuality.MAJOR, chord.inversion()));
+            }
+        }
+        return Optional.empty();
     }
 
     /** Matches a chord against every diatonic triad and seventh, including the raised-seventh forms. */
@@ -121,6 +164,12 @@ public final class ProgressionAnalyzer {
         RomanNumeral from = first.romanNumeral();
         RomanNumeral to = second.romanNumeral();
         if (from == null || to == null || from.isSecondary()) {
+            return Cadence.NONE;
+        }
+        // A chromatic numeral carries a degree, and comparing that degree to a diatonic one
+        // would read V -> Ger+6 as a deceptive cadence, because a German sixth sits on the
+        // sixth degree. Cadence claims are only made about diatonic chords.
+        if (from.isChromatic() || to.isChromatic()) {
             return Cadence.NONE;
         }
         boolean dominantFirst = !from.isSecondary() && (from.degree() == 5 || from.degree() == 7);

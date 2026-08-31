@@ -47,6 +47,14 @@ public record Note(PitchClass pitchClass, int octave) implements Comparable<Note
         return fromMidi(midi);
     }
 
+    /** Keeps the octave right across the boundary: B4 up a minor second is C5, not C4. */
+    public Note transpose(Interval interval) {
+        PitchClass moved = pitchClass.transpose(interval);
+        int semitones = midi() + interval.semitones();
+        int octave = Math.floorDiv(semitones - moved.semitone(), 12) - 1;
+        return new Note(moved, octave);
+    }
+
     public String name() {
         return pitchClass.name() + octave;
     }

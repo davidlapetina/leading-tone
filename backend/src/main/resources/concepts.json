@@ -5,7 +5,8 @@
     "description": "Letter names, sharps and flats, enharmonic spelling, and where each note sits on the keyboard.",
     "prerequisites": [],
     "category": "FUNDAMENTALS",
-    "intrinsicDifficulty": 0.1
+    "intrinsicDifficulty": 0.1,
+    "tradition": "GENERAL"
   },
   {
     "id": "interval",
@@ -15,7 +16,8 @@
       "note"
     ],
     "category": "FUNDAMENTALS",
-    "intrinsicDifficulty": 0.3
+    "intrinsicDifficulty": 0.3,
+    "tradition": "GENERAL"
   },
   {
     "id": "major-scale",
@@ -25,7 +27,8 @@
       "interval"
     ],
     "category": "SCALES",
-    "intrinsicDifficulty": 0.25
+    "intrinsicDifficulty": 0.25,
+    "tradition": "GENERAL"
   },
   {
     "id": "key-signature",
@@ -35,7 +38,8 @@
       "major-scale"
     ],
     "category": "SCALES",
-    "intrinsicDifficulty": 0.35
+    "intrinsicDifficulty": 0.35,
+    "tradition": "GENERAL"
   },
   {
     "id": "scale-degree",
@@ -45,7 +49,8 @@
       "major-scale"
     ],
     "category": "SCALES",
-    "intrinsicDifficulty": 0.3
+    "intrinsicDifficulty": 0.3,
+    "tradition": "GENERAL"
   },
   {
     "id": "minor-scale",
@@ -56,7 +61,8 @@
       "interval"
     ],
     "category": "SCALES",
-    "intrinsicDifficulty": 0.4
+    "intrinsicDifficulty": 0.4,
+    "tradition": "GENERAL"
   },
   {
     "id": "mode",
@@ -67,7 +73,8 @@
       "scale-degree"
     ],
     "category": "SCALES",
-    "intrinsicDifficulty": 0.5
+    "intrinsicDifficulty": 0.5,
+    "tradition": "GENERAL"
   },
   {
     "id": "triad",
@@ -77,7 +84,8 @@
       "interval"
     ],
     "category": "CHORDS",
-    "intrinsicDifficulty": 0.3
+    "intrinsicDifficulty": 0.3,
+    "tradition": "GENERAL"
   },
   {
     "id": "chord-inversion",
@@ -87,7 +95,8 @@
       "triad"
     ],
     "category": "CHORDS",
-    "intrinsicDifficulty": 0.45
+    "intrinsicDifficulty": 0.45,
+    "tradition": "GENERAL"
   },
   {
     "id": "diatonic-triads",
@@ -98,7 +107,8 @@
       "triad"
     ],
     "category": "CHORDS",
-    "intrinsicDifficulty": 0.4
+    "intrinsicDifficulty": 0.4,
+    "tradition": "GENERAL"
   },
   {
     "id": "seventh-chord",
@@ -109,7 +119,8 @@
       "interval"
     ],
     "category": "CHORDS",
-    "intrinsicDifficulty": 0.5
+    "intrinsicDifficulty": 0.5,
+    "tradition": "GENERAL"
   },
   {
     "id": "roman-numeral",
@@ -120,7 +131,8 @@
       "scale-degree"
     ],
     "category": "HARMONY",
-    "intrinsicDifficulty": 0.45
+    "intrinsicDifficulty": 0.45,
+    "tradition": "GENERAL"
   },
   {
     "id": "figured-bass",
@@ -131,7 +143,8 @@
       "roman-numeral"
     ],
     "category": "HARMONY",
-    "intrinsicDifficulty": 0.55
+    "intrinsicDifficulty": 0.55,
+    "tradition": "CLASSICAL"
   },
   {
     "id": "harmonic-function",
@@ -141,7 +154,8 @@
       "roman-numeral"
     ],
     "category": "HARMONY",
-    "intrinsicDifficulty": 0.5
+    "intrinsicDifficulty": 0.5,
+    "tradition": "GENERAL"
   },
   {
     "id": "tonic-function",
@@ -151,7 +165,8 @@
       "harmonic-function"
     ],
     "category": "HARMONY",
-    "intrinsicDifficulty": 0.45
+    "intrinsicDifficulty": 0.45,
+    "tradition": "GENERAL"
   },
   {
     "id": "predominant-function",
@@ -161,18 +176,20 @@
       "harmonic-function"
     ],
     "category": "HARMONY",
-    "intrinsicDifficulty": 0.5
+    "intrinsicDifficulty": 0.5,
+    "tradition": "GENERAL"
   },
   {
     "id": "dominant-function",
     "name": "Dominant function",
-    "description": "V and vii\u00b0 as tension, and the leading tone that pulls back to the tonic.",
+    "description": "V and vii° as tension, and the leading tone that pulls back to the tonic.",
     "prerequisites": [
       "harmonic-function",
       "scale-degree"
     ],
     "category": "HARMONY",
-    "intrinsicDifficulty": 0.55
+    "intrinsicDifficulty": 0.55,
+    "tradition": "GENERAL"
   },
   {
     "id": "dominant-seventh",
@@ -183,7 +200,8 @@
       "dominant-function"
     ],
     "category": "HARMONY",
-    "intrinsicDifficulty": 0.6
+    "intrinsicDifficulty": 0.6,
+    "tradition": "GENERAL"
   },
   {
     "id": "cadence",
@@ -194,7 +212,8 @@
       "tonic-function"
     ],
     "category": "FORM",
-    "intrinsicDifficulty": 0.55
+    "intrinsicDifficulty": 0.55,
+    "tradition": "GENERAL"
   },
   {
     "id": "voice-leading",
@@ -205,19 +224,21 @@
       "dominant-seventh"
     ],
     "category": "VOICE_LEADING",
-    "intrinsicDifficulty": 0.7
+    "intrinsicDifficulty": 0.7,
+    "tradition": "CLASSICAL"
   },
   {
     "id": "secondary-dominant",
     "name": "Secondary dominants",
-    "description": "Borrowing a dominant from another key to tonicise a chord: V7/V, V/vi, vii\u00b07/ii.",
+    "description": "Borrowing a dominant from another key to tonicise a chord: V7/V, V/vi, vii°7/ii.",
     "prerequisites": [
       "dominant-seventh",
       "roman-numeral",
       "key-signature"
     ],
     "category": "HARMONY",
-    "intrinsicDifficulty": 0.75
+    "intrinsicDifficulty": 0.75,
+    "tradition": "GENERAL"
   },
   {
     "id": "modulation",
@@ -229,17 +250,19 @@
       "key-signature"
     ],
     "category": "FORM",
-    "intrinsicDifficulty": 0.85
+    "intrinsicDifficulty": 0.85,
+    "tradition": "GENERAL"
   },
   {
     "id": "extended-chord",
     "name": "Extended chords",
-    "description": "Sixths, ninths, elevenths and thirteenths \u2014 the chord vocabulary jazz is written in.",
+    "description": "Sixths, ninths, elevenths and thirteenths — the chord vocabulary jazz is written in.",
     "prerequisites": [
       "seventh-chord"
     ],
     "category": "CHORDS",
-    "intrinsicDifficulty": 0.6
+    "intrinsicDifficulty": 0.6,
+    "tradition": "JAZZ"
   },
   {
     "id": "altered-dominant",
@@ -250,7 +273,8 @@
       "dominant-seventh"
     ],
     "category": "HARMONY",
-    "intrinsicDifficulty": 0.78
+    "intrinsicDifficulty": 0.78,
+    "tradition": "JAZZ"
   },
   {
     "id": "chord-progression",
@@ -261,7 +285,8 @@
       "harmonic-function"
     ],
     "category": "HARMONY",
-    "intrinsicDifficulty": 0.55
+    "intrinsicDifficulty": 0.55,
+    "tradition": "GENERAL"
   },
   {
     "id": "two-five-one",
@@ -273,19 +298,21 @@
       "dominant-function"
     ],
     "category": "HARMONY",
-    "intrinsicDifficulty": 0.65
+    "intrinsicDifficulty": 0.65,
+    "tradition": "JAZZ"
   },
   {
     "id": "modal-interchange",
     "name": "Modal interchange",
-    "description": "Borrowing chords from the parallel minor or major \u2014 bVI, bVII, iv in a major key.",
+    "description": "Borrowing chords from the parallel minor or major — bVI, bVII, iv in a major key.",
     "prerequisites": [
       "minor-scale",
       "diatonic-triads",
       "roman-numeral"
     ],
     "category": "HARMONY",
-    "intrinsicDifficulty": 0.72
+    "intrinsicDifficulty": 0.72,
+    "tradition": "GENERAL"
   },
   {
     "id": "tritone-substitution",
@@ -296,7 +323,8 @@
       "altered-dominant"
     ],
     "category": "HARMONY",
-    "intrinsicDifficulty": 0.82
+    "intrinsicDifficulty": 0.82,
+    "tradition": "JAZZ"
   },
   {
     "id": "blues-form",
@@ -307,7 +335,8 @@
       "chord-progression"
     ],
     "category": "FORM",
-    "intrinsicDifficulty": 0.5
+    "intrinsicDifficulty": 0.5,
+    "tradition": "JAZZ"
   },
   {
     "id": "counterpoint",
@@ -318,7 +347,8 @@
       "voice-leading"
     ],
     "category": "VOICE_LEADING",
-    "intrinsicDifficulty": 0.7
+    "intrinsicDifficulty": 0.7,
+    "tradition": "CLASSICAL"
   },
   {
     "id": "species-counterpoint",
@@ -328,6 +358,68 @@
       "counterpoint"
     ],
     "category": "VOICE_LEADING",
-    "intrinsicDifficulty": 0.85
+    "intrinsicDifficulty": 0.85,
+    "tradition": "CLASSICAL"
+  },
+  {
+    "id": "chord-symbol",
+    "name": "Reading chord symbols",
+    "description": "How a lead sheet names a chord: the root, the quality shorthand, extensions and alterations, and what a slash means.",
+    "prerequisites": [
+      "seventh-chord"
+    ],
+    "category": "CHORDS",
+    "intrinsicDifficulty": 0.45,
+    "tradition": "JAZZ"
+  },
+  {
+    "id": "chord-scale-theory",
+    "name": "Chord-scale theory",
+    "description": "Choosing a scale that fits a chord, so that improvising over a progression becomes a series of scale choices.",
+    "prerequisites": [
+      "mode",
+      "seventh-chord",
+      "chord-symbol"
+    ],
+    "category": "SCALES",
+    "intrinsicDifficulty": 0.7,
+    "tradition": "JAZZ"
+  },
+  {
+    "id": "jazz-voicing",
+    "name": "Jazz voicings",
+    "description": "Arranging the notes of a chord for the hand and the ear: shell voicings, rootless voicings, and why the third and seventh carry the sound.",
+    "prerequisites": [
+      "chord-symbol",
+      "chord-inversion",
+      "extended-chord"
+    ],
+    "category": "CHORDS",
+    "intrinsicDifficulty": 0.68,
+    "tradition": "JAZZ"
+  },
+  {
+    "id": "turnaround",
+    "name": "Turnarounds",
+    "description": "The short progression that carries the last bars of a chorus back to the top, and the substitutions that decorate it.",
+    "prerequisites": [
+      "two-five-one",
+      "chord-progression"
+    ],
+    "category": "HARMONY",
+    "intrinsicDifficulty": 0.72,
+    "tradition": "JAZZ"
+  },
+  {
+    "id": "blues-scale",
+    "name": "The blues scale",
+    "description": "The minor pentatonic with an added flat fifth, and how the blue notes sit against the underlying harmony.",
+    "prerequisites": [
+      "minor-scale",
+      "blues-form"
+    ],
+    "category": "SCALES",
+    "intrinsicDifficulty": 0.5,
+    "tradition": "JAZZ"
   }
 ]

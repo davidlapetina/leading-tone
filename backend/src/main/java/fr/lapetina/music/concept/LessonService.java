@@ -59,6 +59,12 @@ public class LessonService {
         return List.copyOf(links);
     }
 
+    /** Root, third and seventh: the notes a shell voicing keeps. */
+    private static String shell(String root, ChordQuality quality) {
+        var classes = Chord.of(root, quality).pitchClasses();
+        return classes.get(0).name() + " " + classes.get(1).name() + " " + classes.get(3).name();
+    }
+
     private static String spell(Scale scale) {
         return scale.pitchClasses().stream().map(PitchClass::name).collect(Collectors.joining(" "));
     }
@@ -145,7 +151,7 @@ public class LessonService {
                             "Minor: " + notes(Chord.of("C", ChordQuality.MINOR)) + " — minor third, then major third.",
                             "Diminished: " + notes(Chord.of("C", ChordQuality.DIMINISHED)) + " — two minor thirds.",
                             "Augmented: " + notes(Chord.of("C", ChordQuality.AUGMENTED)) + " — two major thirds.")
-                            .showing(AbcNotation.progression(chords("C", "Cm", "Cdim", "Caug"), c, 3),
+                            .showing(AbcNotation.progression(chords("C", "Cm", "Cdim", "Caug"), c, AbcNotation.CHORD_OCTAVE),
                                     "The same root, four qualities"));
 
             case "chord-inversion" -> List.of(
@@ -156,7 +162,7 @@ public class LessonService {
                     LessonSection.of("How they are written",
                             "First inversion is figured 6, second inversion 6/4. In lead sheets you will see G/B and G/D.",
                             "For seventh chords the figures are 7, 6/5, 4/3 and 4/2 from root position downwards.")
-                            .showing(AbcNotation.progression(chords("G", "G/B", "G/D"), c, 3),
+                            .showing(AbcNotation.progression(chords("G", "G/B", "G/D"), c, AbcNotation.CHORD_OCTAVE),
                                     "G major: root position, first inversion, second inversion"));
 
             case "seventh-chord" -> List.of(
@@ -168,7 +174,7 @@ public class LessonService {
                     LessonSection.of("The two diminished kinds",
                             "Half-diminished: " + notes(Chord.of("B", ChordQuality.HALF_DIMINISHED_SEVENTH)) + " — diminished triad, minor seventh.",
                             "Fully diminished: " + notes(Chord.of("B", ChordQuality.DIMINISHED_SEVENTH)) + " — diminished triad, diminished seventh.")
-                            .showing(AbcNotation.progression(chords("Cmaj7", "Dm7", "G7", "Bm7b5"), c, 3),
+                            .showing(AbcNotation.progression(chords("Cmaj7", "Dm7", "G7", "Bm7b5"), c, AbcNotation.CHORD_OCTAVE),
                                     "Four seventh chords from C major"));
 
             case "roman-numeral" -> List.of(
@@ -178,7 +184,7 @@ public class LessonService {
                     LessonSection.of("The seven of a major key",
                             "In C major: " + chordLine(c, 1, 2, 3, 4, 5, 6, 7),
                             "Numbered: I ii iii IV V vi vii°. That pattern of qualities is the same in every major key.")
-                            .showing(AbcNotation.progression(c.diatonicTriads(), c, 3),
+                            .showing(AbcNotation.progression(c.diatonicTriads(), c, AbcNotation.CHORD_OCTAVE),
                                     "The seven diatonic triads of C major"));
 
             case "dominant-seventh" -> List.of(
@@ -189,7 +195,7 @@ public class LessonService {
                             "The third is the leading tone and rises a semitone to the tonic.",
                             "The seventh falls a step to the third of the tonic chord.",
                             "In C: B rises to C, F falls to E. Both move as little as possible.")
-                            .showing(AbcNotation.progression(List.of(c.dominantSeventh(), c.tonicTriad()), c, 3),
+                            .showing(AbcNotation.progression(List.of(c.dominantSeventh(), c.tonicTriad()), c, AbcNotation.CHORD_OCTAVE),
                                     "G7 resolving to C"));
 
             case "cadence" -> List.of(
@@ -199,7 +205,7 @@ public class LessonService {
                             "Half: the phrase stops on V. Unfinished, and meant to be.",
                             "Plagal: IV to I. The amen.",
                             "Deceptive: V to vi. Sets up the ending, then withholds it.")
-                            .showing(AbcNotation.progression(chords("F", "G", "C"), c, 3),
+                            .showing(AbcNotation.progression(chords("F", "G", "C"), c, AbcNotation.CHORD_OCTAVE),
                                     "IV V I — a perfect authentic cadence in C"));
 
             case "extended-chord" -> List.of(
@@ -211,7 +217,7 @@ public class LessonService {
                     LessonSection.of("Sixths are not sevenths",
                             "C6 is " + notes(Chord.of("C", ChordQuality.MAJOR_SIXTH)) + " — a triad with a sixth added, not a chord with a seventh.",
                             "It is a resting chord where a seventh would want to move.")
-                            .showing(AbcNotation.progression(chords("C6", "C9", "Cmaj9"), c, 3),
+                            .showing(AbcNotation.progression(chords("C6", "C9", "Cmaj9"), c, AbcNotation.CHORD_OCTAVE),
                                     "C6, C9 and Cmaj9"));
 
             case "altered-dominant" -> List.of(
@@ -225,6 +231,65 @@ public class LessonService {
                             "The sharp ninth of C7 is D#, not Eb. It is a raised second degree, so it is spelled as one.",
                             "The chord still functions as a dominant: the alterations sharpen it, they do not change its job."));
 
+            case "chord-symbol" -> List.of(
+                    LessonSection.of("A symbol is a recipe, not a picture",
+                            "A chord symbol names a root and a quality, and leaves the arrangement to you. Cmaj7 tells you which notes; it does not tell you which octave, which order, or which to leave out.",
+                            "That is why the same tune looks the same on every lead sheet and sounds different in every pair of hands."),
+                    LessonSection.of("Reading the shorthand",
+                            "The root comes first, then the quality: " + notes(Chord.of("C", ChordQuality.MAJOR_SEVENTH))
+                                    + " is Cmaj7, and " + notes(Chord.of("C", ChordQuality.DOMINANT_SEVENTH)) + " is C7.",
+                            "A bare number means a dominant. 'maj' or a triangle means a major seventh. A minus or 'm' means minor, and a circle means diminished.",
+                            "Half-diminished is written with a slashed circle, or as m7b5: " + notes(Chord.of("C", ChordQuality.HALF_DIMINISHED_SEVENTH)) + ".")
+                            .showing(AbcNotation.progression(chords("Cmaj7", "C7", "Cm7", "Cm7b5"), c, AbcNotation.CHORD_OCTAVE),
+                                    "four qualities on the same root"),
+                    LessonSection.of("Extensions and alterations",
+                            "A 9, 11 or 13 stacks another third on top. An alteration in brackets bends one note: " + notes(Chord.of("G", ChordQuality.DOMINANT_FLAT_NINTH)) + " is G7(b9).",
+                            "A slash names the bass: C/E means a C chord with E underneath, which is a first inversion by another name."));
+
+            case "jazz-voicing" -> List.of(
+                    LessonSection.of("The two notes that carry the sound",
+                            "The third tells you major or minor. The seventh tells you which kind of seventh. The root is usually the bass player's job, and the fifth says almost nothing.",
+                            "So the smallest useful voicing is root, third and seventh — a shell."),
+                    LessonSection.of("Shells",
+                            "For G7 that is " + shell("G", ChordQuality.DOMINANT_SEVENTH) + ". For Cmaj7 it is " + shell("C", ChordQuality.MAJOR_SEVENTH) + ".",
+                            "Play a ii-V-I with shells and the voice leading appears on its own: the notes barely move.")
+                            .showing(AbcNotation.progression(chords("Dm7", "G7", "Cmaj7"), c, AbcNotation.CHORD_OCTAVE),
+                                    "the same ii-V-I a shell voicing simplifies"),
+                    LessonSection.of("Rootless voicings",
+                            "Drop the root entirely and you have room for the ninth or the thirteenth instead.",
+                            "This is why a jazz pianist's left hand often sounds like a different chord from the one written: it is the same chord, minus what somebody else is already playing."));
+
+            case "chord-scale-theory" -> List.of(
+                    LessonSection.of("A chord and a scale are the same information",
+                            "Every chord tone is a scale degree, and the notes between them are the ones you pass through. Choosing a scale for a chord is choosing which notes are available.",
+                            "This is a way of practising, not a law. Players who never think in scales play the same notes."),
+                    LessonSection.of("The usual pairings",
+                            "Over a dominant seventh: Mixolydian. " + spell(Scale.of("G", ScaleType.MIXOLYDIAN)) + " over G7.",
+                            "Over a minor seventh: Dorian. " + spell(Scale.of("D", ScaleType.DORIAN)) + " over Dm7.",
+                            "Over a major seventh: Ionian, or Lydian if you want the raised fourth."),
+                    LessonSection.of("When the chord is altered",
+                            "An altered dominant asks for the altered scale, which is every tension at once: " + spell(Scale.of("G", ScaleType.ALTERED)) + " over G7alt.",
+                            "Note the spelling: the fourth degree is C flat, not B. It is a diminished fourth above G, and writing it as B would hide that it is the flattened fourth of the scale."));
+
+            case "turnaround" -> List.of(
+                    LessonSection.of("Getting back to the top",
+                            "A chorus ends on the tonic, and then has to start again. A turnaround is the bar or two that makes returning feel like motion rather than repetition.",
+                            "The plain form is I-vi-ii-V: " + chordLine(c, 1, 6, 2, 5) + "."),
+                    LessonSection.of("Decorating it",
+                            "Make the vi a dominant and it pulls harder toward the ii. Make the I a I7 and it pulls toward IV.",
+                            "Substitute a tritone for any of the dominants and the bass walks down by semitone instead of leaping by fourths.")
+                            .showing(AbcNotation.progression(chords("Cmaj7", "Am7", "Dm7", "G7"), c, AbcNotation.CHORD_OCTAVE),
+                                    "I-vi-ii-V in C"));
+
+            case "blues-scale" -> List.of(
+                    LessonSection.of("The minor pentatonic, plus one",
+                            "The blues scale is the minor pentatonic with a flat fifth added: " + spell(Scale.of("C", ScaleType.BLUES)) + " on C.",
+                            "That added note is the blue note. It does not belong to the underlying harmony, and that is the point of it."),
+                    LessonSection.of("Why it works over everything",
+                            "In a blues, the same scale is played over I7, IV7 and V7, which would be wrong by any other reckoning.",
+                            "It sounds right because the blues is not really functional harmony being decorated; it is a melodic tradition that harmony was fitted to afterwards.")
+                            .showing(AbcNotation.scale(Scale.of("C", ScaleType.BLUES), 4), "the C blues scale"));
+
             case "two-five-one" -> List.of(
                     LessonSection.of("The sentence jazz is written in",
                             "ii-V-I is a predominant, then a dominant, then home — the same shape as classical harmony, with sevenths on everything.",
@@ -234,7 +299,7 @@ public class LessonService {
                             "In C: the seventh of Dm7 is C, and it falls to B, the third of G7. The seventh of G7 is F, and it falls to E, the third of Cmaj7.",
                             "That chain of falling sevenths is the whole mechanism, and it is why the progression feels inevitable rather than merely conventional.",
                             "In a minor key the ii is half-diminished: Dm7b5 G7 Cm7.")
-                            .showing(AbcNotation.progression(chords("Dm7", "G7", "Cmaj7"), c, 3),
+                            .showing(AbcNotation.progression(chords("Dm7", "G7", "Cmaj7"), c, AbcNotation.CHORD_OCTAVE),
                                     "ii-V-I in C major"));
 
             case "tritone-substitution" -> List.of(
@@ -244,7 +309,7 @@ public class LessonService {
                     LessonSection.of("What changes",
                             "The bass. Instead of falling a fifth from G to C, it slides a semitone from Db to C.",
                             "In C major, Dm7 Db7 Cmaj7 is a ii-V-I with the dominant substituted.")
-                            .showing(AbcNotation.progression(chords("Dm7", "Db7", "Cmaj7"), c, 3),
+                            .showing(AbcNotation.progression(chords("Dm7", "Db7", "Cmaj7"), c, AbcNotation.CHORD_OCTAVE),
                                     "ii-V-I with a tritone substitution"));
 
             case "counterpoint" -> List.of(

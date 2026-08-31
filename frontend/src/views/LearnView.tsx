@@ -11,6 +11,31 @@ const AREAS: { key: string; title: string; blurb: string }[] = [
   { key: 'FORM', title: 'Form', blurb: 'Cadences, the blues, and changing key' },
 ]
 
+/**
+ * The jazz path, in the order it is usually learned rather than by category.
+ *
+ * <p>Jazz shares most of its theory with everything else, so its concepts live in the same
+ * graph and appear in the areas above too. What is different is the route through them, and
+ * that route is worth showing on its own to somebody who came here for jazz.
+ */
+const JAZZ_THEMES: { title: string; blurb: string; concepts: string[] }[] = [
+  {
+    title: 'Reading the language',
+    blurb: 'A lead sheet names chords and leaves the rest to you.',
+    concepts: ['chord-symbol', 'extended-chord', 'jazz-voicing'],
+  },
+  {
+    title: 'The progression everything is built on',
+    blurb: 'Two-five-one, and the turnarounds that carry you back to the top.',
+    concepts: ['two-five-one', 'turnaround', 'altered-dominant', 'tritone-substitution'],
+  },
+  {
+    title: 'Playing over changes',
+    blurb: 'Choosing notes once you know what the chord is.',
+    concepts: ['chord-scale-theory', 'blues-form', 'blues-scale'],
+  },
+]
+
 const STATE_LABEL: Record<string, string> = {
   UNKNOWN: 'Not started',
   INTRODUCED: 'Just started',
@@ -82,6 +107,8 @@ export function LearnView({ onOpen, onPractise }: LearnViewProps) {
         </section>
       )}
 
+      <JazzPath concepts={concepts} onOpen={onOpen} onPractise={onPractise} />
+
       {AREAS.map(({ key, title, blurb }) => {
         const inArea = concepts.filter((concept) => concept.category === key)
         if (inArea.length === 0) {
@@ -107,6 +134,72 @@ export function LearnView({ onOpen, onPractise }: LearnViewProps) {
         )
       })}
     </div>
+  )
+}
+
+/**
+ * A route through jazz harmony, for somebody who came here for that.
+ *
+ * <p>These concepts are not separate from the rest of the graph — jazz shares almost all of
+ * its theory with everything else, and pretending otherwise would teach it badly. What is
+ * genuinely different is the order and the emphasis, so this offers the route while the
+ * concepts stay where they are in the areas below.
+ */
+function JazzPath({
+  concepts,
+  onOpen,
+  onPractise,
+}: {
+  concepts: ConceptMastery[]
+  onOpen: (conceptId: string) => void
+  onPractise: (conceptId: string) => void
+}) {
+  const byId = new Map(concepts.map((concept) => [concept.conceptId, concept]))
+  const jazz = concepts.filter((concept) => concept.tradition === 'JAZZ')
+  if (jazz.length === 0) {
+    return null
+  }
+  const done = jazz.filter((concept) => concept.mastery >= 0.45).length
+  const percent = Math.round((done / jazz.length) * 100)
+
+  return (
+    <section className="area-block jazz-path">
+      <div className="area-title">
+        <h2>Jazz harmony</h2>
+        <p>
+          A route through the same theory, in the order a jazz musician meets it. {done} of{' '}
+          {jazz.length} solid.
+        </p>
+        <div className="jazz-progress" role="img" aria-label={`${percent}% of the jazz path solid`}>
+          <span style={{ width: `${percent}%` }} />
+        </div>
+      </div>
+
+      {JAZZ_THEMES.map((theme) => {
+        const inTheme = theme.concepts
+          .map((id) => byId.get(id))
+          .filter((concept): concept is ConceptMastery => concept !== undefined)
+        if (inTheme.length === 0) {
+          return null
+        }
+        return (
+          <div className="jazz-theme" key={theme.title}>
+            <h3>{theme.title}</h3>
+            <p className="jazz-theme-blurb">{theme.blurb}</p>
+            <div className="card-grid">
+              {inTheme.map((concept) => (
+                <ConceptCard
+                  key={concept.conceptId}
+                  concept={concept}
+                  onOpen={() => onOpen(concept.conceptId)}
+                  onPractise={() => onPractise(concept.conceptId)}
+                />
+              ))}
+            </div>
+          </div>
+        )
+      })}
+    </section>
   )
 }
 

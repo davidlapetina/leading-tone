@@ -27,6 +27,14 @@ public record Interval(int number, IntervalQuality quality) {
     public static final Interval DIMINISHED_SEVENTH = new Interval(7, IntervalQuality.DIMINISHED);
     public static final Interval MINOR_SEVENTH = new Interval(7, IntervalQuality.MINOR);
     public static final Interval MAJOR_SEVENTH = new Interval(7, IntervalQuality.MAJOR);
+    /** Needed by the altered scale: G altered contains C flat, a diminished fourth above G. */
+    public static final Interval DIMINISHED_FOURTH = new Interval(4, IntervalQuality.DIMINISHED);
+
+    /** What makes an augmented sixth chord an augmented sixth rather than a dominant seventh. */
+    public static final Interval AUGMENTED_SIXTH = new Interval(6, IntervalQuality.AUGMENTED);
+
+    public static final Interval DIMINISHED_OCTAVE = new Interval(8, IntervalQuality.DIMINISHED);
+
     public static final Interval PERFECT_OCTAVE = new Interval(8, IntervalQuality.PERFECT);
     public static final Interval MINOR_NINTH = new Interval(9, IntervalQuality.MINOR);
     public static final Interval MAJOR_NINTH = new Interval(9, IntervalQuality.MAJOR);

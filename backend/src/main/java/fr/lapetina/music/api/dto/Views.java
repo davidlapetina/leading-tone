@@ -97,7 +97,9 @@ public final class Views {
             String category,
             double intrinsicDifficulty,
             List<String> prerequisites,
-            List<String> unlocks) {
+            List<String> unlocks,
+            /** Which practice this belongs to, so the interface can offer a jazz path. */
+            String tradition) {
     }
 
     public record TutorStatusView(

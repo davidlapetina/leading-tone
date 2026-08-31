@@ -62,6 +62,10 @@ public record Scale(PitchClass tonic, ScaleType type) {
         return List.copyOf(result);
     }
 
+    public Scale transpose(Interval interval) {
+        return new Scale(tonic.transpose(interval), type);
+    }
+
     public String name() {
         return tonic.name() + " " + type.displayName().toLowerCase();
     }

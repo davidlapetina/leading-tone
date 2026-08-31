@@ -49,6 +49,15 @@ public class TutorOrchestrator {
     TutorModel tutorModel;
 
     @Inject
+    fr.lapetina.music.knowledge.router.KnowledgeRouter knowledgeRouter;
+
+    @Inject
+    fr.lapetina.music.knowledge.provenance.ProvenanceService provenanceService;
+
+    @Inject
+    fr.lapetina.music.concept.ConceptGraph conceptGraph;
+
+    @Inject
     fr.lapetina.music.llm.tools.TurnScope turnScope;
 
     /** The first turn of a session: nothing has been said yet. */
@@ -166,14 +175,26 @@ public class TutorOrchestrator {
                     decision.action().preferredTaskKind(), scaffold);
         }
 
+        // Everything the answer will rest on is gathered before the model is called: what
+        // the engine computed, what the scores actually contain, and what the sources say.
+        // The model's job is to teach from evidence, not to be the evidence.
+        var concept = conceptGraph.find(decision.conceptId());
+        var knowledge = knowledgeRouter.gather(
+                decision.conceptId(),
+                concept.map(fr.lapetina.music.concept.Concept::name).orElse(decision.conceptName()),
+                concept.map(fr.lapetina.music.concept.Concept::description).orElse(null),
+                learnerMessage != null ? learnerMessage : decision.learnerAskedAbout());
+
         TutorRequest request = new TutorRequest(session.id, snapshot, decision, exercise, learnerMessage,
-                evaluationFeedback, directiveFor(attempt));
+                evaluationFeedback, directiveFor(attempt), knowledge);
         turnScope.beginTurn(decision.conceptId());
         String message = tutorModel.respond(request);
 
         String notation = exercise == null ? null : exercise.notationAbc;
         Interaction interaction = sessionService.append(session, InteractionRole.TUTOR, message,
                 decision, exercise, notation);
+        // Recorded after the interaction exists, so an answer can be traced to its evidence.
+        provenanceService.record(session.id, interaction.id, decision.conceptId(), knowledge);
 
         return new TutorTurn(
                 session.id,

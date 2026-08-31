@@ -1,0 +1,185 @@
+{
+ "@context": "http://schema.org",
+ "@type": "Book",
+ "name": "Open Music Theory",
+ "keywords": "music theory, music analysis, music theory pedagogy, pop music theory, serialism, form analysis",
+ "alternativeHeadline": "Version 2",
+ "inLanguage": "en-us",
+ "copyrightYear": "2023",
+ "disambiguatingDescription": "&lt;i&gt;Open Music Theory&lt;/i&gt; is a natively-online open educational resource intended to serve as the primary text and workbook for undergraduate music theory curricula. &lt;i&gt;OMT2&lt;/i&gt;\u00a0provides not only the material for a complete traditional core undergraduate music theory sequence (fundamentals, diatonic harmony, chromatic harmony, form, 20th-century techniques), but also several other units for instructors who have diversified their curriculum, such as jazz, popular music, rhythm, counterpoint, and orchestration. This version also introduces a complete workbook  of assignments.&lt;br /&gt;&lt;a class=\"link-button\" href=\"https://bit.ly/adopt-music-theory2\" target=\"\u201d_blank\u201d\"&gt;Adoption Form&lt;/a&gt;&lt;a class=\"link-button\" href=\"https://bit.ly/feedback-music-theory\" target=\"\u201d_blank\u201d\"&gt;Feedback&lt;/a&gt;",
+ "description": "<p><strong><em>Open Music Theory Version 2 (OMT2)</em></strong> is an open educational resource intended to serve as the primary text and workbook for undergraduate music theory curricula. As an open and natively-online resource, <em>OMT2</em> is substantially different from other commercially-published music theory textbooks, though it still provides the same content that teachers expect from a music theory text.</p><p><em>OMT2</em> has been designed inclusively. For us, this means broadening our topics beyond the standard harmony and atonal theory topics to include fundamentals, musical form, jazz, pop, rhythm,\u00a0and orchestration. And within those traditional sections of harmony and atonal theory, the authors have deliberately chosen composers who represent diverse genders and races. The book is accessible. And perhaps most importantly, the book is completely free and always will be.</p><p>The text of the book is augmented with several different media: video lessons, audio, interactive notated scores with playback, and small quizzes are embedded directly into each chapter for easy access.</p><p><em>OMT2</em> introduces a full workbook to accompany the text. Almost every chapter offers at least one worksheet on that topic. Some chapters, especially in the Fundamentals section, also collect additional assignments that can be found on other websites.</p><p>Version 2 of this textbook is collaboratively authored and edited by Mark Gotham, Kyle Gullings, Chelsey Hamm, Bryn Hughes, Brian Jarvis, Megan Lavengood, and John Peterson.</p>",
+ "image": "https://viva.pressbooks.pub/app/uploads/sites/12/2021/07/OMT-cover-lower-res-1.png",
+ "author": [
+  {
+   "@type": "Person",
+   "contributor_first_name": "",
+   "contributor_last_name": "",
+   "name": "Mark Gotham",
+   "slug": "markgotham"
+  },
+  {
+   "@type": "Person",
+   "contributor_first_name": "Kyle",
+   "contributor_last_name": "Gullings",
+   "name": "Kyle Gullings",
+   "slug": "gullings"
+  },
+  {
+   "@type": "Person",
+   "contributor_first_name": "Chelsey",
+   "contributor_last_name": "Hamm",
+   "name": "Chelsey Hamm",
+   "slug": "hamm"
+  },
+  {
+   "@type": "Person",
+   "contributor_first_name": "Bryn",
+   "contributor_last_name": "Hughes",
+   "name": "Bryn Hughes",
+   "slug": "hughes"
+  },
+  {
+   "@type": "Person",
+   "contributor_first_name": "Brian",
+   "contributor_last_name": "Jarvis",
+   "contributor_prefix": "Dr.",
+   "contributor_institution": "University of Texas, El Paso",
+   "contributor_user_url": "https://brianedwardjarvis.com",
+   "name": "Brian Jarvis",
+   "slug": "brianjarvis"
+  },
+  {
+   "@type": "Person",
+   "contributor_first_name": "Megan",
+   "contributor_last_name": "Lavengood",
+   "name": "Megan Lavengood",
+   "slug": "meganlavengood"
+  },
+  {
+   "@type": "Person",
+   "contributor_first_name": "John",
+   "contributor_last_name": "Peterson",
+   "name": "John Peterson",
+   "slug": "peterson"
+  }
+ ],
+ "editor": [
+  {
+   "@type": "Person",
+   "name": "Erin K. Maher",
+   "slug": "erinmaher"
+  }
+ ],
+ "translator": [],
+ "reviewedBy": [],
+ "illustrator": [],
+ "contributor": [
+  {
+   "@type": "Person",
+   "contributor_first_name": "Samuel",
+   "contributor_last_name": "Brady",
+   "name": "Samuel Brady",
+   "slug": "brady"
+  },
+  {
+   "@type": "Person",
+   "contributor_first_name": "Scott",
+   "contributor_last_name": "Hanenberg",
+   "name": "Scott Hanenberg",
+   "slug": "scott-hanenberg"
+  },
+  {
+   "@type": "Person",
+   "contributor_first_name": "John",
+   "contributor_last_name": "Kocur",
+   "name": "John Kocur",
+   "slug": "kocur"
+  },
+  {
+   "@type": "Person",
+   "contributor_first_name": "Levi",
+   "contributor_last_name": "Langolf",
+   "name": "Levi Langolf",
+   "slug": "levi-langlof"
+  },
+  {
+   "@type": "Person",
+   "contributor_first_name": "Brian",
+   "contributor_last_name": "Moseley",
+   "name": "Brian Moseley",
+   "slug": "moseley"
+  },
+  {
+   "@type": "Person",
+   "contributor_first_name": "Kris",
+   "contributor_last_name": "Shaffer",
+   "name": "Kris Shaffer",
+   "slug": "shaffer"
+  }
+ ],
+ "about": [
+  {
+   "@type": "Thing",
+   "identifier": "AVA",
+   "name": "Theory of music and musicology"
+  },
+  {
+   "@type": "Thing",
+   "identifier": "AVLA",
+   "name": "Art music, orchestral and formal music"
+  },
+  {
+   "@type": "Thing",
+   "identifier": "AVLM",
+   "name": "Music of film and stage"
+  },
+  {
+   "@type": "Thing",
+   "identifier": "AVLP",
+   "name": "Popular music"
+  },
+  {
+   "@type": "Thing",
+   "identifier": "AVQ",
+   "name": "Musical scores, lyrics and libretti"
+  },
+  {
+   "@type": "Thing",
+   "identifier": "AVS",
+   "name": "Techniques of music / music tutorials / teaching of music"
+  },
+  {
+   "@type": "Thing",
+   "identifier": "MUS041000"
+  }
+ ],
+ "audience": {
+  "@type": "Audience",
+  "name": "adult"
+ },
+ "datePublished": "2021-07-01",
+ "license": {
+  "@type": "CreativeWork",
+  "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "name": "CC BY-SA (Attribution ShareAlike)",
+  "code": "CC BY-SA"
+ },
+ "bookDirectoryExcluded": false,
+ "language": {
+  "@type": "Language",
+  "code": "en-us",
+  "name": "English (United States)"
+ },
+ "_links": {
+  "self": [
+   {
+    "href": "https://viva.pressbooks.pub/openmusictheory/wp-json/pressbooks/v2/metadata",
+    "targetHints": {
+     "allow": [
+      "GET"
+     ]
+    }
+   }
+  ]
+ }
+}

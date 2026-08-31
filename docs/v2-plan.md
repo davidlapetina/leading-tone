@@ -328,6 +328,13 @@ multi-user and authentication · audio-to-microphone transcription · RAG or a v
 database · a mobile application · gamification, streaks or badges · course authoring ·
 MusicXML editing · any external tutoring service.
 
+*Amended.* Retrieval and a search index were on this list, and are now built. The reason
+the list was right and the reason it changed are the same one: retrieval does not make the
+tutor more fluent, and fluency was never the problem. It was added because it makes the
+tutor **attributable** — it can no longer invent a Beethoven example, because examples now
+come from annotated scores with bar numbers, and explanations cite the chapter they came
+from. See docs/knowledge/.
+
 Multi-user is the one worth naming explicitly. `Learner.SINGLETON_ID` is a deliberate
 single-user decision, and undoing it means real authentication, per-request learner
 resolution and a review of every query. That is a project, not a feature, and nothing in

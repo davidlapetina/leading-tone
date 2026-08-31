@@ -1,0 +1,175 @@
+{
+ "parts": [
+  {
+   "id": 2620,
+   "title": "VI. Jazz",
+   "slug": "jazz",
+   "chapters": [
+    {
+     "id": 2624,
+     "title": "Chord Symbols",
+     "slug": "chord-symbols",
+     "link": "https://viva.pressbooks.pub/openmusictheory/chapter/chord-symbols/",
+     "status": "publish",
+     "word_count": 1859,
+     "has_post_content": true,
+     "metadata": {
+      "license": {
+       "@type": "CreativeWork",
+       "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "name": "CC BY-SA (Attribution ShareAlike)"
+      },
+      "author": [
+       {
+        "contributor_first_name": "Megan",
+        "contributor_last_name": "Lavengood",
+        "name": "Megan Lavengood",
+        "slug": "meganlavengood",
+        "@type": "Person"
+       }
+      ]
+     }
+    },
+    {
+     "id": 2629,
+     "title": "ii\u2013V\u2013I",
+     "slug": "ii-v-i",
+     "link": "https://viva.pressbooks.pub/openmusictheory/chapter/ii-v-i/",
+     "status": "publish",
+     "word_count": 1262,
+     "has_post_content": true,
+     "metadata": {
+      "license": {
+       "@type": "CreativeWork",
+       "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "name": "CC BY-SA (Attribution ShareAlike)"
+      },
+      "author": [
+       {
+        "contributor_first_name": "Megan",
+        "contributor_last_name": "Lavengood",
+        "name": "Megan Lavengood",
+        "slug": "meganlavengood",
+        "@type": "Person"
+       }
+      ]
+     }
+    },
+    {
+     "id": 2631,
+     "title": "Embellishing Chords",
+     "slug": "jazz-embellishing-chords",
+     "link": "https://viva.pressbooks.pub/openmusictheory/chapter/jazz-embellishing-chords/",
+     "status": "publish",
+     "word_count": 1161,
+     "has_post_content": true,
+     "metadata": {
+      "license": {
+       "@type": "CreativeWork",
+       "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "name": "CC BY-SA (Attribution ShareAlike)"
+      },
+      "author": [
+       {
+        "contributor_first_name": "Megan",
+        "contributor_last_name": "Lavengood",
+        "name": "Megan Lavengood",
+        "slug": "meganlavengood",
+        "@type": "Person"
+       }
+      ]
+     }
+    },
+    {
+     "id": 2633,
+     "title": "Substitutions",
+     "slug": "substitutions",
+     "link": "https://viva.pressbooks.pub/openmusictheory/chapter/substitutions/",
+     "status": "publish",
+     "word_count": 1316,
+     "has_post_content": true,
+     "metadata": {
+      "license": {
+       "@type": "CreativeWork",
+       "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+       "name": "CC BY-SA (Attribution ShareAlike)"
+      },
+      "author": [
+       {
+        "contributor_first_name": "Megan",
+        "contributor_last_name": "Lavengood",
+        "name": "Megan Lavengood",
+        "slug": "meganlavengood",
+        "@type": "Person"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": 378,
+   "title": "VII. Popular Music",
+   "slug": "popular-music",
+   "chapters": [
+    {
+     "id": 850,
+     "title": "Fragile, Absent, and Emergent Tonics",
+     "slug": "fragile-absent-and-emergent-tonics",
+     "link": "https://viva.pressbooks.pub/openmusictheory/chapter/fragile-absent-and-emergent-tonics/",
+     "status": "publish",
+     "word_count": 930,
+     "has_post_content": true,
+     "metadata": {
+      "license": {
+       "@type": "CreativeWork",
+       "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+       "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+      },
+      "author": [
+       {
+        "contributor_first_name": "Megan",
+        "contributor_last_name": "Lavengood",
+        "name": "Megan Lavengood",
+        "slug": "meganlavengood",
+        "@type": "Person"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": 618,
+   "title": "IX. Twelve-Tone Music",
+   "slug": "twelve-tone-music",
+   "chapters": [
+    {
+     "id": 7289,
+     "title": "Composing with Twelve Tones",
+     "slug": "composing-with-twelve-tones",
+     "link": "https://viva.pressbooks.pub/openmusictheory/chapter/composing-with-twelve-tones/",
+     "status": "publish",
+     "word_count": 2466,
+     "has_post_content": true,
+     "metadata": {
+      "license": {
+       "@type": "CreativeWork",
+       "url": "https://choosealicense.com/no-license/",
+       "name": "All Rights Reserved"
+      },
+      "author": [
+       {
+        "contributor_first_name": "",
+        "contributor_last_name": "",
+        "name": "Mark Gotham",
+        "slug": "markgotham",
+        "@type": "Person"
+       }
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

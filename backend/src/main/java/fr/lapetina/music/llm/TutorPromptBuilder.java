@@ -21,6 +21,17 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class TutorPromptBuilder {
 
+    /** Enough to steer the explanation, not so many that the prompt becomes a syllabus. */
+    private static final int MAX_LISTED_PREREQUISITES = 6;
+
+    @org.eclipse.microprofile.config.inject.ConfigProperty(
+            name = "music.knowledge.prompt.max-chars", defaultValue = "2600")
+    int promptMaxChars;
+
+    @org.eclipse.microprofile.config.inject.ConfigProperty(
+            name = "music.knowledge.prompt.max-chars-per-chunk", defaultValue = "900")
+    int promptMaxCharsPerChunk;
+
     private static final int MAX_LISTED_CONCEPTS = 12;
 
     @Inject
@@ -28,6 +39,8 @@ public class TutorPromptBuilder {
 
     @Inject
     TheoryBriefing theoryBriefing;
+
+
 
     public String learnerState(LearnerSnapshot snapshot) {
         StringBuilder builder = new StringBuilder("Learner: ").append(snapshot.displayName()).append('\n');
@@ -82,6 +95,11 @@ public class TutorPromptBuilder {
     }
 
     public String instruction(TeachingDecision decision) {
+        return instruction(decision, (LearnerSnapshot) null);
+    }
+
+    /** The instruction, told what the learner already has so it does not re-teach it. */
+    public String instruction(TeachingDecision decision, LearnerSnapshot snapshot) {
         Concept concept = conceptGraph.require(decision.conceptId());
         StringBuilder builder = new StringBuilder();
         builder.append("Pedagogical action: ").append(decision.action()).append('\n');
@@ -95,6 +113,7 @@ public class TutorPromptBuilder {
         if (decision.misconception() != null) {
             builder.append("Mistake to address: ").append(decision.misconception().description()).append('\n');
         }
+        builder.append(prerequisiteGuidance(decision, snapshot));
         if (decision.learnerAskedAbout() != null) {
             builder.append("The learner asked about ").append(decision.learnerAskedAbout())
                     .append(". Answer that first, in a sentence or two");
@@ -119,7 +138,62 @@ public class TutorPromptBuilder {
         if (!briefing.isEmpty()) {
             builder.append('\n').append(briefing);
         }
+
         return builder.toString();
+    }
+
+    /**
+     * What not to re-teach.
+     *
+     * <p>The learner model exists to be used, and the most visible way to use it is to stop
+     * explaining things somebody already knows. Asked "what is V/V?" by someone solid on
+     * dominant function, the answer should begin from the dominant, not from what a scale
+     * is. Listing the prerequisites they have is what lets the model do that; listing the
+     * ones they lack is what stops it assuming too much.
+     */
+    String prerequisiteGuidance(TeachingDecision decision, LearnerSnapshot snapshot) {
+        if (snapshot == null) {
+            return "";
+        }
+        List<Concept> prerequisites = conceptGraph.allPrerequisitesOf(decision.conceptId());
+        if (prerequisites.isEmpty()) {
+            return "";
+        }
+        List<String> solid = prerequisites.stream()
+                .filter(concept -> snapshot.knows(concept.id()))
+                .map(Concept::name)
+                .limit(MAX_LISTED_PREREQUISITES)
+                .toList();
+        List<String> shaky = prerequisites.stream()
+                .filter(concept -> !snapshot.knows(concept.id()))
+                .map(Concept::name)
+                .limit(MAX_LISTED_PREREQUISITES)
+                .toList();
+
+        StringBuilder guidance = new StringBuilder();
+        if (!solid.isEmpty()) {
+            guidance.append("Already solid, so build on these rather than explaining them: ")
+                    .append(String.join(", ", solid)).append(".\n");
+        }
+        if (!shaky.isEmpty()) {
+            guidance.append("Not yet solid, so do not assume them: ")
+                    .append(String.join(", ", shaky)).append(".\n");
+        }
+        return guidance.toString();
+    }
+
+    /**
+     * The instruction, plus whatever was gathered for this turn.
+     *
+     * <p>Computed facts, then verified examples, then quoted prose — in that order, and told
+     * apart, so the model knows which of them it is allowed to contradict.
+     */
+    public String instruction(TeachingDecision decision,
+                              fr.lapetina.music.knowledge.router.TutorKnowledge knowledge,
+                              LearnerSnapshot snapshot) {
+        return instruction(decision, snapshot)
+                + fr.lapetina.music.knowledge.router.KnowledgeBlock.render(
+                        knowledge, promptMaxChars, promptMaxCharsPerChunk);
     }
 
     public String exerciseBlock(String prompt, String answerMode) {

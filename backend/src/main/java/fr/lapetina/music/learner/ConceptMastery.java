@@ -8,6 +8,8 @@ public record ConceptMastery(
         String conceptId,
         String name,
         String category,
+        /** Which practice this belongs to, so a learner can follow a jazz path. */
+        String tradition,
         double mastery,
         double confidence,
         LearningState state,
@@ -18,7 +20,7 @@ public record ConceptMastery(
         Instant nextReviewAt) {
 
     public static ConceptMastery unseen(Concept concept) {
-        return new ConceptMastery(concept.id(), concept.name(), concept.category().name(),
+        return new ConceptMastery(concept.id(), concept.name(), concept.category().name(), concept.tradition().name(),
                 0.0, 0.0, LearningState.UNKNOWN, 0, 0, 0, null, null);
     }
 
@@ -28,7 +30,7 @@ public record ConceptMastery(
 
     /** The state is passed in so it can be derived at read time rather than read from the row. */
     public static ConceptMastery of(Concept concept, LearnerConcept state, LearningState derived) {
-        return new ConceptMastery(concept.id(), concept.name(), concept.category().name(),
+        return new ConceptMastery(concept.id(), concept.name(), concept.category().name(), concept.tradition().name(),
                 state.mastery, state.confidence, derived,
                 state.successfulEvidence, state.failedEvidence, state.consecutiveFailures,
                 state.lastPracticedAt, state.nextReviewAt);

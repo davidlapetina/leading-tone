@@ -196,6 +196,24 @@ public class ExerciseGenerator {
                     ExerciseShape.write(TaskKind.IDENTIFY),
                     ExerciseShape.write(TaskKind.BUILD),
                     ExerciseShape.write(TaskKind.ANALYSE))),
+            Map.entry("chord-symbol", List.of(
+                    ExerciseShape.write(TaskKind.IDENTIFY),
+                    ExerciseShape.write(TaskKind.BUILD),
+                    ExerciseShape.play(TaskKind.BUILD))),
+            Map.entry("chord-scale-theory", List.of(
+                    ExerciseShape.write(TaskKind.IDENTIFY),
+                    ExerciseShape.write(TaskKind.BUILD))),
+            Map.entry("jazz-voicing", List.of(
+                    ExerciseShape.write(TaskKind.BUILD),
+                    ExerciseShape.write(TaskKind.ANALYSE),
+                    ExerciseShape.play(TaskKind.BUILD))),
+            Map.entry("turnaround", List.of(
+                    ExerciseShape.write(TaskKind.IDENTIFY),
+                    ExerciseShape.write(TaskKind.BUILD))),
+            Map.entry("blues-scale", List.of(
+                    ExerciseShape.write(TaskKind.BUILD),
+                    ExerciseShape.write(TaskKind.IDENTIFY),
+                    ExerciseShape.play(TaskKind.BUILD))),
             Map.entry("blues-form", List.of(
                     ExerciseShape.write(TaskKind.IDENTIFY),
                     ExerciseShape.write(TaskKind.BUILD),
@@ -316,6 +334,11 @@ public class ExerciseGenerator {
             case "two-five-one" -> twoFiveOne(difficulty, shape);
             case "modal-interchange" -> modalInterchange(difficulty, shape);
             case "tritone-substitution" -> tritoneSubstitution(difficulty, shape);
+            case "chord-symbol" -> chordSymbol(difficulty, shape);
+            case "chord-scale-theory" -> chordScale(difficulty, shape);
+            case "jazz-voicing" -> jazzVoicing(difficulty, shape);
+            case "turnaround" -> turnaround(difficulty, shape);
+            case "blues-scale" -> bluesScale(difficulty, shape);
             case "blues-form" -> bluesForm(difficulty, shape);
             case "counterpoint" -> counterpoint(difficulty, shape);
             case "species-counterpoint" -> speciesCounterpoint(difficulty, shape);
@@ -707,7 +730,7 @@ public class ExerciseGenerator {
             case BUILD -> spec("roman-numeral", ExerciseType.ROMAN_NUMERAL, shape, EvidenceType.TEXT_RECALL,
                     "In %s, which chord is %s?".formatted(key.name(), analysis.romanNumeralSymbol()),
                     ExpectedAnswer.text(chord.symbol(), chord.symbol(), chord.root().name()),
-                    AbcNotation.chord(chord, 3, key), key.name(), difficulty);
+                    AbcNotation.chord(chord, AbcNotation.CHORD_OCTAVE, key), key.name(), difficulty);
             case ANALYSE -> {
                 Progression progression = progression(key, pick(List.of(
                         List.of(1, 4, 5, 1), List.of(1, 6, 4, 5), List.of(1, 2, 5, 1), List.of(6, 4, 1, 5))));
@@ -716,14 +739,14 @@ public class ExerciseGenerator {
                                 .formatted(key.name(), progression.symbols()),
                         ExpectedAnswer.text(progression.numeralLine(), progression.numeralLine(),
                                 String.join(" - ", progression.numerals())),
-                        AbcNotation.progression(progression.chords(), key, 3), key.name(), difficulty);
+                        AbcNotation.progression(progression.chords(), key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
             }
             default -> spec("roman-numeral", ExerciseType.ROMAN_NUMERAL, shape, EvidenceType.TEXT_RECALL,
                     "In %s, what Roman numeral describes %s?".formatted(key.name(), chord.symbol()),
                     ExpectedAnswer.text(analysis.romanNumeralSymbol(), analysis.romanNumeralSymbol(),
                             analysis.romanNumeralSymbol().replace("°", "o"),
                             analysis.romanNumeralSymbol().replace("°", "dim")),
-                    AbcNotation.chord(chord, 3, key), key.name(), difficulty);
+                    AbcNotation.chord(chord, AbcNotation.CHORD_OCTAVE, key), key.name(), difficulty);
         };
     }
 
@@ -788,7 +811,7 @@ public class ExerciseGenerator {
                                 .formatted(key.name(), progression.symbols()),
                         ExpectedAnswer.text(progression.chords().get(2).symbol(),
                                 progression.chords().get(2).symbol()),
-                        AbcNotation.progression(progression.chords(), key, 3), key.name(), difficulty);
+                        AbcNotation.progression(progression.chords(), key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
             }
             default -> spec("harmonic-function", ExerciseType.HARMONIC_FUNCTION, shape, EvidenceType.TEXT_RECALL,
                     "In %s, what function does %s serve?".formatted(key.name(), chord.symbol()),
@@ -846,7 +869,7 @@ public class ExerciseGenerator {
                         "In %s: %s. Which chord prepares the dominant?"
                                 .formatted(key.name(), progression.symbols()),
                         ExpectedAnswer.text(subdominant.symbol(), subdominant.symbol()),
-                        AbcNotation.progression(progression.chords(), key, 3), key.name(), difficulty);
+                        AbcNotation.progression(progression.chords(), key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
             }
             default -> spec("predominant-function", ExerciseType.HARMONIC_FUNCTION, shape,
                     EvidenceType.TEXT_RECALL,
@@ -913,7 +936,7 @@ public class ExerciseGenerator {
                                 .formatted(chord.symbol(), tonic.symbol(), members.get(3).name(),
                                         members.get(1).name()),
                         ExpectedAnswer.noteSequence(List.of(tonic.third().name(), key.tonic().name())),
-                        AbcNotation.progression(List.of(chord, tonic), key, 3), key.name(), difficulty);
+                        AbcNotation.progression(List.of(chord, tonic), key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
             }
             default -> spec("dominant-seventh", ExerciseType.SPELL_CHORD, shape, EvidenceType.TEXT_RECALL,
                     "Spell the dominant seventh of %s.".formatted(key.name()),
@@ -940,7 +963,7 @@ public class ExerciseGenerator {
                                 .formatted(key.name()),
                         ExpectedAnswer.text(authentic.get(0).symbol() + " " + authentic.get(1).symbol(),
                                 authentic.get(0).symbol() + " " + authentic.get(1).symbol(), "V I"),
-                        AbcNotation.progression(authentic, key, 3), key.name(), difficulty);
+                        AbcNotation.progression(authentic, key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
             }
             case ANALYSE -> spec("cadence", ExerciseType.IDENTIFY_CADENCE, shape, EvidenceType.TRANSFER_PROBLEM,
                     "In %s: %s. Give the Roman numerals, then name the cadence."
@@ -952,14 +975,14 @@ public class ExerciseGenerator {
                             cadence.displayName(),
                             String.join(" ", analysis.chords().stream()
                                     .map(ChordAnalysis::romanNumeralSymbol).toList())),
-                    AbcNotation.progression(chords, key, 3), key.name(), difficulty);
+                    AbcNotation.progression(chords, key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
             default -> spec("cadence", ExerciseType.IDENTIFY_CADENCE, shape, EvidenceType.TEXT_RECALL,
                     "In %s: %s. Name the cadence at the end."
                             .formatted(key.name(), String.join(" ", chords.stream().map(Chord::symbol).toList())),
                     ExpectedAnswer.text(cadence.displayName(), cadence.displayName(),
                             cadence.name().toLowerCase().replace('_', ' '),
                             cadence.displayName().replace(" cadence", "")),
-                    AbcNotation.progression(chords, key, 3), key.name(), difficulty);
+                    AbcNotation.progression(chords, key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
         };
     }
 
@@ -981,12 +1004,12 @@ public class ExerciseGenerator {
                     "%s moves to %s. Name where %s goes, then where %s goes."
                             .formatted(dominantSeventh.symbol(), tonic.symbol(), seventh.name(), third.name()),
                     ExpectedAnswer.noteSequence(List.of(tonic.third().name(), key.tonic().name())),
-                    AbcNotation.progression(List.of(dominantSeventh, tonic), key, 3), key.name(), difficulty);
+                    AbcNotation.progression(List.of(dominantSeventh, tonic), key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
             default -> spec("voice-leading", ExerciseType.RESOLVE_TENDENCY_TONE, shape, EvidenceType.TEXT_RECALL,
                     "%s resolves to %s. The seventh is %s — which note should it move to?"
                             .formatted(dominantSeventh.symbol(), tonic.symbol(), seventh.name()),
                     ExpectedAnswer.text(tonic.third().name(), tonic.third().name()),
-                    AbcNotation.progression(List.of(dominantSeventh, tonic), key, 3), key.name(), difficulty);
+                    AbcNotation.progression(List.of(dominantSeventh, tonic), key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
         };
     }
 
@@ -1022,7 +1045,7 @@ public class ExerciseGenerator {
                                 String.join(" ", chords.stream().map(Chord::symbol).toList())),
                         ExpectedAnswer.text(String.join(" ", numerals), String.join(" ", numerals),
                                 String.join(" - ", numerals)),
-                        AbcNotation.progression(chords, key, 3), key.name(), difficulty);
+                        AbcNotation.progression(chords, key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
             }
             default -> spec("secondary-dominant", ExerciseType.SECONDARY_DOMINANT, shape,
                     EvidenceType.TEXT_RECALL,
@@ -1135,7 +1158,7 @@ public class ExerciseGenerator {
             case BUILD -> spec("chord-progression", ExerciseType.ROMAN_NUMERAL, shape, EvidenceType.TEXT_RECALL,
                     "In %s, give the chords for %s.".formatted(key.name(), progression.numeralLine()),
                     ExpectedAnswer.text(progression.symbols(), progression.symbols()),
-                    AbcNotation.progression(progression.chords(), key, 3), key.name(), difficulty);
+                    AbcNotation.progression(progression.chords(), key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
             case ANALYSE -> {
                 int dominantAt = degrees.indexOf(5);
                 Chord dominant = progression.chords().get(Math.max(dominantAt, 0));
@@ -1143,13 +1166,13 @@ public class ExerciseGenerator {
                         EvidenceType.TRANSFER_PROBLEM,
                         "In %s: %s. Which chord is the dominant?".formatted(key.name(), progression.symbols()),
                         ExpectedAnswer.text(dominant.symbol(), dominant.symbol()),
-                        AbcNotation.progression(progression.chords(), key, 3), key.name(), difficulty);
+                        AbcNotation.progression(progression.chords(), key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
             }
             default -> spec("chord-progression", ExerciseType.ROMAN_NUMERAL, shape, EvidenceType.TEXT_RECALL,
                     "In %s: %s. Give the Roman numerals.".formatted(key.name(), progression.symbols()),
                     ExpectedAnswer.text(progression.numeralLine(), progression.numeralLine(),
                             String.join(" - ", progression.numerals())),
-                    AbcNotation.progression(progression.chords(), key, 3), key.name(), difficulty);
+                    AbcNotation.progression(progression.chords(), key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
         };
     }
 
@@ -1178,7 +1201,7 @@ public class ExerciseGenerator {
             case IDENTIFY -> spec("two-five-one", ExerciseType.ROMAN_NUMERAL, shape, EvidenceType.TEXT_RECALL,
                     "%s. Which key is this ii-V-I in?".formatted(symbols),
                     ExpectedAnswer.text(key.tonic().name(), key.tonic().name(), key.name()),
-                    AbcNotation.progression(chords, key, 3), key.name(), difficulty);
+                    AbcNotation.progression(chords, key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
             case ANALYSE -> {
                 // The seventh of the ii becomes the third of the V: the join that makes it work.
                 PitchClass shared = chords.get(0).pitchClasses().get(3);
@@ -1187,12 +1210,12 @@ public class ExerciseGenerator {
                         "In the ii-V-I in %s (%s), which note is shared between %s and %s?"
                                 .formatted(key.name(), symbols, chords.get(0).symbol(), chords.get(1).symbol()),
                         ExpectedAnswer.text(shared.name(), shared.name()),
-                        AbcNotation.progression(chords, key, 3), key.name(), difficulty);
+                        AbcNotation.progression(chords, key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
             }
             default -> spec("two-five-one", ExerciseType.SPELL_CHORD, shape, EvidenceType.TEXT_RECALL,
                     "In %s, name the three chords of a ii-V-I using seventh chords.".formatted(key.name()),
                     ExpectedAnswer.text(symbols, symbols),
-                    AbcNotation.progression(chords, key, 3), key.name(), difficulty);
+                    AbcNotation.progression(chords, key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
         };
     }
 
@@ -1268,7 +1291,7 @@ public class ExerciseGenerator {
                     "In a blues in %s, name the three chords.".formatted(key.tonic().name()),
                     ExpectedAnswer.text("%s %s %s".formatted(one.symbol(), four.symbol(), five.symbol()),
                             "%s %s %s".formatted(one.symbol(), four.symbol(), five.symbol())),
-                    AbcNotation.progression(List.of(one, four, five), key, 3), key.name(), difficulty);
+                    AbcNotation.progression(List.of(one, four, five), key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
             case ANALYSE -> spec("blues-form", ExerciseType.ROMAN_NUMERAL, shape, EvidenceType.TRANSFER_PROBLEM,
                     "In a twelve-bar blues in %s, which chord is played in bar 5?"
                             .formatted(key.tonic().name()),
@@ -1376,6 +1399,133 @@ public class ExerciseGenerator {
                 EvidenceType.EXPLANATION,
                 "In your own words, explain %s and give an example.".formatted(conceptId.replace('-', ' ')),
                 ExpectedAnswer.explanation("A correct explanation of " + conceptId), null, null, difficulty);
+    }
+
+    // ---------------------------------------------------------------- jazz
+
+    /** Reading and writing lead-sheet chord symbols, which is where jazz notation starts. */
+    private ExerciseSpec chordSymbol(double difficulty, ExerciseShape shape) {
+        PitchClass root = randomRoot(difficulty);
+        ChordQuality quality = pick(difficulty < 0.5
+                ? List.of(ChordQuality.MAJOR_SEVENTH, ChordQuality.MINOR_SEVENTH, ChordQuality.DOMINANT_SEVENTH)
+                : List.of(ChordQuality.HALF_DIMINISHED_SEVENTH, ChordQuality.DOMINANT_FLAT_NINTH,
+                        ChordQuality.MINOR_MAJOR_SEVENTH, ChordQuality.DOMINANT_SEVENTH_SUS4,
+                        ChordQuality.SIX_NINE));
+        Chord chord = Chord.of(root, quality);
+        List<String> notes = chord.pitchClasses().stream().map(PitchClass::name).toList();
+
+        if (shape.isPlayed()) {
+            return spec("chord-symbol", ExerciseType.PLAY_CHORD, shape, EvidenceType.MIDI_CHORD,
+                    "Play %s.".formatted(chord.symbol()),
+                    ExpectedAnswer.midiChord(chord.symbol(), chord.describe()), null, null, difficulty);
+        }
+        return switch (shape.kind()) {
+            case IDENTIFY -> spec("chord-symbol", ExerciseType.SPELL_CHORD, shape, EvidenceType.TEXT_RECALL,
+                    "What chord symbol names %s?".formatted(String.join(" ", notes)),
+                    ExpectedAnswer.text(chord.symbol(), chord.symbol()), null, null, difficulty);
+            default -> spec("chord-symbol", ExerciseType.SPELL_CHORD, shape, EvidenceType.TEXT_RECALL,
+                    "Spell %s.".formatted(chord.symbol()),
+                    ExpectedAnswer.noteSet(notes), null, null, difficulty);
+        };
+    }
+
+    /** Which scale fits a chord: the step from naming harmony to improvising over it. */
+    private ExerciseSpec chordScale(double difficulty, ExerciseShape shape) {
+        PitchClass root = randomRoot(difficulty);
+        record Pairing(ChordQuality quality, ScaleType scale, String name) {}
+        Pairing pairing = pick(difficulty < 0.6
+                ? List.of(new Pairing(ChordQuality.DOMINANT_SEVENTH, ScaleType.MIXOLYDIAN, "Mixolydian"),
+                        new Pairing(ChordQuality.MINOR_SEVENTH, ScaleType.DORIAN, "Dorian"),
+                        new Pairing(ChordQuality.MAJOR_SEVENTH, ScaleType.MAJOR, "Ionian"))
+                : List.of(new Pairing(ChordQuality.HALF_DIMINISHED_SEVENTH, ScaleType.LOCRIAN, "Locrian"),
+                        new Pairing(ChordQuality.DOMINANT_FLAT_NINTH, ScaleType.ALTERED, "altered"),
+                        new Pairing(ChordQuality.MAJOR_SEVENTH_SHARP_ELEVENTH, ScaleType.LYDIAN, "Lydian")));
+        Chord chord = Chord.of(root, pairing.quality());
+        Scale scale = new Scale(root, pairing.scale());
+
+        if (shape.kind() == TaskKind.IDENTIFY) {
+            return spec("chord-scale-theory", ExerciseType.IDENTIFY_MODE, shape, EvidenceType.TEXT_RECALL,
+                    "Which scale is the usual choice over %s?".formatted(chord.symbol()),
+                    ExpectedAnswer.text(pairing.name(), pairing.name(), pairing.scale().displayName()),
+                    null, null, difficulty);
+        }
+        return spec("chord-scale-theory", ExerciseType.SPELL_SCALE, shape, EvidenceType.TEXT_RECALL,
+                "Spell the %s scale you would play over %s.".formatted(pairing.name(), chord.symbol()),
+                ExpectedAnswer.noteSequence(scale.pitchClasses().stream().map(PitchClass::name).toList()),
+                null, null, difficulty);
+    }
+
+    /**
+     * Shell voicings. The third and the seventh are what make a chord sound like itself, so
+     * the exercise is about those rather than about stacking everything.
+     */
+    private ExerciseSpec jazzVoicing(double difficulty, ExerciseShape shape) {
+        PitchClass root = randomRoot(difficulty);
+        ChordQuality quality = pick(List.of(ChordQuality.DOMINANT_SEVENTH, ChordQuality.MAJOR_SEVENTH,
+                ChordQuality.MINOR_SEVENTH));
+        Chord chord = Chord.of(root, quality);
+        List<PitchClass> classes = chord.pitchClasses();
+        List<String> shell = List.of(classes.get(0).name(), classes.get(1).name(), classes.get(3).name());
+
+        if (shape.isPlayed()) {
+            return spec("jazz-voicing", ExerciseType.PLAY_CHORD, shape, EvidenceType.MIDI_CHORD,
+                    "Play a shell voicing of %s: root, third and seventh.".formatted(chord.symbol()),
+                    ExpectedAnswer.midiNotes(shell, "a shell voicing of " + chord.symbol()),
+                    null, null, difficulty);
+        }
+        if (shape.kind() == TaskKind.ANALYSE) {
+            return spec("jazz-voicing", ExerciseType.SPELL_CHORD, shape, EvidenceType.TRANSFER_PROBLEM,
+                    "In a rootless voicing of %s the bass player covers the root. Which note carries the quality?"
+                            .formatted(chord.symbol()),
+                    ExpectedAnswer.text(classes.get(1).name(), classes.get(1).name()), null, null, difficulty);
+        }
+        return spec("jazz-voicing", ExerciseType.SPELL_CHORD, shape, EvidenceType.TEXT_RECALL,
+                "Spell a shell voicing of %s: root, third and seventh.".formatted(chord.symbol()),
+                ExpectedAnswer.noteSet(shell), null, null, difficulty);
+    }
+
+    /** The few bars that carry the end of a chorus back to the top. */
+    private ExerciseSpec turnaround(double difficulty, ExerciseShape shape) {
+        Key key = randomKey(difficulty, Mode.MAJOR);
+        List<Chord> chords = List.of(
+                Chord.of(key.tonic(), ChordQuality.MAJOR_SEVENTH),
+                Chord.of(key.scale().degree(6), ChordQuality.MINOR_SEVENTH),
+                Chord.of(key.scale().degree(2), ChordQuality.MINOR_SEVENTH),
+                key.dominantSeventh());
+        String symbols = String.join(" ", chords.stream().map(Chord::symbol).toList());
+
+        if (shape.kind() == TaskKind.IDENTIFY) {
+            return spec("turnaround", ExerciseType.ROMAN_NUMERAL, shape, EvidenceType.TEXT_RECALL,
+                    "%s. Which key does this turnaround belong to?".formatted(symbols),
+                    ExpectedAnswer.text(key.tonic().name(), key.tonic().name(), key.name()),
+                    AbcNotation.progression(chords, key, AbcNotation.CHORD_OCTAVE), key.name(), difficulty);
+        }
+        return spec("turnaround", ExerciseType.ROMAN_NUMERAL, shape, EvidenceType.TEXT_RECALL,
+                "Spell a I-vi-ii-V turnaround in %s, as chord symbols.".formatted(key.name()),
+                ExpectedAnswer.text(symbols, symbols), null, key.name(), difficulty);
+    }
+
+    /** The minor pentatonic with the flat fifth added: the note that makes it sound blue. */
+    private ExerciseSpec bluesScale(double difficulty, ExerciseShape shape) {
+        PitchClass tonic = randomRoot(difficulty);
+        Scale scale = new Scale(tonic, ScaleType.BLUES);
+        List<String> notes = scale.pitchClasses().stream().map(PitchClass::name).toList();
+
+        if (shape.isPlayed()) {
+            return spec("blues-scale", ExerciseType.PLAY_SCALE, shape, EvidenceType.MIDI_SCALE,
+                    "Play the %s blues scale.".formatted(tonic.name()),
+                    ExpectedAnswer.midiScale(tonic.name(), ScaleType.BLUES.name(), tonic.name() + " blues"),
+                    null, null, difficulty);
+        }
+        if (shape.kind() == TaskKind.IDENTIFY) {
+            return spec("blues-scale", ExerciseType.SPELL_SCALE, shape, EvidenceType.TEXT_RECALL,
+                    "In the %s blues scale, which note is the blue note added to the minor pentatonic?"
+                            .formatted(tonic.name()),
+                    ExpectedAnswer.text(notes.get(3), notes.get(3)), null, null, difficulty);
+        }
+        return spec("blues-scale", ExerciseType.SPELL_SCALE, shape, EvidenceType.TEXT_RECALL,
+                "Spell the %s blues scale.".formatted(tonic.name()),
+                ExpectedAnswer.noteSequence(notes), null, null, difficulty);
     }
 
     // ---------------------------------------------------------------- helpers

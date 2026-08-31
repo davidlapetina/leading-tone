@@ -20,7 +20,7 @@ class SettingsServiceTest {
     SettingsService settingsService;
 
     private static SettingsUpdate only(String model, Double temperature) {
-        return new SettingsUpdate(null, null, model, null, temperature, null, null, null, null, null, null);
+        return new SettingsUpdate(null, null, null, null, model, null, temperature, null, null, null, null, null, null);
     }
 
     @Test
@@ -54,7 +54,7 @@ class SettingsServiceTest {
         settingsService.update(only(null, 40.0));
         assertTrue(settingsService.current().temperature <= 2.0);
 
-        settingsService.update(new SettingsUpdate(null, null, null, null, null, 10, null, 0, -5, 0, null));
+        settingsService.update(new SettingsUpdate(null, null, null, null, null, null, null, 10, null, 0, -5, 0, null));
         Settings settings = settingsService.current();
         assertTrue(settings.numCtx >= 1024);
         assertTrue(settings.timeoutSeconds >= 5);
@@ -68,7 +68,7 @@ class SettingsServiceTest {
         settingsService.reset();
         String before = settingsService.current().modelSignature();
 
-        settingsService.update(new SettingsUpdate(null, null, null, null, null, null, null, null, null, null, "David"));
+        settingsService.update(new SettingsUpdate(null, null, null, null, null, null, null, null, null, null, null, null, "David"));
         assertEquals(before, settingsService.current().modelSignature(), "a name change is not a model change");
 
         settingsService.update(only("qwen3:30b-a3b", null));

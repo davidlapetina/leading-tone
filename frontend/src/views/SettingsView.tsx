@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
 import type { Settings } from '../api/types'
+import { KnowledgeSources } from '../components/KnowledgeSources'
 
 /**
  * The application's own configuration, kept in the database rather than the environment.
@@ -162,6 +163,29 @@ export function SettingsView() {
         <Field label="What to call you" hint="Used when the tutor addresses you.">
           <input value={draft.learnerName} onChange={(event) => set('learnerName', event.target.value)} />
         </Field>
+      </section>
+
+      <section className="panel-card">
+        <h2>Published sources</h2>
+        <Field
+          label="How this copy is used"
+          hint="Thirteen of the fourteen sources are NonCommercial. Commercial use makes them unavailable here, and needs separate permission from the rights holders."
+        >
+          <select
+            value={draft.runtimeMode}
+            onChange={(event) => set('runtimeMode', event.target.value as Settings['runtimeMode'])}
+          >
+            <option value="NON_COMMERCIAL">Personal study, teaching or research</option>
+            <option value="COMMERCIAL">Commercial</option>
+          </select>
+        </Field>
+        <Field label="Use published sources" hint="Ground explanations in the sources below.">
+          <Toggle
+            value={draft.knowledgeEnabled}
+            onChange={(value) => set('knowledgeEnabled', value)}
+          />
+        </Field>
+        <KnowledgeSources />
       </section>
 
       <section className="panel-card">

@@ -23,7 +23,25 @@ public record TutorRequest(
         /** Short, learner-facing: "Expected Eb." Shown as-is when there is no model. */
         String evaluationFeedback,
         /** Instructions about that verdict, for the model only. Never shown to anyone. */
-        String modelDirective) {
+        String modelDirective,
+        /**
+         * What was computed, quoted and cited for this turn. Gathered by the orchestrator
+         * before the model is called, so the model explains evidence rather than supplying
+         * it.
+         */
+        fr.lapetina.music.knowledge.router.TutorKnowledge knowledge) {
+
+    public TutorRequest {
+        knowledge = knowledge == null
+                ? fr.lapetina.music.knowledge.router.TutorKnowledge.EMPTY : knowledge;
+    }
+
+    public TutorRequest(java.util.UUID sessionId, LearnerSnapshot snapshot, TeachingDecision decision,
+                        Exercise exercise, String learnerMessage, String evaluationFeedback,
+                        String modelDirective) {
+        this(sessionId, snapshot, decision, exercise, learnerMessage, evaluationFeedback,
+                modelDirective, fr.lapetina.music.knowledge.router.TutorKnowledge.EMPTY);
+    }
 
     public TutorRequest(java.util.UUID sessionId, LearnerSnapshot snapshot, TeachingDecision decision,
                         Exercise exercise, String learnerMessage, String evaluationFeedback) {

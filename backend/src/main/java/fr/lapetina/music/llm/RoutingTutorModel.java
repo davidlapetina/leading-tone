@@ -70,7 +70,7 @@ public class RoutingTutorModel implements TutorModel {
 
     private String call(TutorRequest request, Settings settings) {
         String learnerState = promptBuilder.learnerState(request.snapshot());
-        String instruction = promptBuilder.instruction(request.decision());
+        String instruction = promptBuilder.instruction(request.decision(), request.knowledge(), request.snapshot());
         String exerciseBlock = exerciseBlock(request);
         String learnerMessage = learnerMessage(request);
 

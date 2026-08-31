@@ -61,6 +61,7 @@ public class ConceptResource {
                 concept.category().name(),
                 concept.intrinsicDifficulty(),
                 concept.prerequisites(),
-                conceptGraph.dependentsOf(concept.id()).stream().map(Concept::id).toList());
+                conceptGraph.dependentsOf(concept.id()).stream().map(Concept::id).toList(),
+                concept.tradition().name());
     }
 }

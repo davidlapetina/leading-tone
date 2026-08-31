@@ -119,11 +119,6 @@ public class TheoryResource {
     }
 
     private static Key parseKey(String text) {
-        String[] parts = text.trim().split("\\s+");
-        if (parts.length == 0) {
-            throw new BadRequestException("Unreadable key: " + text);
-        }
-        Mode mode = parts.length > 1 && parts[1].toLowerCase().startsWith("min") ? Mode.MINOR : Mode.MAJOR;
-        return new Key(PitchClass.parse(parts[0]), mode);
+        return Key.parse(text);
     }
 }

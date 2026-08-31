@@ -553,3 +553,192 @@ select {
 
 .btn-danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 35%, var(--line)); }
 .btn-danger:hover:not(:disabled) { background: var(--bad); border-color: var(--bad); color: #fff; }
+
+/* ---------------------------------------------------------------- published sources
+   The licence is part of the interface here, not a footnote. This application is MIT and
+   none of these sources are, so their terms are shown where someone decides to bring one
+   in rather than only in a notices file. */
+.knowledge-status {
+  margin: 0.9rem 0 1.1rem;
+  padding: 0.7rem 0.85rem;
+  background: var(--card-soft);
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  color: var(--ink-mid);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.knowledge-note { color: var(--ink-dim); }
+
+.source-list {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.source-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.source-row:first-child { border-top: none; }
+.source-main { min-width: 0; flex: 1; }
+
+.source-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.source-name { font-weight: 600; color: var(--ink); }
+
+.source-meta {
+  margin-top: 0.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--ink-dim);
+}
+
+.source-state-active { color: var(--good); font-weight: 500; }
+.source-failed { color: var(--bad); }
+
+/* A NonCommercial source is marked differently because the restriction outlives every
+   transformation we apply to it: indexing and embedding do not remove it. */
+.licence-badge {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  padding: 0.12rem 0.42rem;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  border: 1px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.licence-badge:hover { border-color: currentcolor; }
+.licence-badge-nc { background: var(--accent-soft); color: var(--accent); }
+
+.source-report {
+  margin-top: 0.45rem;
+  font-size: 0.83rem;
+  color: var(--ink-mid);
+  line-height: 1.5;
+}
+
+.source-report p { margin: 0.15rem 0; }
+
+/* What was refused, and why. Saying nothing would leave the impression that everything
+   published was taken. */
+.source-refused {
+  color: var(--accent);
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--accent-soft);
+}
+
+.source-toggle { margin-top: 0.35rem; }
+.source-error { color: var(--bad); font-size: 0.85rem; margin-top: 0.6rem; }
+
+@media (max-width: 560px) {
+  .source-row { flex-direction: column; gap: 0.5rem; }
+}
+
+/* ---------------------------------------------------------------- musical examples
+   A real excerpt and a written one look different on purpose. A learner should never have
+   to wonder whether the bars in front of them are Beethoven's or ours. */
+.example-set { display: flex; flex-direction: column; gap: 0.9rem; margin: 0.9rem 0; }
+
+.example-card {
+  margin: 0;
+  padding: 0.9rem 1rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.example-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.example-cite { font-weight: 600; color: var(--ink); font-size: 0.92rem; }
+
+.example-what {
+  margin: 0.15rem 0 0.3rem;
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 0.82rem;
+  color: var(--primary-dark);
+}
+
+.origin-badge {
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.14rem 0.5rem;
+  border-radius: 999px;
+  background: var(--warn-soft);
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.origin-badge-verified { background: var(--good-soft); color: var(--good); }
+
+.example-card .score { margin: 0.2rem 0 0; overflow-x: auto; }
+
+.example-licence {
+  margin: 0.45rem 0 0;
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+}
+
+.example-none {
+  margin: 0.6rem 0;
+  font-size: 0.86rem;
+  color: var(--ink-dim);
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------- the jazz path
+   Set apart visually, but not separated: these concepts also appear in the areas below,
+   because jazz shares its theory with everything else and teaching it as a walled garden
+   would be teaching it badly. */
+.jazz-path {
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--accent-soft) 0%, transparent 120px);
+  padding: 1.1rem 1.2rem 0.6rem;
+}
+
+.jazz-path .area-title h2 { color: var(--accent); }
+
+.jazz-progress {
+  margin-top: 0.6rem;
+  height: 5px;
+  width: min(280px, 100%);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.jazz-progress span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+
+.jazz-theme { margin-top: 1.1rem; }
+.jazz-theme h3 { margin: 0 0 0.1rem; font-size: 0.95rem; color: var(--ink); }
+.jazz-theme-blurb { margin: 0 0 0.6rem; font-size: 0.85rem; color: var(--ink-mid); }

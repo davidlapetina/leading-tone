@@ -54,6 +54,15 @@ public class SettingsService {
         if (update.toolsEnabled() != null) {
             settings.toolsEnabled = update.toolsEnabled();
         }
+        if (update.knowledgeEnabled() != null) {
+            settings.knowledgeEnabled = update.knowledgeEnabled();
+        }
+        if (update.runtimeMode() != null && !update.runtimeMode().isBlank()) {
+            // Validated rather than stored as typed: an unrecognised mode must be a 400,
+            // not a silent fallback to the permissive one.
+            settings.runtimeMode =
+                    fr.lapetina.music.knowledge.license.RuntimeMode.parse(update.runtimeMode()).name();
+        }
         if (update.model() != null && !update.model().isBlank()) {
             settings.model = update.model().trim();
         }
@@ -92,6 +101,8 @@ public class SettingsService {
         Settings fresh = new Settings();
         settings.llmEnabled = defaultLlmEnabled;
         settings.toolsEnabled = fresh.toolsEnabled;
+        settings.knowledgeEnabled = fresh.knowledgeEnabled;
+        settings.runtimeMode = fresh.runtimeMode;
         settings.model = defaultModel;
         settings.baseUrl = defaultBaseUrl;
         settings.temperature = fresh.temperature;
