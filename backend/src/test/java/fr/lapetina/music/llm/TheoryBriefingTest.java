@@ -66,6 +66,34 @@ class TheoryBriefingTest {
     }
 
     @Test
+    @DisplayName("jazz vocabulary is spelled by the engine, not remembered by the model")
+    void spellsJazzChordsCorrectly() {
+        String extended = briefing.forConcept("extended-chord");
+        assertTrue(extended.contains("C E G Bb D"), extended);
+        assertTrue(extended.contains("C E G A"), extended);
+
+        String altered = briefing.forConcept("altered-dominant");
+        assertTrue(altered.contains("C E G Bb D#"), altered);
+        assertTrue(altered.contains("never Eb"), altered);
+
+        String twoFive = briefing.forConcept("two-five-one");
+        assertTrue(twoFive.contains("Dm7 G7 Cmaj7"), twoFive);
+        assertTrue(twoFive.contains("Gm7 C7 Fmaj7"), twoFive);
+
+        String tritone = briefing.forConcept("tritone-substitution");
+        assertTrue(tritone.contains("Db7"), tritone);
+        assertTrue(tritone.contains("B and F"), tritone);
+    }
+
+    @Test
+    void statesTheRulesOfCounterpoint() {
+        String facts = briefing.forConcept("counterpoint");
+        assertTrue(facts.contains("contrary"), facts);
+        assertTrue(facts.contains("Parallel fifths"), facts);
+        assertTrue(briefing.forConcept("species-counterpoint").contains("consonance on every beat"));
+    }
+
+    @Test
     @DisplayName("no concept produces a briefing that throws or lies about being present")
     void coversTheGraphWithoutFailing() {
         ConceptGraph graph = new ConceptGraph(new ObjectMapper());

@@ -3,6 +3,8 @@ package fr.lapetina.music.exercise;
 import fr.lapetina.music.learner.EvidenceType;
 import fr.lapetina.music.theory.AbcNotation;
 import fr.lapetina.music.theory.Cadence;
+import fr.lapetina.music.theory.CounterpointAnalyzer;
+import fr.lapetina.music.theory.Motion;
 import fr.lapetina.music.theory.CadencePoint;
 import fr.lapetina.music.theory.Chord;
 import fr.lapetina.music.theory.ChordAnalysis;
@@ -167,6 +169,45 @@ public class ExerciseGenerator {
                     ExerciseShape.write(TaskKind.BUILD),
                     ExerciseShape.write(TaskKind.ANALYSE),
                     ExerciseShape.play(TaskKind.BUILD))),
+            Map.entry("extended-chord", List.of(
+                    ExerciseShape.write(TaskKind.IDENTIFY),
+                    ExerciseShape.write(TaskKind.BUILD),
+                    ExerciseShape.write(TaskKind.ANALYSE),
+                    ExerciseShape.play(TaskKind.BUILD))),
+            Map.entry("altered-dominant", List.of(
+                    ExerciseShape.write(TaskKind.IDENTIFY),
+                    ExerciseShape.write(TaskKind.BUILD),
+                    ExerciseShape.write(TaskKind.ANALYSE),
+                    ExerciseShape.play(TaskKind.BUILD))),
+            Map.entry("chord-progression", List.of(
+                    ExerciseShape.write(TaskKind.IDENTIFY),
+                    ExerciseShape.write(TaskKind.BUILD),
+                    ExerciseShape.write(TaskKind.ANALYSE))),
+            Map.entry("two-five-one", List.of(
+                    ExerciseShape.write(TaskKind.IDENTIFY),
+                    ExerciseShape.write(TaskKind.BUILD),
+                    ExerciseShape.write(TaskKind.ANALYSE),
+                    ExerciseShape.play(TaskKind.BUILD))),
+            Map.entry("modal-interchange", List.of(
+                    ExerciseShape.write(TaskKind.IDENTIFY),
+                    ExerciseShape.write(TaskKind.BUILD),
+                    ExerciseShape.write(TaskKind.ANALYSE))),
+            Map.entry("tritone-substitution", List.of(
+                    ExerciseShape.write(TaskKind.IDENTIFY),
+                    ExerciseShape.write(TaskKind.BUILD),
+                    ExerciseShape.write(TaskKind.ANALYSE))),
+            Map.entry("blues-form", List.of(
+                    ExerciseShape.write(TaskKind.IDENTIFY),
+                    ExerciseShape.write(TaskKind.BUILD),
+                    ExerciseShape.write(TaskKind.ANALYSE))),
+            Map.entry("counterpoint", List.of(
+                    ExerciseShape.write(TaskKind.IDENTIFY),
+                    ExerciseShape.write(TaskKind.BUILD),
+                    ExerciseShape.write(TaskKind.ANALYSE))),
+            Map.entry("species-counterpoint", List.of(
+                    ExerciseShape.write(TaskKind.IDENTIFY),
+                    ExerciseShape.write(TaskKind.BUILD),
+                    ExerciseShape.write(TaskKind.ANALYSE))),
             Map.entry("modulation", List.of(
                     ExerciseShape.write(TaskKind.IDENTIFY),
                     ExerciseShape.write(TaskKind.BUILD),
@@ -269,6 +310,15 @@ public class ExerciseGenerator {
             case "voice-leading" -> voiceLeading(difficulty, shape);
             case "secondary-dominant" -> secondaryDominant(difficulty, shape);
             case "modulation" -> modulation(difficulty, shape);
+            case "extended-chord" -> extendedChord(difficulty, shape);
+            case "altered-dominant" -> alteredDominant(difficulty, shape);
+            case "chord-progression" -> chordProgression(difficulty, shape);
+            case "two-five-one" -> twoFiveOne(difficulty, shape);
+            case "modal-interchange" -> modalInterchange(difficulty, shape);
+            case "tritone-substitution" -> tritoneSubstitution(difficulty, shape);
+            case "blues-form" -> bluesForm(difficulty, shape);
+            case "counterpoint" -> counterpoint(difficulty, shape);
+            case "species-counterpoint" -> speciesCounterpoint(difficulty, shape);
             default -> explain(conceptId, difficulty);
         };
     }
@@ -1012,6 +1062,312 @@ public class ExerciseGenerator {
                         null, from.name(), difficulty);
             }
         };
+    }
+
+    // ---------------------------------------------------------------- jazz harmony
+
+    private ExerciseSpec extendedChord(double difficulty, ExerciseShape shape) {
+        PitchClass root = randomRoot(difficulty);
+        ChordQuality quality = pick(List.of(ChordQuality.MAJOR_SIXTH, ChordQuality.MINOR_SIXTH,
+                ChordQuality.DOMINANT_NINTH, ChordQuality.MAJOR_NINTH, ChordQuality.MINOR_NINTH,
+                ChordQuality.DOMINANT_THIRTEENTH));
+        Chord chord = Chord.of(root, quality);
+        List<String> notes = chord.pitchClasses().stream().map(PitchClass::name).toList();
+
+        if (shape.isPlayed()) {
+            return spec("extended-chord", ExerciseType.PLAY_CHORD, shape, EvidenceType.MIDI_CHORD,
+                    "Play %s.".formatted(chord.symbol()),
+                    ExpectedAnswer.midiChord(chord.symbol(), chord.describe()), null, null, difficulty);
+        }
+        return switch (shape.kind()) {
+            case IDENTIFY -> spec("extended-chord", ExerciseType.SPELL_CHORD, shape, EvidenceType.TEXT_RECALL,
+                    "Which chord is %s?".formatted(String.join(" ", notes)),
+                    ExpectedAnswer.text(chord.symbol(), chord.symbol(), chord.describe()),
+                    null, null, difficulty);
+            case ANALYSE -> {
+                String top = notes.get(notes.size() - 1);
+                Interval extension = quality.intervals().get(quality.size() - 1);
+                yield spec("extended-chord", ExerciseType.IDENTIFY_INTERVAL, shape, EvidenceType.TEXT_RECALL,
+                        "In %s, which note is the %s?".formatted(chord.symbol(), ordinalWord(extension.number())),
+                        ExpectedAnswer.text(top, top), null, null, difficulty);
+            }
+            default -> spec("extended-chord", ExerciseType.SPELL_CHORD, shape, EvidenceType.TEXT_RECALL,
+                    "Spell %s.".formatted(chord.symbol()),
+                    ExpectedAnswer.noteSet(notes), null, null, difficulty);
+        };
+    }
+
+    private ExerciseSpec alteredDominant(double difficulty, ExerciseShape shape) {
+        PitchClass root = randomRoot(difficulty);
+        ChordQuality quality = pick(List.of(ChordQuality.DOMINANT_FLAT_NINTH,
+                ChordQuality.DOMINANT_SHARP_NINTH, ChordQuality.DOMINANT_SHARP_ELEVENTH,
+                ChordQuality.DOMINANT_FLAT_THIRTEENTH));
+        Chord chord = Chord.of(root, quality);
+        List<String> notes = chord.pitchClasses().stream().map(PitchClass::name).toList();
+        String altered = notes.get(notes.size() - 1);
+
+        if (shape.isPlayed()) {
+            return spec("altered-dominant", ExerciseType.PLAY_CHORD, shape, EvidenceType.MIDI_CHORD,
+                    "Play %s.".formatted(chord.symbol()),
+                    ExpectedAnswer.midiChord(chord.symbol(), chord.describe()), null, null, difficulty);
+        }
+        return switch (shape.kind()) {
+            case IDENTIFY -> spec("altered-dominant", ExerciseType.SPELL_CHORD, shape, EvidenceType.TEXT_RECALL,
+                    "Which altered dominant is %s?".formatted(String.join(" ", notes)),
+                    ExpectedAnswer.text(chord.symbol(), chord.symbol()), null, null, difficulty);
+            case ANALYSE -> spec("altered-dominant", ExerciseType.IDENTIFY_INTERVAL, shape,
+                    EvidenceType.TRANSFER_PROBLEM,
+                    "In %s, which note is the altered tension?".formatted(chord.symbol()),
+                    ExpectedAnswer.text(altered, altered), null, null, difficulty);
+            default -> spec("altered-dominant", ExerciseType.SPELL_CHORD, shape, EvidenceType.TEXT_RECALL,
+                    "Spell %s.".formatted(chord.symbol()),
+                    ExpectedAnswer.noteSet(notes), null, null, difficulty);
+        };
+    }
+
+    private ExerciseSpec chordProgression(double difficulty, ExerciseShape shape) {
+        Key key = randomKey(difficulty, Mode.MAJOR);
+        List<Integer> degrees = pick(List.of(
+                List.of(1, 5, 6, 4), List.of(1, 6, 4, 5), List.of(6, 4, 1, 5), List.of(1, 4, 2, 5)));
+        Progression progression = progression(key, degrees);
+
+        return switch (shape.kind()) {
+            case BUILD -> spec("chord-progression", ExerciseType.ROMAN_NUMERAL, shape, EvidenceType.TEXT_RECALL,
+                    "In %s, give the chords for %s.".formatted(key.name(), progression.numeralLine()),
+                    ExpectedAnswer.text(progression.symbols(), progression.symbols()),
+                    AbcNotation.progression(progression.chords(), key, 3), key.name(), difficulty);
+            case ANALYSE -> {
+                int dominantAt = degrees.indexOf(5);
+                Chord dominant = progression.chords().get(Math.max(dominantAt, 0));
+                yield spec("chord-progression", ExerciseType.HARMONIC_FUNCTION, shape,
+                        EvidenceType.TRANSFER_PROBLEM,
+                        "In %s: %s. Which chord is the dominant?".formatted(key.name(), progression.symbols()),
+                        ExpectedAnswer.text(dominant.symbol(), dominant.symbol()),
+                        AbcNotation.progression(progression.chords(), key, 3), key.name(), difficulty);
+            }
+            default -> spec("chord-progression", ExerciseType.ROMAN_NUMERAL, shape, EvidenceType.TEXT_RECALL,
+                    "In %s: %s. Give the Roman numerals.".formatted(key.name(), progression.symbols()),
+                    ExpectedAnswer.text(progression.numeralLine(), progression.numeralLine(),
+                            String.join(" - ", progression.numerals())),
+                    AbcNotation.progression(progression.chords(), key, 3), key.name(), difficulty);
+        };
+    }
+
+    /** The ii-V-I, spelled with sevenths, which is how it is actually played. */
+    private List<Chord> twoFiveOneChords(Key key) {
+        return List.of(
+                Chord.of(key.scale().degree(2), key.mode() == Mode.MAJOR
+                        ? ChordQuality.MINOR_SEVENTH : ChordQuality.HALF_DIMINISHED_SEVENTH),
+                key.dominantSeventh(),
+                Chord.of(key.tonic(), key.mode() == Mode.MAJOR
+                        ? ChordQuality.MAJOR_SEVENTH : ChordQuality.MINOR_SEVENTH));
+    }
+
+    private ExerciseSpec twoFiveOne(double difficulty, ExerciseShape shape) {
+        Key key = randomKey(difficulty, Mode.MAJOR);
+        List<Chord> chords = twoFiveOneChords(key);
+        String symbols = String.join(" ", chords.stream().map(Chord::symbol).toList());
+
+        if (shape.isPlayed()) {
+            return spec("two-five-one", ExerciseType.PLAY_CHORD, shape, EvidenceType.MIDI_CHORD,
+                    "In a ii-V-I in %s, play the V chord.".formatted(key.name()),
+                    ExpectedAnswer.midiChord(chords.get(1).symbol(), chords.get(1).describe()),
+                    null, key.name(), difficulty);
+        }
+        return switch (shape.kind()) {
+            case IDENTIFY -> spec("two-five-one", ExerciseType.ROMAN_NUMERAL, shape, EvidenceType.TEXT_RECALL,
+                    "%s. Which key is this ii-V-I in?".formatted(symbols),
+                    ExpectedAnswer.text(key.tonic().name(), key.tonic().name(), key.name()),
+                    AbcNotation.progression(chords, key, 3), key.name(), difficulty);
+            case ANALYSE -> {
+                // The seventh of the ii becomes the third of the V: the join that makes it work.
+                PitchClass shared = chords.get(0).pitchClasses().get(3);
+                yield spec("two-five-one", ExerciseType.RESOLVE_TENDENCY_TONE, shape,
+                        EvidenceType.TRANSFER_PROBLEM,
+                        "In the ii-V-I in %s (%s), which note is shared between %s and %s?"
+                                .formatted(key.name(), symbols, chords.get(0).symbol(), chords.get(1).symbol()),
+                        ExpectedAnswer.text(shared.name(), shared.name()),
+                        AbcNotation.progression(chords, key, 3), key.name(), difficulty);
+            }
+            default -> spec("two-five-one", ExerciseType.SPELL_CHORD, shape, EvidenceType.TEXT_RECALL,
+                    "In %s, name the three chords of a ii-V-I using seventh chords.".formatted(key.name()),
+                    ExpectedAnswer.text(symbols, symbols),
+                    AbcNotation.progression(chords, key, 3), key.name(), difficulty);
+        };
+    }
+
+    private ExerciseSpec modalInterchange(double difficulty, ExerciseShape shape) {
+        Key major = randomKey(difficulty, Mode.MAJOR);
+        Key parallel = major.parallel();
+        int degree = pick(List.of(4, 6, 7));
+        Chord borrowed = parallel.triad(degree, false);
+
+        return switch (shape.kind()) {
+            case IDENTIFY -> spec("modal-interchange", ExerciseType.CHORD_QUALITY_IN_KEY, shape,
+                    EvidenceType.TEXT_RECALL,
+                    "In %s, the chord %s appears. Which key is it borrowed from?"
+                            .formatted(major.name(), borrowed.symbol()),
+                    ExpectedAnswer.text(parallel.name(), parallel.name(), parallel.tonic().name(),
+                            "parallel minor"),
+                    null, major.name(), difficulty);
+            case ANALYSE -> {
+                Chord diatonic = major.triad(degree);
+                yield spec("modal-interchange", ExerciseType.CHORD_QUALITY_IN_KEY, shape,
+                        EvidenceType.TRANSFER_PROBLEM,
+                        "In %s, the diatonic chord on degree %d is %s. What is it when borrowed from %s?"
+                                .formatted(major.name(), degree, diatonic.symbol(), parallel.name()),
+                        ExpectedAnswer.text(borrowed.symbol(), borrowed.symbol()),
+                        null, major.name(), difficulty);
+            }
+            default -> spec("modal-interchange", ExerciseType.CHORD_QUALITY_IN_KEY, shape,
+                    EvidenceType.TEXT_RECALL,
+                    "In %s, name the chord on degree %d borrowed from the parallel minor."
+                            .formatted(major.name(), degree),
+                    ExpectedAnswer.text(borrowed.symbol(), borrowed.symbol()),
+                    null, major.name(), difficulty);
+        };
+    }
+
+    private ExerciseSpec tritoneSubstitution(double difficulty, ExerciseShape shape) {
+        Key key = randomKey(difficulty, Mode.MAJOR);
+        Chord dominant = key.dominantSeventh();
+        Chord substitute = Chord.of(dominant.root().transpose(Interval.AUGMENTED_FOURTH),
+                ChordQuality.DOMINANT_SEVENTH);
+        List<PitchClass> tritone = List.of(dominant.pitchClasses().get(1), dominant.pitchClasses().get(3));
+
+        return switch (shape.kind()) {
+            case IDENTIFY -> spec("tritone-substitution", ExerciseType.SECONDARY_DOMINANT, shape,
+                    EvidenceType.TEXT_RECALL,
+                    "Which dominant seventh is the tritone substitution for %s?".formatted(dominant.symbol()),
+                    ExpectedAnswer.text(substitute.symbol(), substitute.symbol(),
+                            substitute.root().name()),
+                    null, key.name(), difficulty);
+            case ANALYSE -> spec("tritone-substitution", ExerciseType.IDENTIFY_TRITONE, shape,
+                    EvidenceType.TRANSFER_PROBLEM,
+                    "%s and %s work as substitutes because they share two notes. Name them."
+                            .formatted(dominant.symbol(), substitute.symbol()),
+                    ExpectedAnswer.noteSet(tritone.stream().map(PitchClass::name).toList()),
+                    null, key.name(), difficulty);
+            default -> spec("tritone-substitution", ExerciseType.SECONDARY_DOMINANT, shape,
+                    EvidenceType.TEXT_RECALL,
+                    "In %s, replace the V7 with its tritone substitution. Name the chord."
+                            .formatted(key.name()),
+                    ExpectedAnswer.text(substitute.symbol(), substitute.symbol()),
+                    null, key.name(), difficulty);
+        };
+    }
+
+    private ExerciseSpec bluesForm(double difficulty, ExerciseShape shape) {
+        Key key = randomKey(difficulty, Mode.MAJOR);
+        Chord one = Chord.of(key.tonic(), ChordQuality.DOMINANT_SEVENTH);
+        Chord four = Chord.of(key.scale().degree(4), ChordQuality.DOMINANT_SEVENTH);
+        Chord five = Chord.of(key.scale().degree(5), ChordQuality.DOMINANT_SEVENTH);
+
+        return switch (shape.kind()) {
+            case BUILD -> spec("blues-form", ExerciseType.ROMAN_NUMERAL, shape, EvidenceType.TEXT_RECALL,
+                    "In a blues in %s, name the three chords.".formatted(key.tonic().name()),
+                    ExpectedAnswer.text("%s %s %s".formatted(one.symbol(), four.symbol(), five.symbol()),
+                            "%s %s %s".formatted(one.symbol(), four.symbol(), five.symbol())),
+                    AbcNotation.progression(List.of(one, four, five), key, 3), key.name(), difficulty);
+            case ANALYSE -> spec("blues-form", ExerciseType.ROMAN_NUMERAL, shape, EvidenceType.TRANSFER_PROBLEM,
+                    "In a twelve-bar blues in %s, which chord is played in bar 5?"
+                            .formatted(key.tonic().name()),
+                    ExpectedAnswer.text(four.symbol(), four.symbol(), "IV7", "IV"),
+                    null, key.name(), difficulty);
+            default -> spec("blues-form", ExerciseType.IDENTIFY_CADENCE, shape, EvidenceType.TEXT_RECALL,
+                    "How many bars are there in a standard blues chorus?",
+                    ExpectedAnswer.text("12", "12", "twelve"), null, null, difficulty);
+        };
+    }
+
+    // ---------------------------------------------------------------- counterpoint
+
+    /** Two voices moving, with the motion computed rather than asserted. */
+    private record TwoVoices(Note lowerFrom, Note upperFrom, Note lowerTo, Note upperTo, Motion motion) {
+        String describe() {
+            return "%s over %s moving to %s over %s"
+                    .formatted(upperFrom.name(), lowerFrom.name(), upperTo.name(), lowerTo.name());
+        }
+    }
+
+    private TwoVoices twoVoices(double difficulty) {
+        Key key = randomKey(difficulty, Mode.MAJOR);
+        List<PitchClass> scale = key.scale().pitchClasses();
+        int lowerIndex = random.nextInt(4);
+        int step = pick(List.of(-1, 1, 2));
+        int upperGap = pick(List.of(2, 4, 5));
+
+        Note lowerFrom = new Note(scale.get(lowerIndex), 3);
+        Note upperFrom = new Note(scale.get((lowerIndex + upperGap) % 7), 4);
+        Note lowerTo = new Note(scale.get(Math.floorMod(lowerIndex + step, 7)), 3);
+        Note upperTo = new Note(scale.get(Math.floorMod(lowerIndex + step + upperGap, 7)), 4);
+        return new TwoVoices(lowerFrom, upperFrom, lowerTo, upperTo,
+                CounterpointAnalyzer.motionBetween(lowerFrom, upperFrom, lowerTo, upperTo));
+    }
+
+    private ExerciseSpec counterpoint(double difficulty, ExerciseShape shape) {
+        TwoVoices voices = twoVoices(difficulty);
+
+        return switch (shape.kind()) {
+            case BUILD -> spec("counterpoint", ExerciseType.EXPLAIN, shape, EvidenceType.TEXT_RECALL,
+                    "What is the name for two voices moving in opposite directions?",
+                    ExpectedAnswer.text("contrary motion", "contrary motion", "contrary"),
+                    null, null, difficulty);
+            case ANALYSE -> {
+                boolean forbidden = CounterpointAnalyzer.hasParallelPerfects(
+                        voices.lowerFrom(), voices.upperFrom(), voices.lowerTo(), voices.upperTo());
+                yield spec("counterpoint", ExerciseType.EXPLAIN, shape, EvidenceType.TRANSFER_PROBLEM,
+                        "%s. Are these two voices allowed to move like that in strict counterpoint?"
+                                .formatted(capitalise(voices.describe())),
+                        ExpectedAnswer.text(forbidden ? "no" : "yes",
+                                forbidden ? "no" : "yes",
+                                forbidden ? "parallel fifths" : "allowed"),
+                        null, null, difficulty);
+            }
+            default -> spec("counterpoint", ExerciseType.EXPLAIN, shape, EvidenceType.TEXT_RECALL,
+                    "%s. What kind of motion is that?".formatted(capitalise(voices.describe())),
+                    ExpectedAnswer.text(voices.motion().displayName(), voices.motion().displayName(),
+                            voices.motion().name().toLowerCase()),
+                    null, null, difficulty);
+        };
+    }
+
+    private ExerciseSpec speciesCounterpoint(double difficulty, ExerciseShape shape) {
+        Key key = randomKey(difficulty, Mode.MAJOR);
+        List<PitchClass> scale = key.scale().pitchClasses();
+        Note cantus = new Note(scale.get(random.nextInt(5)), 3);
+        Interval interval = pick(List.of(Interval.MAJOR_THIRD, Interval.PERFECT_FIFTH,
+                Interval.MAJOR_SIXTH, Interval.MAJOR_SECOND, Interval.MINOR_SEVENTH,
+                Interval.PERFECT_FOURTH));
+        PitchClass above = cantus.pitchClass().transpose(interval);
+        boolean consonant = CounterpointAnalyzer.isConsonant(interval);
+
+        return switch (shape.kind()) {
+            case BUILD -> spec("species-counterpoint", ExerciseType.BUILD_INTERVAL, shape,
+                    EvidenceType.TEXT_RECALL,
+                    "In first species, name a consonant interval a third or wider above the cantus firmus.",
+                    ExpectedAnswer.text("major third", "major third", "minor third", "perfect fifth",
+                            "major sixth", "minor sixth", "octave", "third", "sixth", "fifth"),
+                    null, key.name(), difficulty);
+            case ANALYSE -> spec("species-counterpoint", ExerciseType.EXPLAIN, shape,
+                    EvidenceType.TRANSFER_PROBLEM,
+                    "Against a cantus firmus on %s, is %s a consonance in first species?"
+                            .formatted(cantus.pitchClass().name(), above.name()),
+                    ExpectedAnswer.text(consonant ? "yes" : "no", consonant ? "yes" : "no",
+                            consonant ? "consonant" : "dissonant"),
+                    null, key.name(), difficulty);
+            default -> spec("species-counterpoint", ExerciseType.IDENTIFY_INTERVAL, shape,
+                    EvidenceType.TEXT_RECALL,
+                    "Against a cantus firmus on %s, what interval does %s form above it?"
+                            .formatted(cantus.pitchClass().name(), above.name()),
+                    ExpectedAnswer.text(intervalName(interval), intervalName(interval),
+                            interval.symbol()),
+                    null, key.name(), difficulty);
+        };
+    }
+
+    private static String capitalise(String text) {
+        return Character.toUpperCase(text.charAt(0)) + text.substring(1);
     }
 
     /** Fallback for a concept with no generator: the model proposes a verdict, weakly. */

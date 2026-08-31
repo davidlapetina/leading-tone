@@ -208,10 +208,18 @@ Set `DB_URL`, `DB_USER` and `DB_PASSWORD` for anything other than the local data
 
 ## What it does
 
+- **Covers common practice and jazz.** 31 concepts from note names to species
+  counterpoint: diatonic harmony, Roman numerals, cadences, secondary dominants and
+  modulation, then extended and altered chords, the ii-V-I, modal interchange, tritone
+  substitution and the twelve-bar blues. Counterpoint is marked, not opined about —
+  parallel fifths are computed.
 - **Asks in several ways.** Each concept has three or more forms — name it, build it,
   explain what it is doing in a key — and the tutor rotates through them, so the same
   question is never asked twice running. Challenging you means analysing a progression, not
   the same question in a harder key.
+- **Makes the step smaller when you keep missing it.** Two failures in a row and the
+  question comes with a hint; four and it becomes a choice of four. Both are weighted lower,
+  so the easy route cannot earn mastery.
 - **Diagnoses instead of asking.** A first session starts by finding out, not by
   announcing a syllabus.
 - **Never leaves you with nothing to do.** Every turn, including the explanatory ones,
@@ -307,3 +315,7 @@ Audio-to-MIDI, RAG, vector search, user accounts, mobile, course authoring, teac
 dashboards, multi-user, gamification, MusicXML editing, and any external tutoring service.
 None of them test the hypothesis. The learner model is the interesting part, and it is
 built here rather than delegated.
+
+## Licence
+
+MIT. See [LICENSE](LICENSE).

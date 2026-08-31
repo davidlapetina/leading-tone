@@ -103,6 +103,65 @@ public class TheoryBriefing {
                     - In C major, V7/V is %s and it points at G. V/vi is %s and it points at Am.
                     - An applied dominant is a major triad or dominant seventh a fifth above its target.
                     """.formatted(secondary("C", 5), secondary("C", 6));
+            case "extended-chord" -> """
+                    - C6 %s, Cm6 %s.
+                    - C9 %s, Cmaj9 %s, Cm9 %s, C13 %s.
+                    - The ninth is a second above the octave, the thirteenth a sixth above it.
+                    """.formatted(notes("C", ChordQuality.MAJOR_SIXTH), notes("C", ChordQuality.MINOR_SIXTH),
+                    notes("C", ChordQuality.DOMINANT_NINTH), notes("C", ChordQuality.MAJOR_NINTH),
+                    notes("C", ChordQuality.MINOR_NINTH), notes("C", ChordQuality.DOMINANT_THIRTEENTH));
+            case "altered-dominant" -> """
+                    - C7b9 %s, C7#9 %s, C7#11 %s, C7b13 %s.
+                    - The alteration is spelled as what it is: the #9 of C7 is D#, never Eb.
+                    - An altered dominant still resolves like a dominant; the tension is sharper, not different.
+                    """.formatted(notes("C", ChordQuality.DOMINANT_FLAT_NINTH),
+                    notes("C", ChordQuality.DOMINANT_SHARP_NINTH),
+                    notes("C", ChordQuality.DOMINANT_SHARP_ELEVENTH),
+                    notes("C", ChordQuality.DOMINANT_FLAT_THIRTEENTH));
+            case "chord-progression" -> """
+                    - In C major, I-V-vi-IV is %s; I-vi-IV-V is %s.
+                    - Roots falling by a fifth is the strongest progression there is; it is what the
+                      circle of fifths describes.
+                    """.formatted(progressionIn(Key.major("C"), 1, 5, 6, 4),
+                    progressionIn(Key.major("C"), 1, 6, 4, 5));
+            case "two-five-one" -> """
+                    - In C major the ii-V-I is %s. In F major it is %s. In Bb major it is %s.
+                    - The seventh of the ii becomes the third of the V, and the third of the V rises
+                      a semitone to the tonic. That joint is what makes it feel inevitable.
+                    - In a minor key the ii is half-diminished: in C minor, Dm7b5 G7 Cm7.
+                    """.formatted(twoFiveOne(Key.major("C")), twoFiveOne(Key.major("F")),
+                    twoFiveOne(Key.major("Bb")));
+            case "modal-interchange" -> """
+                    - Borrowed into C major from C minor: iv is Fm, bVI is Ab, bVII is Bb, bIII is Eb.
+                    - The chord comes from the parallel key, which shares a tonic, not from the relative
+                      one, which shares a signature.
+                    """;
+            case "tritone-substitution" -> """
+                    - G7 %s and Db7 %s share B and F, the tritone that wants to resolve.
+                    - The substitute sits a tritone from the original, and its root falls a semitone
+                      to the target instead of a fifth.
+                    - In C major, Dm7 Db7 Cmaj7 is the ii-V-I with the V substituted.
+                    """.formatted(notesOf(Chord.of("G", ChordQuality.DOMINANT_SEVENTH)),
+                    notesOf(Chord.of("Db", ChordQuality.DOMINANT_SEVENTH)));
+            case "blues-form" -> """
+                    - Twelve bars. In C: bars 1-4 C7, bars 5-6 F7, bars 7-8 C7, bar 9 G7, bar 10 F7,
+                      bars 11-12 C7 then G7 as the turnaround.
+                    - All three chords are dominant sevenths, including the tonic, which is what makes
+                      the blues sound like nothing else in common practice harmony.
+                    """;
+            case "counterpoint" -> """
+                    - Four motions: parallel (same direction, same interval), similar (same direction,
+                      different interval), contrary (opposite directions), oblique (one voice holds).
+                    - Parallel fifths and parallel octaves are forbidden because they destroy the
+                      independence of the two lines. Parallel thirds and sixths are fine.
+                    - Contrary motion is the safest way into a perfect consonance.
+                    """;
+            case "species-counterpoint" -> """
+                    - First species: note against note, a consonance on every beat.
+                    - Consonances are unisons, thirds, perfect fifths, sixths and octaves. Seconds,
+                      fourths, sevenths and any tritone are dissonant.
+                    - Begin and end on a perfect consonance; approach the final by contrary motion.
+                    """;
             case "modulation" -> """
                     - C major and G major share these triads, any of which can pivot: %s.
                     - A modulation is only confirmed by a cadence in the new key.
@@ -164,6 +223,21 @@ public class TheoryBriefing {
         Chord applied = Chord.of(target.root().transpose(Interval.PERFECT_FIFTH),
                 degree == 5 ? ChordQuality.DOMINANT_SEVENTH : ChordQuality.MAJOR);
         return applied.symbol() + " " + notesOf(applied);
+    }
+
+    private static String progressionIn(Key key, int... degrees) {
+        StringBuilder builder = new StringBuilder();
+        for (int degree : degrees) {
+            builder.append(key.triad(degree).symbol()).append(' ');
+        }
+        return builder.toString().trim();
+    }
+
+    private static String twoFiveOne(Key key) {
+        return "%s %s %s".formatted(
+                Chord.of(key.scale().degree(2), ChordQuality.MINOR_SEVENTH).symbol(),
+                key.dominantSeventh().symbol(),
+                Chord.of(key.tonic(), ChordQuality.MAJOR_SEVENTH).symbol());
     }
 
     private static String shared(Key from, Key to) {

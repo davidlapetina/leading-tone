@@ -28,6 +28,13 @@ public record Interval(int number, IntervalQuality quality) {
     public static final Interval MINOR_SEVENTH = new Interval(7, IntervalQuality.MINOR);
     public static final Interval MAJOR_SEVENTH = new Interval(7, IntervalQuality.MAJOR);
     public static final Interval PERFECT_OCTAVE = new Interval(8, IntervalQuality.PERFECT);
+    public static final Interval MINOR_NINTH = new Interval(9, IntervalQuality.MINOR);
+    public static final Interval MAJOR_NINTH = new Interval(9, IntervalQuality.MAJOR);
+    public static final Interval AUGMENTED_NINTH = new Interval(9, IntervalQuality.AUGMENTED);
+    public static final Interval PERFECT_ELEVENTH = new Interval(11, IntervalQuality.PERFECT);
+    public static final Interval AUGMENTED_ELEVENTH = new Interval(11, IntervalQuality.AUGMENTED);
+    public static final Interval MINOR_THIRTEENTH = new Interval(13, IntervalQuality.MINOR);
+    public static final Interval MAJOR_THIRTEENTH = new Interval(13, IntervalQuality.MAJOR);
 
     public Interval {
         if (number < 1) {

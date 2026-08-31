@@ -26,10 +26,12 @@ public record RomanNumeral(int degree, ChordQuality quality, Inversion inversion
     }
 
     public String symbol() {
+        // Upper case for a major third, lower case for a minor one — extensions above the
+        // seventh do not change which it is.
         boolean upperCase = switch (quality) {
-            case MAJOR, AUGMENTED, DOMINANT_SEVENTH, MAJOR_SEVENTH, AUGMENTED_SEVENTH, SUS2, SUS4 -> true;
-            case MINOR, DIMINISHED, MINOR_SEVENTH, MINOR_MAJOR_SEVENTH,
-                 HALF_DIMINISHED_SEVENTH, DIMINISHED_SEVENTH -> false;
+            case MINOR, DIMINISHED, MINOR_SEVENTH, MINOR_MAJOR_SEVENTH, HALF_DIMINISHED_SEVENTH,
+                 DIMINISHED_SEVENTH, MINOR_SIXTH, MINOR_NINTH -> false;
+            default -> true;
         };
         StringBuilder builder = new StringBuilder(numeralFor(degree, upperCase));
         builder.append(switch (quality) {
