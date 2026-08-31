@@ -6,6 +6,7 @@ import fr.lapetina.music.learner.EvidenceService;
 import fr.lapetina.music.learner.Learner;
 import fr.lapetina.music.learner.LearnerService;
 import fr.lapetina.music.learner.LearnerSnapshot;
+import fr.lapetina.music.learner.MisconceptionService;
 import jakarta.inject.Inject;
 import fr.lapetina.music.exercise.AnswerMode;
 import jakarta.ws.rs.DELETE;
@@ -19,6 +20,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import java.util.List;
+import java.util.Map;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @Path("/api/learner")
@@ -30,6 +32,9 @@ public class LearnerResource {
 
     @Inject
     EvidenceService evidenceService;
+
+    @Inject
+    MisconceptionService misconceptionService;
 
     /**
      * Wiping the learner model is a development affordance for starting a scenario from
@@ -71,10 +76,59 @@ public class LearnerResource {
         return learnerService.snapshot(learnerService.choosePracticeMode(chosen));
     }
 
+    /**
+     * Free mode: work on a concept the learner picked. The tutor still decides how to teach
+     * it, and still goes back a step if the groundwork is missing.
+     */
+    @PUT
+    @Path("/focus/concept/{conceptId}")
+    public LearnerSnapshot focusConcept(@PathParam("conceptId") String conceptId) {
+        return learnerService.snapshot(learnerService.chooseFocus(conceptId, null));
+    }
+
+    /** Free mode over a whole area — chords, harmony, voice leading. */
+    @PUT
+    @Path("/focus/category/{category}")
+    public LearnerSnapshot focusCategory(@PathParam("category") String category) {
+        return learnerService.snapshot(learnerService.chooseFocus(null, category.toUpperCase()));
+    }
+
+    /** Back to guided mode, where the learner model chooses. */
+    @DELETE
+    @Path("/focus")
+    public LearnerSnapshot clearFocus() {
+        return learnerService.snapshot(learnerService.chooseFocus(null, null));
+    }
+
     @GET
     @Path("/concepts")
     public List<ConceptMastery> concepts() {
         return learnerService.snapshot(learnerService.current()).concepts();
+    }
+
+    /**
+     * Everything known about the learner, in one file.
+     *
+     * <p>All of it lives in one database, and the whole point of the application is what
+     * accumulates there. Being able to take it away is the only protection against losing
+     * it.
+     */
+    @GET
+    @Path("/export")
+    public Map<String, Object> export() {
+        Learner learner = learnerService.current();
+        return Map.of(
+                "exportedAt", java.time.Instant.now().toString(),
+                "learner", Map.of(
+                        "id", learner.id.toString(),
+                        "displayName", learner.displayName,
+                        "createdAt", learner.createdAt.toString(),
+                        "preferences", learnerService.preferencesOf(learner)),
+                "concepts", learnerService.snapshot(learner).concepts(),
+                "misconceptions", misconceptionService.open(learner).stream()
+                        .map(fr.lapetina.music.learner.MisconceptionView::of).toList(),
+                "evidence", evidenceService.recent(learner, 100_000).stream()
+                        .map(Views.EvidenceView::of).toList());
     }
 
     /** The audit trail: why the tutor believes what it believes. */

@@ -53,7 +53,7 @@ public class TeachingPolicy {
      * how a tutor stops being one.
      */
     public TeachingDecision next(LearnerSnapshot snapshot, Optional<LearnerFocus> focus) {
-        if (snapshot.isBlank() && focus.isEmpty()) {
+        if (snapshot.isBlank() && focus.isEmpty() && !snapshot.isFreeMode()) {
             return diagnose(snapshot);
         }
         Optional<TeachingDecision> misconception = correctMisconception(snapshot);
@@ -63,6 +63,14 @@ public class TeachingPolicy {
         Optional<TeachingDecision> asked = answerQuestion(snapshot, focus);
         if (asked.isPresent()) {
             return asked.get();
+        }
+        // Free mode: the learner picked the subject, so reviews of other things wait.
+        if (snapshot.focusConceptId() != null) {
+            ConceptMastery target = snapshot.concept(snapshot.focusConceptId());
+            Optional<TeachingDecision> shaky = target.state() == LearningState.UNKNOWN
+                    ? reinforceWeakPrerequisite(snapshot, target)
+                    : Optional.empty();
+            return shaky.orElseGet(() -> decisionFor(snapshot, target, actionFor(target)));
         }
         Optional<TeachingDecision> review = review(snapshot);
         if (review.isPresent()) {
@@ -153,7 +161,16 @@ public class TeachingPolicy {
                 .comparing((ConceptMastery concept) -> concept.state() == LearningState.UNKNOWN)
                 .thenComparingDouble(concept -> conceptGraph.require(concept.conceptId()).intrinsicDifficulty());
 
-        Optional<ConceptMastery> candidate = conceptGraph.frontier(snapshot::knows).stream()
+        // A chosen area narrows the frontier without abandoning the prerequisite rules:
+        // asking for "harmony" while triads are shaky still sends the tutor back a step.
+        List<Concept> frontier = conceptGraph.frontier(snapshot::knows).stream()
+                .filter(concept -> withinFocus(snapshot, concept))
+                .toList();
+        if (frontier.isEmpty()) {
+            frontier = conceptGraph.frontier(snapshot::knows);
+        }
+
+        Optional<ConceptMastery> candidate = frontier.stream()
                 .map(concept -> snapshot.concept(concept.id()))
                 .min(order);
 
@@ -174,6 +191,11 @@ public class TeachingPolicy {
                 .min(Comparator.comparingDouble(ConceptMastery::mastery))
                 .orElseThrow(() -> new IllegalStateException("The snapshot has no observed concepts"));
         return decisionFor(snapshot, weakest, actionFor(weakest));
+    }
+
+    private boolean withinFocus(LearnerSnapshot snapshot, Concept concept) {
+        return snapshot.focusCategory() == null
+                || concept.category().name().equalsIgnoreCase(snapshot.focusCategory());
     }
 
     private TeachingDecision decisionFor(LearnerSnapshot snapshot, ConceptMastery target, TeachingAction action) {

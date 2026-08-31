@@ -55,6 +55,21 @@ public class LearnerService {
         return Learner.create(displayName);
     }
 
+    /**
+     * Puts the tutor on a topic the learner chose. Passing null for both returns it to
+     * guided mode, where the learner model decides.
+     */
+    @Transactional
+    public Learner chooseFocus(String conceptId, String category) {
+        if (conceptId != null && !conceptGraph.contains(conceptId)) {
+            throw new IllegalArgumentException("Unknown concept: " + conceptId);
+        }
+        Learner learner = current();
+        learner.focusConceptId = conceptId;
+        learner.focusCategory = conceptId != null ? null : category;
+        return learner;
+    }
+
     /** Records how the learner has asked to practise. Null hands the choice back to the tutor. */
     @Transactional
     public Learner choosePracticeMode(fr.lapetina.music.exercise.AnswerMode mode) {
@@ -95,7 +110,8 @@ public class LearnerService {
                 .toList();
 
         return new LearnerSnapshot(learner.id, learner.displayName, List.copyOf(concepts), List.copyOf(due),
-                misconceptions, preferencesOf(learner), learner.preferredAnswerMode);
+                misconceptions, preferencesOf(learner), learner.preferredAnswerMode,
+                learner.focusConceptId, learner.focusCategory);
     }
 
     public Map<String, Double> preferencesOf(Learner learner) {

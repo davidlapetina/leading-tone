@@ -47,6 +47,18 @@ public class Learner extends PanacheEntityBase {
     @Column(name = "preferred_answer_mode")
     public AnswerMode preferredAnswerMode;
 
+    /**
+     * A concept the learner has chosen to work on, or null to let the tutor choose. Free
+     * mode: the learner still cannot mark their own work, but they can say what the
+     * subject is.
+     */
+    @Column(name = "focus_concept_id")
+    public String focusConceptId;
+
+    /** A whole area — chords, harmony — to stay within, when no single concept was chosen. */
+    @Column(name = "focus_category")
+    public String focusCategory;
+
     public static Learner create(String displayName) {
         Learner learner = new Learner();
         learner.displayName = displayName;

@@ -20,5 +20,13 @@ public record TutorRequest(
         TeachingDecision decision,
         Exercise exercise,
         String learnerMessage,
-        String evaluationFeedback) {
+        /** Short, learner-facing: "Expected Eb." Shown as-is when there is no model. */
+        String evaluationFeedback,
+        /** Instructions about that verdict, for the model only. Never shown to anyone. */
+        String modelDirective) {
+
+    public TutorRequest(java.util.UUID sessionId, LearnerSnapshot snapshot, TeachingDecision decision,
+                        Exercise exercise, String learnerMessage, String evaluationFeedback) {
+        this(sessionId, snapshot, decision, exercise, learnerMessage, evaluationFeedback, null);
+    }
 }

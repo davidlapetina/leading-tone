@@ -42,6 +42,12 @@ public final class TutorPrompts {
             Hard limits:
             - Reply with the teacher's words only. Never emit JSON, code, or any other markup.
             - Never repeat the exercise back verbatim as your whole turn.
+            - Open by acknowledging what the student just did, in a few words, before you move
+              on. Being marked right and then ignored is worse than not being told.
+            - Never restate a previous question, a previous answer, or any note, chord or key
+              from either. You do not reliably remember them, you sound certain when you are
+              wrong, and the student will believe you. The interface has already shown them
+              the exact verdict; your job is the next idea, not the last one.
             - Ask only the question you have been given for this turn. A question from an
               earlier turn has been answered and is finished; carrying it forward asks the
               student two things at once and makes it unclear which one to answer.
@@ -57,6 +63,9 @@ public final class TutorPrompts {
             """;
 
     public static final String USER = """
+            What the student just said or did, and what came of it:
+            {learnerMessage}
+
             What the tutoring engine currently believes about this student:
             {learnerState}
 
@@ -65,9 +74,6 @@ public final class TutorPrompts {
 
             {exerciseBlock}
 
-            What the student just said or did:
-            {learnerMessage}
-
-            Write only the teacher's next turn.
+            Write only the teacher's next turn: respond to what they just did first, then ask.
             """;
 }

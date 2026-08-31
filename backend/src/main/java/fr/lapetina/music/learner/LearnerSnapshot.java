@@ -15,7 +15,13 @@ public record LearnerSnapshot(
         List<ConceptMastery> dueForReview,
         List<MisconceptionView> openMisconceptions,
         Map<String, Double> preferences,
-        fr.lapetina.music.exercise.AnswerMode preferredAnswerMode) {
+        fr.lapetina.music.exercise.AnswerMode preferredAnswerMode,
+        String focusConceptId,
+        String focusCategory) {
+
+    public boolean isFreeMode() {
+        return focusConceptId != null || focusCategory != null;
+    }
 
     public ConceptMastery concept(String conceptId) {
         return concepts.stream()

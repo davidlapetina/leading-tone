@@ -53,8 +53,26 @@ class TeachingPolicyTest {
                 dueList.add(view);
             }
         }
+        return snapshot(masteries, due, misconceptions, null, null);
+    }
+
+    private LearnerSnapshot snapshot(Map<String, Double> masteries, List<String> due,
+                                     List<MisconceptionView> misconceptions,
+                                     String focusConcept, String focusCategory) {
+        List<ConceptMastery> concepts = new ArrayList<>();
+        List<ConceptMastery> dueList = new ArrayList<>();
+        for (Concept concept : graph.all()) {
+            double mastery = masteries.getOrDefault(concept.id(), 0.0);
+            ConceptMastery view = new ConceptMastery(concept.id(), concept.name(), concept.category().name(),
+                    mastery, mastery > 0 ? 0.9 : 0.0, stateFor(mastery), mastery > 0 ? 5 : 0, 0, 0,
+                    mastery > 0 ? Instant.now() : null, null);
+            concepts.add(view);
+            if (due.contains(concept.id())) {
+                dueList.add(view);
+            }
+        }
         return new LearnerSnapshot(UUID.randomUUID(), "Test", concepts, dueList, misconceptions,
-                Map.of("keyboardPreference", 0.9), null);
+                Map.of("keyboardPreference", 0.9), null, focusConcept, focusCategory);
     }
 
     private static LearningState stateFor(double mastery) {
@@ -224,6 +242,32 @@ class TeachingPolicyTest {
         assertEquals("secondary-dominant", decision.learnerAskedAbout());
         assertNotEquals("secondary-dominant", decision.conceptId());
         assertTrue(decision.rationale().contains("secondary-dominant"), decision.rationale());
+    }
+
+    @Test
+    @DisplayName("free mode: a chosen concept is taught, whatever else was due")
+    void teachesTheConceptTheLearnerChose() {
+        Map<String, Double> masteries = allAt(0.9);
+        masteries.put("triad", 0.3);
+        TeachingDecision guided = policy.next(snapshot(masteries, List.of("interval"), List.of()));
+        assertEquals("interval", guided.conceptId());
+
+        TeachingDecision chosen = policy.next(
+                snapshot(masteries, List.of("interval"), List.of(), "cadence", null));
+        assertEquals("cadence", chosen.conceptId());
+    }
+
+    @Test
+    @DisplayName("a chosen area narrows the frontier without abandoning prerequisites")
+    void staysWithinTheChosenArea() {
+        Map<String, Double> masteries = allAt(0.9);
+        graph.all().stream()
+                .filter(concept -> concept.category().name().equals("HARMONY"))
+                .forEach(concept -> masteries.put(concept.id(), 0.0));
+
+        TeachingDecision decision = policy.next(
+                snapshot(masteries, List.of(), List.of(), null, "HARMONY"));
+        assertEquals("HARMONY", graph.require(decision.conceptId()).category().name());
     }
 
     @Test

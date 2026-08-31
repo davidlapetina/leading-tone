@@ -1,8 +1,15 @@
+import { z } from 'zod'
 import {
+  evidenceRow,
   learnerSnapshot,
+  lesson,
+  teachingDecision,
   tutorStatus,
   tutorTurn,
+  type EvidenceRow,
   type LearnerSnapshot,
+  type Lesson,
+  type TeachingDecision,
   type TutorStatus,
   type TutorTurn,
 } from './types'
@@ -63,5 +70,21 @@ export const api = {
   setPracticeMode: (mode: 'play' | 'write' | 'auto'): Promise<LearnerSnapshot> =>
     request(`/learner/practice-mode/${mode}`, learnerSnapshot, { method: 'PUT' }),
 
+  focusConcept: (conceptId: string): Promise<LearnerSnapshot> =>
+    request(`/learner/focus/concept/${conceptId}`, learnerSnapshot, { method: 'PUT' }),
+
+  focusCategory: (category: string): Promise<LearnerSnapshot> =>
+    request(`/learner/focus/category/${category}`, learnerSnapshot, { method: 'PUT' }),
+
+  clearFocus: (): Promise<LearnerSnapshot> =>
+    request('/learner/focus', learnerSnapshot, { method: 'DELETE' }),
+
   status: (): Promise<TutorStatus> => request('/session/status', tutorStatus),
+
+  lesson: (conceptId: string): Promise<Lesson> => request(`/concepts/${conceptId}/lesson`, lesson),
+
+  nextAction: (): Promise<TeachingDecision> => request('/session/next-action', teachingDecision),
+
+  evidence: (limit = 25): Promise<EvidenceRow[]> =>
+    request(`/learner/evidence?limit=${limit}`, z.array(evidenceRow)),
 }

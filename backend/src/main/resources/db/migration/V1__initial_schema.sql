@@ -4,7 +4,7 @@
 create table learner (
     id                    uuid primary key,
     display_name          text        not null,
-    created_at            timestamptz not null,
+    created_at            timestamp with time zone not null,
     explanation_depth     double precision not null default 0.5,
     socratic_preference   double precision not null default 0.5,
     notation_preference   double precision not null default 0.5,
@@ -39,8 +39,8 @@ create table learner_concept (
     successful_evidence  integer not null default 0,
     failed_evidence      integer not null default 0,
     strong_evidence      integer not null default 0,
-    last_practiced_at    timestamptz,
-    next_review_at       timestamptz,
+    last_practiced_at    timestamp with time zone,
+    next_review_at       timestamp with time zone,
     review_interval_days integer not null default 0,
     constraint learner_concept_unique unique (learner_id, concept_id)
 );
@@ -50,8 +50,8 @@ create index learner_concept_review_idx on learner_concept (learner_id, next_rev
 create table tutor_session (
     id         uuid primary key,
     learner_id uuid not null references learner (id) on delete cascade,
-    started_at timestamptz not null,
-    ended_at   timestamptz
+    started_at timestamp with time zone not null,
+    ended_at   timestamp with time zone
 );
 
 create table exercise (
@@ -67,7 +67,7 @@ create table exercise (
     difficulty      double precision not null,
     notation_abc    text,
     solved          boolean not null default false,
-    created_at      timestamptz not null
+    created_at      timestamp with time zone not null
 );
 
 create index exercise_learner_idx on exercise (learner_id, created_at desc);
@@ -84,7 +84,7 @@ create table interaction (
     expects_answer  boolean not null default false,
     answer_mode     text,
     exercise_id     uuid references exercise (id) on delete set null,
-    created_at      timestamptz not null,
+    created_at      timestamp with time zone not null,
     constraint interaction_sequence_unique unique (session_id, sequence)
 );
 
@@ -105,7 +105,7 @@ create table evidence (
     mastery_before double precision not null,
     mastery_after  double precision not null,
     source         text,
-    created_at     timestamptz not null
+    created_at     timestamp with time zone not null
 );
 
 create index evidence_learner_concept_idx on evidence (learner_id, concept_id, created_at desc);
@@ -117,9 +117,9 @@ create table misconception (
     code        text not null,
     description text not null,
     occurrences integer not null default 1,
-    detected_at timestamptz not null,
-    last_seen_at timestamptz not null,
-    resolved_at timestamptz,
+    detected_at timestamp with time zone not null,
+    last_seen_at timestamp with time zone not null,
+    resolved_at timestamp with time zone,
     constraint misconception_unique unique (learner_id, concept_id, code)
 );
 
@@ -131,5 +131,5 @@ create table exercise_attempt (
     partial     boolean not null default false,
     feedback    text,
     detail      text,
-    created_at  timestamptz not null
+    created_at  timestamp with time zone not null
 );

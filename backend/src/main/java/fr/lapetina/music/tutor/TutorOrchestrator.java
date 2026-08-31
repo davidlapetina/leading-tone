@@ -103,7 +103,8 @@ public class TutorOrchestrator {
         }
 
         AttemptResult result = exerciseService.answerWithText(exercise, answer);
-        return turn(learner, session, answer, result, result.outcome().feedback(), Optional.empty(), null);
+        return turn(learner, session, answer, result, result.outcome().feedback(),
+                Optional.empty(), null);
     }
 
     /** The learner answered an exercise by playing. */
@@ -118,6 +119,28 @@ public class TutorOrchestrator {
         sessionService.append(session, InteractionRole.LEARNER, "(played " + played + ")", null, null, null);
         return turn(learner, session, "played " + played, result, result.outcome().feedback(),
                 Optional.empty(), null);
+    }
+
+    /**
+     * The verdict, with the question and the right answer alongside it.
+     *
+     * <p>Without the question, a model confirming a correct answer restates it from
+     * memory and gets it wrong — telling a learner that B flat is a minor second above C
+     * when the question said A. Everything here is computed, so the confirmation cannot
+     * drift from what was actually asked.
+     */
+    private static String directiveFor(AttemptResult result) {
+        if (result == null) {
+            return null;
+        }
+        boolean right = result.outcome().result() == fr.lapetina.music.learner.EvidenceResult.CORRECT;
+        return """
+                They answered the previous question and it was %s.
+                Acknowledge that in a few words — "that's right", "not quite" — and then move on to
+                the question below. Do not restate the previous question, their answer, or any note,
+                chord or key from it. You will get it wrong, and the interface has already shown them
+                the exact verdict."""
+                .formatted(right ? "correct" : "not correct");
     }
 
     /**
@@ -144,7 +167,7 @@ public class TutorOrchestrator {
         }
 
         TutorRequest request = new TutorRequest(session.id, snapshot, decision, exercise, learnerMessage,
-                evaluationFeedback);
+                evaluationFeedback, directiveFor(attempt));
         turnScope.beginTurn(decision.conceptId());
         String message = tutorModel.respond(request);
 

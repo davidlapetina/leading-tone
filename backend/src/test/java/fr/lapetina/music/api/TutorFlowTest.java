@@ -316,6 +316,46 @@ class TutorFlowTest {
     }
 
     @Test
+    @DisplayName("free mode: the learner can choose the topic, and the tutor teaches it")
+    void theLearnerCanChooseTheTopic() {
+        given().when().post("/api/session").then().statusCode(200);
+
+        given().when().put("/api/learner/focus/concept/cadence")
+                .then().statusCode(200).body("focusConceptId", is("cadence"));
+        // On a blank profile the groundwork comes first, but the choice is still what is
+        // driving the tutor — it says so.
+        given().when().get("/api/session/next-action")
+                .then().statusCode(200).body("rationale", containsString("cadence"));
+
+        given().when().put("/api/learner/focus/category/CHORDS")
+                .then().statusCode(200)
+                .body("focusCategory", is("CHORDS"))
+                .body("focusConceptId", nullValue());
+
+        given().when().delete("/api/learner/focus")
+                .then().statusCode(200)
+                .body("focusConceptId", nullValue())
+                .body("focusCategory", nullValue());
+    }
+
+    @Test
+    @DisplayName("everything known about the learner can be taken away in one file")
+    void exportsTheLearnerModel() {
+        Response opening = given().when().post("/api/session").then().extract().response();
+        String exerciseId = opening.path("exerciseId");
+        given().contentType(ContentType.JSON).body(Map.of("answer", "wrong"))
+                .when().post("/api/exercises/{id}/answer", exerciseId).then().statusCode(200);
+
+        given().when().get("/api/learner/export")
+                .then().statusCode(200)
+                .body("learner.id", notNullValue())
+                .body("exportedAt", notNullValue())
+                .body("concepts.size()", greaterThanOrEqualTo(30))
+                .body("evidence.size()", greaterThanOrEqualTo(1))
+                .body("evidence[0].masteryAfter", notNullValue());
+    }
+
+    @Test
     void servesTheConceptGraph() {
         given().when().get("/api/concepts")
                 .then().statusCode(200)

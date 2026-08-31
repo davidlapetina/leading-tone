@@ -137,12 +137,11 @@ public class RoutingTutorModel implements TutorModel {
         if (request.learnerMessage() != null && !request.learnerMessage().isBlank()) {
             builder.append(request.learnerMessage());
         }
-        if (request.evaluationFeedback() != null && !request.evaluationFeedback().isBlank()) {
+        if (request.modelDirective() != null && !request.modelDirective().isBlank()) {
             if (builder.length() > 0) {
                 builder.append('\n');
             }
-            builder.append("The evaluator's verdict, which is final and which you must not contradict: ")
-                    .append(request.evaluationFeedback());
+            builder.append(request.modelDirective());
         }
         return builder.isEmpty() ? "(nothing yet)" : builder.toString();
     }

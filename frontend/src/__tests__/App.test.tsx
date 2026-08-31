@@ -15,6 +15,13 @@ vi.mock('../api/client', () => ({
     answerWithMidi: vi.fn(),
     learner: vi.fn(),
     status: vi.fn(),
+    nextAction: vi.fn(),
+    evidence: vi.fn(),
+    lesson: vi.fn(),
+    focusConcept: vi.fn(),
+    focusCategory: vi.fn(),
+    clearFocus: vi.fn(),
+    setPracticeMode: vi.fn(),
   },
   ApiError: class extends Error {},
 }))
@@ -53,6 +60,7 @@ const snapshot: LearnerSnapshot = {
       state: 'LEARNING',
       successfulEvidence: 2,
       failedEvidence: 1,
+      consecutiveFailures: 0,
       lastPracticedAt: null,
       nextReviewAt: null,
     },
@@ -61,6 +69,8 @@ const snapshot: LearnerSnapshot = {
   openMisconceptions: [],
   preferences: { keyboardPreference: 0.5 },
   preferredAnswerMode: null,
+  focusConceptId: null,
+  focusCategory: null,
 }
 
 function renderApp() {
@@ -84,29 +94,48 @@ describe('App', () => {
     })
     vi.mocked(api.startSession).mockResolvedValue(opening)
     vi.mocked(api.learner).mockResolvedValue(snapshot)
+    vi.mocked(api.nextAction).mockResolvedValue({
+      action: 'DIAGNOSE',
+      conceptId: 'note',
+      conceptName: 'Notes and the keyboard',
+      rationale: 'Nothing is known yet.',
+      difficulty: 0.35,
+    })
+    vi.mocked(api.evidence).mockResolvedValue([])
+    vi.mocked(api.focusConcept).mockResolvedValue(snapshot)
+    vi.mocked(api.clearFocus).mockResolvedValue(snapshot)
     vi.mocked(api.status).mockResolvedValue({
       narrator: 'template',
       languageModelAvailable: false,
-      conceptCount: 22,
+      model: 'qwen3:8b',
+      toolsEnabled: false,
+      conceptCount: 31,
     })
   })
 
-  it('opens a session and shows the tutor and the learner model together', async () => {
+  it('opens on the catalogue, so there is something to read before anything is asked', async () => {
     renderApp()
 
-    expect(await screen.findByText(opening.message)).toBeInTheDocument()
-    expect(await screen.findByText('Write another name for F#.')).toBeInTheDocument()
-    expect(await screen.findByText('Notes and the keyboard')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Learn' })).toBeInTheDocument()
+    // Once as the suggested next thing, once as a card in its area.
+    expect((await screen.findAllByText('Notes and the keyboard')).length).toBeGreaterThan(0)
+    expect(await screen.findByText('Fundamentals')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Read' })).toBeInTheDocument()
+    // The session still starts underneath, so the tutor is ready when you switch to it.
     expect(api.startSession).toHaveBeenCalledTimes(1)
   })
 
-  it('sends a typed answer to the open exercise', async () => {
+  it('moves to the tutor, and sends a typed answer to the open exercise', async () => {
     vi.mocked(api.answerWithText).mockResolvedValue({ ...opening, message: 'Correct.' })
     renderApp()
-    await screen.findByText(opening.message)
+    await screen.findByRole('heading', { name: 'Learn' })
+
+    // The sidebar item, not one of the per-topic Practise buttons.
+    await userEvent.click(screen.getByTitle('Work with the tutor'))
+    expect(await screen.findByText(opening.message)).toBeInTheDocument()
 
     await userEvent.type(screen.getByLabelText('Message the teacher'), 'Gb')
-    await userEvent.click(screen.getByRole('button', { name: 'Send' }))
+    await userEvent.click(screen.getByRole('button', { name: /^Send$/ }))
 
     await waitFor(() => expect(api.answerWithText).toHaveBeenCalledWith('exercise-1', 'Gb'))
     expect(await screen.findByText('Gb')).toBeInTheDocument()
@@ -118,8 +147,8 @@ describe('App', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('backend is down')
   })
 
-  it('says when there is no keyboard attached', async () => {
+  it('says that answers can be played on screen when no instrument is attached', async () => {
     renderApp()
-    expect(await screen.findByText(/MIDI unavailable|No keyboard/)).toBeInTheDocument()
+    expect(await screen.findByText(/on-screen piano/i)).toBeInTheDocument()
   })
 })

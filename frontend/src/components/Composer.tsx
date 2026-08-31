@@ -22,10 +22,10 @@ export function Composer({
   activeNotes,
 }: ComposerProps) {
   const [text, setText] = useState('')
-  // null until the learner says either way, so the default can follow whether an
-  // instrument is actually connected rather than being frozen at first render.
+  // null until the learner says either way, so the default can follow whether a question
+  // is actually waiting to be played rather than being frozen at first render.
   const [keysOpen, setKeysOpen] = useState<boolean | null>(null)
-  const showKeys = keysOpen ?? !hasDevice
+  const showKeys = keysOpen ?? (awaitingKeyboard && !hasDevice)
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
@@ -39,33 +39,40 @@ export function Composer({
   return (
     <form className="composer" onSubmit={submit}>
       {awaitingKeyboard && (
-        <>
-          <div className="keyboard-prompt">
-            <span className="piano">
-              {hasDevice ? 'Waiting for the piano…' : 'No instrument connected'}
-            </span>
-            {hasDevice && (
-              <>
-                <span className="played">
-                  {activeNotes.length > 0 ? activeNotes.map(noteName).join(' ') : '—'}
-                </span>
-                <button type="button" onClick={onSubmitPlaying} disabled={disabled}>
-                  Send what I played
-                </button>
-              </>
-            )}
-            <button type="button" onClick={() => setKeysOpen(!showKeys)}>
-              {showKeys ? 'Hide keys' : 'Use on-screen keys'}
-            </button>
-          </div>
-          {showKeys && <VirtualKeyboard onSubmit={onPlayNotes} disabled={disabled} />}
-        </>
+        <div className="keyboard-prompt">
+          <span className="piano">
+            {hasDevice ? 'Waiting for the piano…' : 'This one is played'}
+          </span>
+          {hasDevice && (
+            <>
+              <span className="played">
+                {activeNotes.length > 0 ? activeNotes.map(noteName).join(' ') : '—'}
+              </span>
+              <button type="button" onClick={onSubmitPlaying} disabled={disabled}>
+                Send what I played
+              </button>
+            </>
+          )}
+        </div>
       )}
+
+      {showKeys && <VirtualKeyboard onSubmit={onPlayNotes} disabled={disabled} />}
+
       <div className="composer-row">
+        {/* Always reachable, so the piano is never something you have to discover. */}
+        <button
+          type="button"
+          className={`keys-toggle${showKeys ? ' keys-toggle-on' : ''}`}
+          aria-pressed={showKeys}
+          title={showKeys ? 'Hide the on-screen piano' : 'Show the on-screen piano'}
+          onClick={() => setKeysOpen(!showKeys)}
+        >
+          Piano
+        </button>
         <input
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder={awaitingKeyboard ? 'Or type the answer…' : 'Ask something…'}
+          placeholder={awaitingKeyboard ? 'Or type the answer…' : 'Answer, or ask about anything…'}
           disabled={disabled}
           aria-label="Message the teacher"
         />

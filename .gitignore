@@ -10,3 +10,4 @@ dist/
 *.iml
 test-results/
 playwright-report/
+backend/data/

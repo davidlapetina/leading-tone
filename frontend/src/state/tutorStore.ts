@@ -86,7 +86,18 @@ export const useTutorStore = create<TutorState>((set, get) => {
 
     send: async (text: string) => {
       const { sessionId, current } = get()
-      if (!sessionId || !text.trim()) {
+      if (!sessionId) {
+        return
+      }
+      // An empty message asks the tutor to take the next turn without the learner saying
+      // anything — used when they pick a topic and want it to start.
+      if (!text.trim()) {
+        set({ busy: true, error: null })
+        try {
+          acceptTurn(await api.sendMessage(sessionId, 'Let us work on this.'))
+        } catch (error) {
+          fail(error)
+        }
         return
       }
       set((state) => ({

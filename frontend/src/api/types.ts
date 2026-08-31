@@ -60,6 +60,7 @@ export const conceptMastery = z.object({
   ]),
   successfulEvidence: z.number(),
   failedEvidence: z.number(),
+  consecutiveFailures: z.number(),
   lastPracticedAt: z.string().nullable(),
   nextReviewAt: z.string().nullable(),
 })
@@ -80,11 +81,63 @@ export const learnerSnapshot = z.object({
   openMisconceptions: z.array(misconceptionView),
   preferences: z.record(z.string(), z.number()),
   preferredAnswerMode: z.enum(['TEXT', 'MIDI']).nullable(),
+  focusConceptId: z.string().nullable(),
+  focusCategory: z.string().nullable(),
+})
+
+export const lessonSection = z.object({
+  heading: z.string(),
+  points: z.array(z.string()),
+  abc: z.string().nullable(),
+  caption: z.string().nullable(),
+})
+
+export const conceptLink = z.object({
+  conceptId: z.string(),
+  name: z.string(),
+  mastery: z.number(),
+  known: z.boolean(),
+})
+
+export const lesson = z.object({
+  conceptId: z.string(),
+  name: z.string(),
+  summary: z.string(),
+  category: z.string(),
+  sections: z.array(lessonSection),
+  restsOn: z.array(conceptLink),
+  opensUp: z.array(conceptLink),
+  mastery: z.number(),
+  state: z.string(),
+  ready: z.boolean(),
+})
+
+export const teachingDecision = z.object({
+  action: z.string(),
+  conceptId: z.string(),
+  conceptName: z.string(),
+  rationale: z.string(),
+  difficulty: z.number(),
+})
+
+export const evidenceRow = z.object({
+  id: z.string(),
+  conceptId: z.string(),
+  evidenceType: z.string(),
+  result: z.string(),
+  difficulty: z.number(),
+  weight: z.number(),
+  masteryBefore: z.number(),
+  masteryAfter: z.number(),
+  source: z.string().nullable(),
+  createdAt: z.string(),
 })
 
 export const tutorStatus = z.object({
   narrator: z.string(),
   languageModelAvailable: z.boolean(),
+  model: z.string(),
+  toolsEnabled: z.boolean(),
   conceptCount: z.number(),
 })
 
@@ -95,3 +148,7 @@ export type ConceptMastery = z.infer<typeof conceptMastery>
 export type MisconceptionView = z.infer<typeof misconceptionView>
 export type LearnerSnapshot = z.infer<typeof learnerSnapshot>
 export type TutorStatus = z.infer<typeof tutorStatus>
+export type Lesson = z.infer<typeof lesson>
+export type LessonSection = z.infer<typeof lessonSection>
+export type TeachingDecision = z.infer<typeof teachingDecision>
+export type EvidenceRow = z.infer<typeof evidenceRow>

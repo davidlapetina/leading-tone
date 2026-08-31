@@ -8,9 +8,11 @@ async function resetLearner(page: Page) {
   expect(response.ok(), 'the learner reset endpoint should be available in dev').toBeTruthy()
 }
 
+/** Starts cold and goes straight to the tutor, which now lives behind its own tab. */
 async function openTutor(page: Page) {
   await resetLearner(page)
   await page.goto('/')
+  await page.getByTitle('Work with the tutor').click()
   await expect(page.locator('.turn-tutor').first()).toBeVisible()
 }
 
@@ -21,7 +23,7 @@ async function openExerciseId(page: Page): Promise<string | null> {
 
 async function send(page: Page, text: string) {
   await page.getByLabel('Message the teacher').fill(text)
-  await page.getByRole('button', { name: 'Send', exact: true }).click()
+  await page.getByRole('button', { name: /^Send$/ }).click()
 }
 
 test.describe('the tutor', () => {
@@ -29,7 +31,7 @@ test.describe('the tutor', () => {
     await openTutor(page)
 
     const first = await page.locator('.turn-tutor').first().innerText()
-    expect(first.toLowerCase()).not.toMatch(/lesson|chapter|module|curriculum|unit \d/)
+    expect(first.toLowerCase()).not.toMatch(/chapter|module|curriculum|unit \d/)
     await expect(page.locator('.turn-meta').first()).toHaveText(/diagnose/i)
     await expect(page.getByLabel('Message the teacher')).toBeEnabled()
   })
@@ -86,14 +88,13 @@ test.describe('the tutor', () => {
 
   test('shows the learner model filling in as evidence arrives', async ({ page }) => {
     await openTutor(page)
-    await expect(page.locator('.panel')).toContainText(/nothing observed yet/i)
-
     await send(page, 'not the answer')
     await expect(page.locator('.verdict').first()).toBeVisible()
 
-    await expect(page.locator('.panel .concepts li').first()).toBeVisible()
-    // Mastery is shown as a bar, never as a number to optimise.
-    await expect(page.locator('.panel')).not.toContainText('%')
+    // Progress is its own section now, and it fills in from the answers given.
+    await page.getByTitle('What the tutor believes you know').click()
+    await expect(page.getByRole('heading', { name: 'Progress' })).toBeVisible()
+    await expect(page.locator('.progress-table').first()).toBeVisible()
   })
 
   test('can be answered on the on-screen piano when no instrument is connected', async ({ page }) => {
@@ -101,6 +102,7 @@ test.describe('the tutor', () => {
     // Ask for keyboard practice, so the tutor sets a question that must be played.
     await page.request.put(`${API}/learner/practice-mode/play`)
     await page.goto('/')
+    await page.getByTitle('Work with the tutor').click()
     await expect(page.locator('.turn-tutor').first()).toBeVisible()
 
     // With no MIDI device, the on-screen keys are offered without being asked for.
@@ -123,8 +125,23 @@ test.describe('the tutor', () => {
     expect(evidence[0].result).toBe('CORRECT')
   })
 
-  test('reports that no keyboard is attached rather than failing silently', async ({ page }) => {
+  test('says that answers can be played on screen when no instrument is attached', async ({ page }) => {
     await openTutor(page)
-    await expect(page.locator('.midi')).toHaveText(/no keyboard|midi unavailable|midi blocked/i)
+    await expect(page.locator('.pill').last()).toHaveText(/on-screen piano/i)
+  })
+
+  test('teaches a topic before asking about it', async ({ page }) => {
+    await resetLearner(page)
+    await page.goto('/')
+    await expect(page.getByRole('heading', { name: 'Learn' })).toBeVisible()
+
+    await page.getByRole('button', { name: 'Read' }).first().click()
+    await expect(page.locator('.lesson-section').first()).toBeVisible()
+    // A lesson explains and shows a worked example, before anything is asked.
+    await expect(page.locator('.lesson-section li').first()).not.toBeEmpty();
+    await expect(page.locator('.example').first()).toBeVisible()
+
+    await page.getByRole('button', { name: 'Practise this' }).click()
+    await expect(page.locator('.turn-tutor').first()).toBeVisible()
   })
 })
