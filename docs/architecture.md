@@ -101,15 +101,17 @@ fr.lapetina.music
 ├── knowledge       published sources: the registry, licensing, ingestion, chunking,
 │                   in-process embeddings, the Lucene index, retrieval, attribution,
 │                   and the harmony corpora with their engraved excerpts
+├── settings        what is configurable while it runs, kept in the database
+├── store           persistence shared across the rest
+├── infrastructure  startup, health and the plumbing none of the above should know about
 └── api             REST resources and their read models
 ```
 
 The dependency direction is inward: `theory` knows about nothing, `learner` knows about
 `concept`, `tutor` knows about everything below it, and `api` knows about `tutor`.
-`knowledge` depends only on `theory` and `concept`, so both it and `llm` can be deleted and
-the application still teaches — with computed facts and generated exercises, just without
-citations. The
-`llm` package can be deleted and the application still teaches — less pleasantly, but
+`knowledge` reaches only `theory`, `concept` and `settings`, and `llm` is reached only from
+`tutor` and `api`. So both can be deleted and the application still teaches — with
+computed facts and generated exercises, less pleasantly and without citations, but
 correctly. See `TemplateTutor`.
 
 ## Why the theory engine is written in Java rather than delegated
