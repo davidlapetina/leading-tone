@@ -52,11 +52,13 @@ Download the build for your machine, open it, and it starts. **Nothing else to i
 no Java, no database, no Docker, no configuration file, no Python and no vector database.
 The search index and the embedding model run inside the application itself.
 
+**[Download the latest release](https://github.com/davidlapetina/leading-tone/releases/latest)**
+
 | | |
 |---|---|
-| macOS | `Leading Tone-1.0.0.dmg` |
-| Windows | `Leading Tone-1.0.0.msi` |
-| Linux | `leading-tone_1.0.0_amd64.deb` |
+| macOS | `Leading.Tone-*.dmg` |
+| Windows | `Leading.Tone-*.msi` |
+| Linux | `leading-tone_*_amd64.deb` |
 
 It opens your browser onto the interface when it starts, preferring Chrome, Edge or Firefox
 if you have one — those are the browsers that can talk to a MIDI keyboard, and Safari cannot.

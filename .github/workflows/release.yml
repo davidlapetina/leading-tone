@@ -14,7 +14,11 @@ on:
   workflow_dispatch:
 
 permissions:
+  # contents to create the release; actions to read the artifacts the build jobs uploaded.
+  # Naming any permission drops the rest to none, so the second one is not redundant --
+  # without it download-artifact has nothing to download and the release comes out empty.
   contents: write
+  actions: read
 
 defaults:
   run:
@@ -98,9 +102,15 @@ jobs:
           path: installers
           merge-multiple: true
 
+      - name: Show what will be attached
+        run: ls -lh installers/
+
       - uses: softprops/action-gh-release@v2
         with:
           files: installers/*
+          # Without this the upload matches nothing, uploads nothing, and reports success:
+          # a published release with no downloads on it and a green tick above.
+          fail_on_unmatched_files: true
           draft: true
           body: |
             Download the one for your machine. Nothing else to install — no Java, no Docker,
