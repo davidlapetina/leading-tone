@@ -169,7 +169,7 @@ handed a decision and asked for the words. It has a `proposeEvidence` tool and t
 
 That is why turning it off changes the wording and nothing else.
 
-- **Nothing is a lesson plan.** 31 concepts with prerequisites, not a syllabus. The route
+- **Nothing is a lesson plan.** 36 concepts with prerequisites, not a syllabus. The route
   through them comes from what you have demonstrated, and is different for everyone.
 - **The theory is computed, not remembered.** Chords, scales, Roman numerals, cadences and
   parallel fifths are all worked out by an engine that knows F♯ and G♭ are different notes.
