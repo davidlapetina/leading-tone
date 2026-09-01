@@ -88,11 +88,10 @@ public record ExampleRequest(String romanNumeral, String cadence, String compose
         Matcher roman = ROMAN.matcher(message);
         while (roman.find()) {
             String candidate = roman.group(1);
-            // "I" and "in" are ordinary English; a bare lone letter is not a request.
-            if (candidate.length() > 1 || Character.isUpperCase(candidate.charAt(0))) {
-                if (candidate.length() > 1) {
-                    return candidate;
-                }
+            // A single letter is not a request: "I" is a pronoun and "V" on its own is more
+            // often a stray capital than a chord. Two characters is the shortest real ask.
+            if (candidate.length() > 1) {
+                return candidate;
             }
         }
         return null;

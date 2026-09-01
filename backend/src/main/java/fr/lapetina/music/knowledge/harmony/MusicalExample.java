@@ -1,5 +1,6 @@
 package fr.lapetina.music.knowledge.harmony;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.UUID;
 
 /**
@@ -45,7 +46,14 @@ public record MusicalExample(
                 licenseId, attribution);
     }
 
-    /** How a citation reads to a learner. */
+    /**
+     * How a citation reads to a learner.
+     *
+     * <p>Annotated because Jackson serialises a record's components, not its methods, and
+     * this is part of the API contract: the interface validates the shape it receives and
+     * renders nothing if a field it needs has quietly gone.
+     */
+    @JsonProperty("citation")
     public String citation() {
         StringBuilder text = new StringBuilder(composer == null ? "" : composer);
         if (work != null) {
@@ -60,6 +68,7 @@ public record MusicalExample(
         return text.toString();
     }
 
+    @JsonProperty("hasScore")
     public boolean hasScore() {
         return abc != null && !abc.isBlank();
     }

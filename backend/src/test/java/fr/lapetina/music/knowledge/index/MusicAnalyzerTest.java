@@ -47,7 +47,9 @@ class MusicAnalyzerTest {
     @DisplayName("an applied dominant survives tokenization as one symbol, plus its parts")
     void keepsAppliedDominantsWhole() {
         assertEquals(List.of("V7/V", "V7", "V"), symbols("V7/V"));
-        assertEquals(List.of("V/V", "V", "V"), symbols("V/V"));
+        // V/V expands to V once, not twice: a term indexed twice is scored twice for no
+        // musical reason.
+        assertEquals(List.of("V/V", "V"), symbols("V/V"));
         assertNotEquals(symbols("V/V"), symbols("V7/V"));
     }
 

@@ -24,7 +24,9 @@ export function CorpusExample({ conceptId, limit = 2 }: { conceptId: string; lim
     return null
   }
   if (examples.isError || !examples.data) {
-    return null
+    // Say so rather than rendering an empty heading. A section that silently disappears
+    // when the response shape changes is how a broken contract goes unnoticed.
+    return <p className="example-none">Could not load examples for this topic.</p>
   }
   if (examples.data.found === 0) {
     return (

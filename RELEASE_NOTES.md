@@ -127,11 +127,25 @@ library are inside it.
 From source:
 
 ```bash
-make test     # 369 tests: no Docker, no database, no network, no model
+make test     # 373 tests: no Docker, no database, no network, no model
 make run
 ```
 
 ---
+
+## Fixed during final review
+
+- **Note durations were wrong in every engraved excerpt.** A sixteenth was written as a
+  sixty-fourth and dotted rhythms as triplets, because the fraction was computed inside out.
+  Classical piano writing is full of sixteenths, so most excerpts were affected.
+- **The Roman numeral above the staff was truncated.** ABC read `V7/V` as a slash chord and
+  drew `V7` — a different chord from the one being taught.
+- **Corpus examples stopped rendering.** Unifying two example records turned `citation` from
+  a field into a method, so it vanished from the JSON and the interface rejected the
+  payload — silently. Both the field and the silence are fixed.
+- **Fifteen of thirty-six concepts had no written lesson**, including secondary dominants.
+  All are written now, and a test fails the build if a concept in the catalogue opens to an
+  empty page.
 
 ## Notes
 

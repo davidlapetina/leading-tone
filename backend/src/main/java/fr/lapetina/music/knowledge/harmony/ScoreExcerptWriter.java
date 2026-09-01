@@ -137,9 +137,10 @@ public final class ScoreExcerptWriter {
         StringBuilder body = new StringBuilder();
         for (int measure = fromMeasure; measure <= toMeasure; measure++) {
             if (target != null && target.measure() == measure && target.label() != null) {
-                // An annotation, not a change to the music. The score stays what the corpus
-                // says it is; the label is presentation.
-                body.append('"').append(target.label().replace("\"", "")).append('"');
+                // An annotation, not a chord symbol. Without the leading caret, ABC reads
+                // "V7/V" as a slash chord and engraves it as "V7" -- a different chord from
+                // the one being taught. The caret means "this text, above the staff".
+                body.append('"').append('^').append(target.label().replace("\"", "")).append('"');
             }
             body.append(writeMeasure(notes, measure));
             if (measure < toMeasure) {
@@ -194,15 +195,37 @@ public final class ScoreExcerptWriter {
         return fr.lapetina.music.theory.AbcNotation.pitch(Note.parse(note.name()));
     }
 
-    /** A length in eighth-note units, omitted when it is exactly one. */
-    private static String length(double duration) {
+    /**
+     * A length in eighth-note units.
+     *
+     * <p>ABC reads {@code n/d} as the unit multiplied by n over d, so an eighth is written
+     * as nothing at all, a quarter as {@code 2}, a sixteenth as {@code /2} and a dotted
+     * eighth as {@code 3/2}. The denominators tried cover dyadic rhythms and triplets, which
+     * is what these corpora contain.
+     */
+    static String length(double duration) {
         double units = duration / UNIT;
-        long whole = Math.round(units);
-        if (Math.abs(units - whole) < 1e-6) {
-            return whole == 1 ? "" : Long.toString(Math.max(whole, 1));
+        if (units <= 0) {
+            return "";
         }
-        // Not a whole number of eighths: write it as a fraction, which ABC understands.
-        long numerator = Math.round(units * 4);
-        return "/" + Math.max(1, Math.round(4.0 / (numerator / 4.0)));
+        for (int denominator : DENOMINATORS) {
+            double scaled = units * denominator;
+            long numerator = Math.round(scaled);
+            if (numerator >= 1 && Math.abs(scaled - numerator) < 1e-6) {
+                return render(numerator, denominator);
+            }
+        }
+        // Nothing fitted, so round to the nearest eighth rather than write a wrong rhythm
+        // as though it were exact.
+        return render(Math.max(1, Math.round(units)), 1);
+    }
+
+    private static final int[] DENOMINATORS = {1, 2, 4, 8, 16, 3, 6, 12};
+
+    private static String render(long numerator, int denominator) {
+        if (denominator == 1) {
+            return numerator == 1 ? "" : Long.toString(numerator);
+        }
+        return numerator == 1 ? "/" + denominator : numerator + "/" + denominator;
     }
 }

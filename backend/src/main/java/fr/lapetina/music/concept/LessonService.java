@@ -11,6 +11,7 @@ import fr.lapetina.music.theory.Inversion;
 import fr.lapetina.music.theory.Key;
 import fr.lapetina.music.theory.Mode;
 import fr.lapetina.music.theory.PitchClass;
+import fr.lapetina.music.theory.RomanNumeralAnalyzer;
 import fr.lapetina.music.theory.Scale;
 import fr.lapetina.music.theory.ScaleType;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -230,6 +231,156 @@ public class LessonService {
                     LessonSection.of("Spelling still matters",
                             "The sharp ninth of C7 is D#, not Eb. It is a raised second degree, so it is spelled as one.",
                             "The chord still functions as a dominant: the alterations sharpen it, they do not change its job."));
+
+            case "key-signature" -> List.of(
+                    LessonSection.of("The accidentals a key always has",
+                            "Rather than write a sharp before every F in D major, the key signature says it once at the start and it holds for the whole piece.",
+                            "D major is " + spell(Scale.of("D", ScaleType.MAJOR)) + ", so its signature is two sharps: F# and C#."),
+                    LessonSection.of("They accumulate in a fixed order",
+                            "Sharps arrive F C G D A E B; flats arrive in the reverse, B E A D G C F.",
+                            "So one sharp is G major, two is D, three is A. One flat is F major, two is Bb, three is Eb.",
+                            "The order is not arbitrary: each new key is a fifth away from the last, and a fifth up adds exactly one sharp."),
+                    LessonSection.of("Relative minors share a signature",
+                            "A minor key uses the signature of the major a minor third above it. " + Key.major("C").relative().name() + " and C major both have none.",
+                            "Which of the two you are in is decided by the music, not the signature."));
+
+            case "scale-degree" -> List.of(
+                    LessonSection.of("Every note of a key has a job",
+                            "Numbered from the tonic: 1 tonic, 2 supertonic, 3 mediant, 4 subdominant, 5 dominant, 6 submediant, 7 leading tone.",
+                            "In C major that is " + spell(Scale.of("C", ScaleType.MAJOR)) + " in order."),
+                    LessonSection.of("The names describe the pull, not the position",
+                            "The leading tone is called that because it leads: a semitone below the tonic, it wants to rise to it. In C that is B going to C.",
+                            "The dominant is the strongest note after the tonic, and the chord built on it is what makes an ending sound like an ending.",
+                            "In a natural minor the seventh is a whole tone below the tonic and does not pull the same way, which is why the harmonic minor raises it."));
+
+            case "diatonic-triads" -> List.of(
+                    LessonSection.of("Seven notes, seven chords",
+                            "Stack thirds on each degree of the scale, using only notes from the key, and you get the chords that key contains.",
+                            "In C major: " + chordLine(c, 1, 2, 3, 4, 5, 6, 7) + "."),
+                    LessonSection.of("The pattern is the same in every major key",
+                            "Major, minor, minor, major, major, minor, diminished. Learn it once and it transfers to all twelve keys.",
+                            "In G major the same pattern gives " + chordLine(Key.major("G"), 1, 2, 3, 4, 5, 6, 7) + ".")
+                            .showing(AbcNotation.progression(c.diatonicTriads(), c, AbcNotation.CHORD_OCTAVE),
+                                    "the seven triads of C major"));
+
+            case "mode" -> List.of(
+                    LessonSection.of("The same notes, a different home",
+                            "Play the white keys from D to D and you get D Dorian: " + spell(Scale.of("D", ScaleType.DORIAN)) + ".",
+                            "The notes are C major's. What changed is which one feels like home, and that changes everything about how they sound."),
+                    LessonSection.of("What gives each mode its character",
+                            "Dorian is minor with a raised sixth: " + spell(Scale.of("D", ScaleType.DORIAN)) + " against D natural minor's " + spell(Scale.of("D", ScaleType.NATURAL_MINOR)) + ".",
+                            "Lydian is major with a raised fourth: " + spell(Scale.of("F", ScaleType.LYDIAN)) + ".",
+                            "Mixolydian is major with a lowered seventh: " + spell(Scale.of("G", ScaleType.MIXOLYDIAN)) + ".",
+                            "One note is usually the whole difference, and it is worth knowing which."));
+
+            case "figured-bass" -> List.of(
+                    LessonSection.of("Numbers under the bass",
+                            "Figures say what intervals sit above the written bass note, not what the chord is called. The player works out the rest.",
+                            "A bare bass note means a root-position triad. A 6 means the third is in the bass; a 6/4 means the fifth is."),
+                    LessonSection.of("Reading the common figures",
+                            "For triads: nothing, 6, 6/4. For sevenths: 7, 6/5, 4/3, 4/2.",
+                            "So " + notes(Chord.of("G", ChordQuality.DOMINANT_SEVENTH)) + " written as V6/5 puts B in the bass.",
+                            "It is a shorthand for improvising an accompaniment, which is what it was invented for."));
+
+            case "harmonic-function" -> List.of(
+                    LessonSection.of("Chords do jobs, and there are only three",
+                            "Tonic is home. Predominant leaves it. Dominant pulls back. Almost all common-practice harmony is that cycle, repeated.",
+                            "In C major: " + chordLine(c, 1) + " is tonic, " + chordLine(c, 4, 2) + " are predominant, " + chordLine(c, 5, 7) + " are dominant."),
+                    LessonSection.of("Function explains substitution",
+                            "Two chords with the same function can often stand in for each other, because the job matters more than the notes.",
+                            "IV and ii both lead to V. I and vi both feel like arrival, which is why V-vi sounds like an ending that was withheld.")
+                            .showing(AbcNotation.progression(chords("C", "F", "G", "C"), c, AbcNotation.CHORD_OCTAVE),
+                                    "tonic, predominant, dominant, tonic"));
+
+            case "tonic-function" -> List.of(
+                    LessonSection.of("Home",
+                            "The tonic chord is where a passage is at rest. Everything else is heard in relation to it.",
+                            "In C major that is " + chordLine(c, 1) + "."),
+                    LessonSection.of("Its neighbours share the feeling",
+                            "iii and vi share two notes with the tonic triad, so they can stand in for it: " + chordLine(c, 1, 3, 6) + ".",
+                            "That is why a phrase ending on vi still sounds like an arrival, just not a final one."));
+
+            case "predominant-function" -> List.of(
+                    LessonSection.of("The chord before the dominant",
+                            "Predominants set up the dominant. They are what makes an ending feel prepared rather than abrupt.",
+                            "The main two in C major are " + chordLine(c, 4, 2) + "."),
+                    LessonSection.of("ii or IV",
+                            "They share two notes, so they do the same job. ii moves to V by a fifth, which is stronger; IV moves by a step, which is smoother.",
+                            "In jazz the ii is almost always chosen, with a seventh on it: " + notes(Chord.of("D", ChordQuality.MINOR_SEVENTH)) + ".")
+                            .showing(AbcNotation.progression(chords("Dm", "G", "C"), c, AbcNotation.CHORD_OCTAVE),
+                                    "ii - V - I in C major"));
+
+            case "dominant-function" -> List.of(
+                    LessonSection.of("The chord that wants to resolve",
+                            "The dominant is built on the fifth degree: " + chordLine(c, 5) + " in C major. Add its seventh and it becomes " + notes(c.dominantSeventh()) + ".",
+                            "It contains the leading tone, which pulls up to the tonic, and with the seventh a tritone, which pulls inward."),
+                    LessonSection.of("Why the tritone decides everything",
+                            "In G7 the tritone is B and F. B rises to C, F falls to E, and you have landed on C major almost inevitably.",
+                            "vii° does the same job with the same tritone and no root: " + chordLine(c, 7) + ".")
+                            .showing(AbcNotation.progression(List.of(c.dominantSeventh(), c.tonicTriad()), c, AbcNotation.CHORD_OCTAVE),
+                                    "G7 resolving to C"));
+
+            case "secondary-dominant" -> List.of(
+                    LessonSection.of("Borrowing a dominant from another key",
+                            "Any chord can be made to feel like a temporary home by putting its own dominant in front of it.",
+                            "The dominant of C is G. So the dominant of G — the dominant of the dominant — is D, and we write it V/V.",
+                            "In C major, V7/V is " + notes(RomanNumeralAnalyzer.realize("V7/V", c)) + "."),
+                    LessonSection.of("The accidental is the giveaway",
+                            "V7/V in C contains F#, which is not in C major. That sharp is the leading tone of G, and it is what makes G sound momentarily like home.",
+                            "Any chord borrowed this way brings the accidental its target key needs. That is how you spot one on the page.")
+                            .showing(AbcNotation.progression(chords("C", "D7", "G", "C"), c, AbcNotation.CHORD_OCTAVE),
+                                    "I - V7/V - V - I in C major"),
+                    LessonSection.of("It tonicises without modulating",
+                            "A secondary dominant points at a chord for a moment and then moves on. The key has not changed.",
+                            "When the music stays in the new key and cadences there, that is modulation, which is a larger claim."));
+
+            case "chord-progression" -> List.of(
+                    LessonSection.of("Chords in order, not in isolation",
+                            "A progression is a sequence that goes somewhere. Root motion down a fifth is the strongest step there is, which is why ii-V-I and vi-ii-V-I feel inevitable.",
+                            "In C major: " + String.join(" ", chords("Dm", "G", "C").stream().map(ch -> ch.symbol()).toList()) + "."),
+                    LessonSection.of("Common shapes worth knowing by ear",
+                            "I-IV-V-I is the plain cadential shape. I-vi-IV-V is the one behind a great deal of popular music.",
+                            "vi-ii-V-I is the same falling-fifths motion extended backwards, and is the backbone of a jazz standard.")
+                            .showing(AbcNotation.progression(chords("C", "Am", "F", "G"), c, AbcNotation.CHORD_OCTAVE),
+                                    "I - vi - IV - V in C major"));
+
+            case "modal-interchange" -> List.of(
+                    LessonSection.of("Borrowing from the parallel minor",
+                            "C major and C minor share a tonic. Chords from the minor can be used in the major without leaving the key.",
+                            "The common borrowings are " + chordLine(Key.minor("C"), 4) + ", " + notes(Chord.of("Ab", ChordQuality.MAJOR)) + " as bVI, and " + notes(Chord.of("Eb", ChordQuality.MAJOR)) + " as bIII."),
+                    LessonSection.of("What it sounds like",
+                            "A borrowed iv in a major key is the classic sudden darkening — the same chord you expected, one note lower.",
+                            "It is not modulation: nothing cadences in the minor, and the tonic never changes.")
+                            .showing(AbcNotation.progression(chords("C", "Fm", "C"), c, AbcNotation.CHORD_OCTAVE),
+                                    "a borrowed iv in C major"));
+
+            case "voice-leading" -> List.of(
+                    LessonSection.of("Move as little as possible",
+                            "When one chord goes to the next, each voice should move to the nearest available note. Common tones are held.",
+                            "G7 to C: the B rises a semitone to C, the F falls a semitone to E, the G stays. Only the bass leaps."),
+                    LessonSection.of("The rules worth keeping",
+                            "Resolve the leading tone upward. Resolve the seventh downward. Avoid parallel fifths and octaves between any two voices.",
+                            "These are conventions of one tradition, not laws of music — but within that tradition they are what makes four parts sound like four independent lines rather than a stack of chords."));
+
+            case "blues-form" -> List.of(
+                    LessonSection.of("Twelve bars, three chords",
+                            "Four bars of I, two of IV, two of I, then V, IV, I, and a bar to turn around.",
+                            "In C: " + String.join(" ", chords("C7", "F7", "G7").stream().map(ch -> ch.symbol()).toList()) + " — and note that all three are dominant sevenths."),
+                    LessonSection.of("Why every chord is a seventh",
+                            "In common-practice harmony a dominant seventh must resolve. In the blues it does not: I7 is home, and stays home.",
+                            "That is the clearest case of a rule belonging to a tradition rather than to music. The blues did not break it; it was never playing that game.")
+                            .showing(AbcNotation.progression(chords("C7", "F7", "C7", "G7"), c, AbcNotation.CHORD_OCTAVE),
+                                    "the shape of a blues in C"));
+
+            case "modulation" -> List.of(
+                    LessonSection.of("Changing key, and meaning it",
+                            "A modulation moves the tonic. Afterwards the music is heard in a new key, and it usually takes a cadence there to convince the ear.",
+                            "The nearest keys are a fifth away — C to G, or C to F — because they differ by a single accidental."),
+                    LessonSection.of("The pivot chord",
+                            "The smooth way across is a chord both keys contain. " + chordLine(c, 6) + " is vi in C major and ii in G major, so it can be heard either way.",
+                            "Play it as vi, then treat it as ii, and follow with G major's own V-I. The join is inaudible, which is the point.")
+                            .showing(AbcNotation.progression(chords("C", "Am", "D7", "G"), c, AbcNotation.CHORD_OCTAVE),
+                                    "C major pivoting to G major through Am"));
 
             case "chord-symbol" -> List.of(
                     LessonSection.of("A symbol is a recipe, not a picture",

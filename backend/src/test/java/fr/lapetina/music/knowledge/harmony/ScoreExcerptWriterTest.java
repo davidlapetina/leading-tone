@@ -76,6 +76,38 @@ class ScoreExcerptWriterTest {
     }
 
     @Test
+    @DisplayName("a sixteenth is engraved as a sixteenth, not as a sixty-fourth")
+    void writesDurationsCorrectly() {
+        // ABC reads n/d as the L: unit times n over d, and the unit here is an eighth.
+        assertEquals("", ScoreExcerptWriter.length(1.0 / 8), "an eighth is the unit");
+        assertEquals("2", ScoreExcerptWriter.length(1.0 / 4), "a quarter is two eighths");
+        assertEquals("4", ScoreExcerptWriter.length(1.0 / 2));
+        assertEquals("8", ScoreExcerptWriter.length(1.0));
+        assertEquals("/2", ScoreExcerptWriter.length(1.0 / 16), "a sixteenth is half an eighth");
+        assertEquals("/4", ScoreExcerptWriter.length(1.0 / 32));
+        assertEquals("3/2", ScoreExcerptWriter.length(3.0 / 16), "a dotted eighth");
+        assertEquals("3", ScoreExcerptWriter.length(3.0 / 8), "a dotted quarter");
+        assertEquals("/3", ScoreExcerptWriter.length(1.0 / 24), "an eighth-note triplet");
+    }
+
+    @Test
+    @DisplayName("a bar of sixteenths comes out as sixteenths")
+    void keepsTheRhythmOfARealBar() {
+        List<NoteEvent> semiquavers = List.of(
+                note(1, 0.0, 0.0625, 1, 1, "C4"),
+                note(1, 0.0625, 0.0625, 1, 1, "D4"),
+                note(1, 0.125, 0.0625, 1, 1, "E4"),
+                note(1, 0.1875, 0.0625, 1, 1, "F4"));
+
+        String abc = ScoreExcerptWriter.toAbc(semiquavers, null, "C", "2/4", 1, 1, null);
+
+        assertTrue(abc.contains("C/2D/2E/2F/2"), abc);
+        // The header legitimately says L:1/8; the notes must not.
+        String notes = abc.substring(abc.indexOf("clef=treble"));
+        assertFalse(notes.contains("/8"), "a sixteenth written as /8 would be four times too short");
+    }
+
+    @Test
     void producesNothingFromNothing() {
         assertEquals("", ScoreExcerptWriter.toAbc(List.of(), "x", "C", "4/4", 1, 1, null));
     }
@@ -98,8 +130,9 @@ class ScoreExcerptWriterTest {
         String abc = ScoreExcerptWriter.toAbc(BAR_17, null, "A", "2/4", 17, 17,
                 new ScoreExcerptWriter.Target(17, 0.0, "V7/V"));
 
-        assertTrue(abc.contains("\"V7/V\""), abc);
-        assertEquals(1, abc.split("\"V7/V\"", -1).length - 1,
+        // The caret matters: without it ABC reads V7/V as a slash chord and draws "V7".
+        assertTrue(abc.contains("\"^V7/V\""), abc);
+        assertEquals(1, abc.split("\"\\^V7/V\"", -1).length - 1,
                 "annotated once, on one staff, not above every voice");
     }
 
@@ -110,6 +143,6 @@ class ScoreExcerptWriterTest {
         String marked = ScoreExcerptWriter.toAbc(BAR_17, null, "A", "2/4", 17, 17,
                 new ScoreExcerptWriter.Target(17, 0.0, "V7/V"));
 
-        assertEquals(plain.replace("|]", ""), marked.replace("\"V7/V\"", "").replace("|]", ""));
+        assertEquals(plain.replace("|]", ""), marked.replace("\"^V7/V\"", "").replace("|]", ""));
     }
 }

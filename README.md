@@ -17,6 +17,30 @@ inventing one.
 
 ---
 
+## What it looks like
+
+The catalogue, with what you have covered and what is ready to read next.
+
+![The Learn view](docs/images/learn.png)
+
+A lesson, and under it the same harmony in real music — actual bars from an annotated
+score, with the chord marked and the source cited. **Nothing on this page was written by a
+language model,** and when no real example exists it says so rather than inventing one.
+
+![A corpus example, engraved](docs/images/example.png)
+
+A route through jazz harmony for anyone who came for that. The same theory, in the order a
+jazz musician meets it.
+
+![The jazz path](docs/images/jazz.png)
+
+Sources are brought in from Settings. Nothing downloads until you ask, and each one shows
+its licence where you decide.
+
+![Published sources](docs/images/sources.png)
+
+---
+
 ## Run it
 
 One file. Java 21 is the only requirement.
@@ -117,7 +141,7 @@ make test-e2e    # browser, against a running backend
 make check       # all of the above, plus lint, typecheck and the jar
 ```
 
-**369 tests, and none of them need Docker, a database, a network or a language model.** The
+**373 tests, and none of them need Docker, a database, a network or a language model.** The
 backend runs against an in-memory database; ingestion is tested against recorded copies of
 the real publisher responses; the browser tests switch the model off so they test the tutor
 rather than a model's wording.

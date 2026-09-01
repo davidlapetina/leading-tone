@@ -76,7 +76,9 @@ public final class MusicSymbols {
      * {@code V7/V} scores far higher.
      */
     public static List<String> expand(String symbol) {
-        List<String> parts = new ArrayList<>();
+        // A set, because V/V expands to V twice, and a term indexed or queried twice is
+        // scored twice for no musical reason.
+        Set<String> parts = new LinkedHashSet<>();
         String t = normalise(symbol);
         if (t.contains("-")) {
             for (String piece : t.split("-")) {
@@ -90,7 +92,7 @@ public final class MusicSymbols {
             parts.add(t.substring(slash + 1));
         }
         parts.remove(t);
-        return parts;
+        return new ArrayList<>(parts);
     }
 
     /** True when a line is mostly notation rather than prose, so it stays with its explanation. */
