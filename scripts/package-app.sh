@@ -10,7 +10,14 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 NAME="Leading Tone"
-VERSION="${APP_VERSION:-1.0.0}"
+
+# The version comes from the build unless the release workflow passes the tag. Reading it
+# rather than repeating it: the two drifted once already, and a release whose jar calls
+# itself a snapshot makes a reader wonder what else is stale. The suffix is stripped because
+# jpackage will not take one.
+POM_VERSION=$(sed -n 's:.*<version>\(.*\)</version>.*:\1:p' backend/pom.xml | head -1)
+VERSION="${APP_VERSION:-${POM_VERSION%-SNAPSHOT}}"
+[ -n "$VERSION" ] || { echo "could not read a version from backend/pom.xml"; exit 1; }
 JAR=backend/target/leading-tone-runner.jar
 OUT=dist
 WORK=backend/target/packaging
