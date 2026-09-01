@@ -127,7 +127,7 @@ library are inside it.
 From source:
 
 ```bash
-make test     # 387 tests: no Docker, no database, no network, no model
+make test     # 390 tests: no Docker, no database, no network, no model
 make run
 ```
 
@@ -137,6 +137,9 @@ make run
 
 Found by running the packaged jar and looking at what it drew, not by running tests.
 
+
+- **An unknown knowledge source answered 400 where an unknown concept answered 404**, so
+  the same mistake looked like two different kinds of failure depending on what you asked for.
 
 - **Every minor-key excerpt was drawn with no key signature.** ABC needs an upper-case
   tonic, and the corpora write minor in lower case, so `K:fm` was rejected outright and 171

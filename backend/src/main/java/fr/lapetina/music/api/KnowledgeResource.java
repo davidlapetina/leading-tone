@@ -20,6 +20,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -101,7 +102,7 @@ public class KnowledgeResource {
     @GET
     @Path("/sources/{id}")
     public Map<String, Object> source(@PathParam("id") String id) {
-        return describe(registry.require(id));
+        return describe(declared(id));
     }
 
     /**
@@ -111,7 +112,7 @@ public class KnowledgeResource {
     @POST
     @Path("/sources/{id}/ingest")
     public IngestReport ingest(@PathParam("id") String id, @QueryParam("force") @DefaultValue("false") boolean force) {
-        registry.require(id);
+        declared(id);
         return ingestionService.ingest(id, force);
     }
 
@@ -124,7 +125,7 @@ public class KnowledgeResource {
     @POST
     @Path("/sources/{id}/reindex")
     public IngestReport reindex(@PathParam("id") String id) {
-        registry.require(id);
+        declared(id);
         return ingestionService.ingest(id, true);
     }
 
@@ -138,7 +139,7 @@ public class KnowledgeResource {
     @POST
     @Path("/sources/{id}/refresh")
     public IngestReport refresh(@PathParam("id") String id) {
-        registry.require(id);
+        declared(id);
         rawStore.forget(id);
         return ingestionService.ingest(id, true);
     }
@@ -147,6 +148,18 @@ public class KnowledgeResource {
      * Shows exactly what the tutor would be handed for a question, with scores. This is
      * the endpoint that makes a ranking argument settleable.
      */
+    /**
+     * The declared source with this id, or a 404.
+     *
+     * <p>The registry raises this as an argument complaint, which the mappers turn into a
+     * 400. A path that names a resource that is not there is a 404, the same as an unknown
+     * concept, so the translation happens here rather than in the domain.
+     */
+    private SourceManifest.ManifestSource declared(String id) {
+        return registry.find(id)
+                .orElseThrow(() -> new NotFoundException("No such knowledge source: " + id));
+    }
+
     @GET
     @Path("/search")
     public Map<String, Object> search(@QueryParam("q") @Size(max = 2000) String query,
