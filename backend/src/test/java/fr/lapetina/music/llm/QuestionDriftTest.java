@@ -61,4 +61,33 @@ class QuestionDriftTest {
         assertFalse(RoutingTutorModel.asksADifferentQuestion(
                 "Play F#3.", new TutorRequest(null, null, null, null, null, null, null)));
     }
+
+    @Test
+    @DisplayName("a turn that agrees with a wrong answer is replaced by the template turn")
+    void doesNotAgreeWithAnAnswerTheEngineMarkedWrong() {
+        TutorRequest wrong = answered(false);
+
+        assertTrue(RoutingTutorModel.affirmsAWrongAnswer("That's right! Now let's try another.", wrong));
+        assertTrue(RoutingTutorModel.affirmsAWrongAnswer("Exactly — now, what about the fifth?", wrong));
+        assertTrue(RoutingTutorModel.affirmsAWrongAnswer(
+                "That\u2019s right to notice the colour, but let\u2019s focus on the sound.", wrong),
+                "it opens by agreeing, whatever it goes on to say");
+
+        assertFalse(RoutingTutorModel.affirmsAWrongAnswer("Not quite — Eb is the one you want.", wrong));
+        assertFalse(RoutingTutorModel.affirmsAWrongAnswer(
+                "You tried C, but that is not the note we were after.", wrong));
+    }
+
+    @Test
+    @DisplayName("agreeing with a right answer is the whole point")
+    void leavesAgreementAloneWhenTheAnswerWasRight() {
+        assertFalse(RoutingTutorModel.affirmsAWrongAnswer("That's right! Now let's try another.", answered(true)));
+        // No answer at all: there is nothing to agree or disagree with.
+        assertFalse(RoutingTutorModel.affirmsAWrongAnswer("That's right! Now let's try another.", answered(null)));
+    }
+
+    private static TutorRequest answered(Boolean correctly) {
+        return new TutorRequest(null, null, null, null, null, null, null,
+                fr.lapetina.music.knowledge.router.TutorKnowledge.EMPTY, correctly);
+    }
 }

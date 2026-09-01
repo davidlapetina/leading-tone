@@ -63,6 +63,10 @@ public class RoutingTutorModel implements TutorModel {
                 LOG.warnf("The model asked for a different note than the exercise; using the template turn instead.");
                 return fallback.respond(request);
             }
+            if (affirmsAWrongAnswer(trimmed, request)) {
+                LOG.warnf("The model opened by agreeing with an answer that was wrong; using the template turn instead.");
+                return fallback.respond(request);
+            }
             return trimmed;
         } catch (RuntimeException modelFailure) {
             failures.recordFailure(Instant.now(), modelFailure.getMessage());
@@ -145,6 +149,24 @@ public class RoutingTutorModel implements TutorModel {
             return true;
         }
         return answer.contains("\"parameters\":") || answer.contains("\"arguments\":");
+    }
+
+    /** How a turn opens when it is agreeing with the learner. */
+    private static final java.util.regex.Pattern AGREEMENT = java.util.regex.Pattern.compile(
+            "^\\W*(that\u2019?'?s (right|correct)|correct|well done|exactly|nicely done|spot on"
+                    + "|good (job|work)|perfect|yes\\b)", java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Whether the turn opens by agreeing with an answer the engine marked wrong.
+     *
+     * <p>The directive tells the model the verdict and asks it to acknowledge it in a few
+     * words. It usually does. When it does not, a learner reads "that's right" directly above
+     * an interface that says the answer was wrong, and the tutor has told them something
+     * false about their own work -- so the template turn, which cannot disagree with the
+     * marking, is used instead.
+     */
+    static boolean affirmsAWrongAnswer(String answer, TutorRequest request) {
+        return Boolean.FALSE.equals(request.answeredCorrectly()) && AGREEMENT.matcher(answer).find();
     }
 
     private String exerciseBlock(TutorRequest request) {

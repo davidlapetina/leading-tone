@@ -186,7 +186,9 @@ public class TutorOrchestrator {
                 learnerMessage != null ? learnerMessage : decision.learnerAskedAbout());
 
         TutorRequest request = new TutorRequest(session.id, snapshot, decision, exercise, learnerMessage,
-                evaluationFeedback, directiveFor(attempt), knowledge);
+                evaluationFeedback, directiveFor(attempt), knowledge,
+                attempt == null ? null
+                        : attempt.outcome().result() == fr.lapetina.music.learner.EvidenceResult.CORRECT);
         turnScope.beginTurn(decision.conceptId());
         String message = tutorModel.respond(request);
 

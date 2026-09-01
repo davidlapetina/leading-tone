@@ -29,7 +29,13 @@ public record TutorRequest(
          * before the model is called, so the model explains evidence rather than supplying
          * it.
          */
-        fr.lapetina.music.knowledge.router.TutorKnowledge knowledge) {
+        fr.lapetina.music.knowledge.router.TutorKnowledge knowledge,
+        /**
+         * Whether the previous answer was right, or null when there was no answer. The model
+         * is told this in its directive and mostly obeys it; this is what lets the turn it
+         * produces be checked against it.
+         */
+        Boolean answeredCorrectly) {
 
     public TutorRequest {
         knowledge = knowledge == null
@@ -40,7 +46,7 @@ public record TutorRequest(
                         Exercise exercise, String learnerMessage, String evaluationFeedback,
                         String modelDirective) {
         this(sessionId, snapshot, decision, exercise, learnerMessage, evaluationFeedback,
-                modelDirective, fr.lapetina.music.knowledge.router.TutorKnowledge.EMPTY);
+                modelDirective, fr.lapetina.music.knowledge.router.TutorKnowledge.EMPTY, null);
     }
 
     public TutorRequest(java.util.UUID sessionId, LearnerSnapshot snapshot, TeachingDecision decision,

@@ -127,7 +127,7 @@ library are inside it.
 From source:
 
 ```bash
-make test     # 397 tests: no Docker, no database, no network, no model
+make test     # 400 tests: no Docker, no database, no network, no model
 make run
 ```
 
@@ -137,6 +137,13 @@ make run
 
 Found by running the packaged jar and looking at what it drew, not by running tests.
 
+
+- **The tutor could open by agreeing with an answer that was wrong.** The model is told the
+  verdict and asked to acknowledge it, and usually does; when it did not, a learner read
+  "that's right" directly above an interface saying the answer was wrong. A turn that agrees
+  with a wrong answer is now replaced by the template turn, which cannot disagree with the
+  marking — the same guard that already caught the model asking for a different note than the
+  exercise.
 
 - **Wrong answers were being marked correct.** An answer counts wherever the expected words
   appear inside it, so that "it's G major" passes — but that also marked "F G A Bb C D E"
