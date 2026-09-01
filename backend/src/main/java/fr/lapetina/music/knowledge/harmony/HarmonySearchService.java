@@ -5,6 +5,8 @@ import fr.lapetina.music.knowledge.attribution.AttributionService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -73,6 +75,45 @@ public class HarmonySearchService {
                 .list());
     }
 
+    /**
+     * Examples of one harmony, each from a different piece.
+     *
+     * <p>Rows for a harmony arrive clustered: one movement can hold fifty tonic chords, so
+     * asking for fifty gets fifty bars of the same movement. This asks which pieces contain
+     * the harmony at all and then takes one from each, which is what makes two examples of a
+     * triad two different pieces rather than two bars of Dvořák.
+     */
+    public List<MusicalExample> findExamplesAcrossWorks(String romanNumeral, String sourceIdPrefix,
+                                                        int limit) {
+        Set<String> allowed = retrievableSourceIds();
+        if (allowed.isEmpty() || romanNumeral == null || romanNumeral.isBlank()) {
+            return List.of();
+        }
+        String sourceFilter = sourceIdPrefix == null || sourceIdPrefix.isBlank()
+                ? "%" : sourceIdPrefix + "%";
+        List<String> works = HarmonyEvent.getEntityManager()
+                .createQuery("select distinct e.work from HarmonyEvent e"
+                        + " where e.active = true and e.romanNumeral = :numeral"
+                        + " and e.sourceId like :source and e.sourceId in :allowed"
+                        + " order by e.work", String.class)
+                .setParameter("numeral", romanNumeral.trim())
+                .setParameter("source", sourceFilter)
+                .setParameter("allowed", allowed)
+                .setMaxResults(Math.clamp(limit, 1, 20))
+                .getResultList();
+
+        List<HarmonyEvent> picked = new ArrayList<>();
+        for (String work : works) {
+            HarmonyEvent.<HarmonyEvent>find(
+                            "active = true and romanNumeral = ?1 and work = ?2"
+                                    + " and sourceId like ?3 and sourceId in ?4"
+                                    + " order by measure, beat",
+                            romanNumeral.trim(), work, sourceFilter, allowed)
+                    .page(0, 1).firstResultOptional().ifPresent(picked::add);
+        }
+        return toExamples(picked);
+    }
+
     public List<MusicalExample> findCadences(String cadenceType, String composer, int limit) {
         Set<String> allowed = retrievableSourceIds();
         if (allowed.isEmpty()) {
@@ -114,12 +155,18 @@ public class HarmonySearchService {
             return List.of();
         }
         List<HarmonyEvent> matches = new ArrayList<>();
-        // Candidates are rows matching the first chord; each is then checked forwards.
+        // Candidates are rows matching the first chord; each is then checked forwards. They
+        // arrive ordered by work, and checking each one with its own query meant hundreds of
+        // queries to answer one lesson -- eight seconds for a page. A work is loaded once
+        // instead and every candidate in it is checked against what is already in hand.
+        Map<String, List<HarmonyEvent>> loaded = new LinkedHashMap<>();
         for (HarmonyEvent start : candidates(pattern.get(0), composer, sourceIdPrefix, allowed, limit * 40)) {
             if (matches.size() >= limit) {
                 break;
             }
-            if (continues(start, pattern)) {
+            List<HarmonyEvent> inWork = loaded.computeIfAbsent(
+                    start.sourceId + "\u0000" + start.work, key -> eventsOf(start));
+            if (continues(start, inWork, pattern)) {
                 matches.add(start);
             }
         }
@@ -141,14 +188,24 @@ public class HarmonySearchService {
                 .list();
     }
 
-    /** Whether the chords after this one, in the same work, complete the pattern. */
-    private boolean continues(HarmonyEvent start, List<String> pattern) {
-        List<HarmonyEvent> following = HarmonyEvent.<HarmonyEvent>find(
-                        "active = true and sourceId = ?1 and work = ?2 and measure >= ?3"
-                                + " order by measure, beat",
-                        start.sourceId, start.work, start.measure == null ? 0 : start.measure)
-                .page(0, pattern.size() * 8)
+    /** Every annotation in one work, in order, so its candidates can be checked in memory. */
+    private static List<HarmonyEvent> eventsOf(HarmonyEvent start) {
+        return HarmonyEvent.<HarmonyEvent>find(
+                        "active = true and sourceId = ?1 and work = ?2 order by measure, beat",
+                        start.sourceId, start.work)
+                .page(0, 4000)
                 .list();
+    }
+
+    /** Whether the chords after this one, in the same work, complete the pattern. */
+    private boolean continues(HarmonyEvent start, List<HarmonyEvent> inWork, List<String> pattern) {
+        int from = 0;
+        while (from < inWork.size() && inWork.get(from) != start) {
+            from++;
+        }
+        List<HarmonyEvent> following = from < inWork.size()
+                ? inWork.subList(from, Math.min(inWork.size(), from + pattern.size() * 8))
+                : List.of();
 
         int expected = 0;
         for (HarmonyEvent event : following) {

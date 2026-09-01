@@ -39,7 +39,21 @@ public class ConceptExamples {
      * substitution is a pattern across several chords, not one label, so those are left out
      * rather than approximated by their first chord.
      */
-    private static final Map<String, List<String>> NUMERALS = Map.ofEntries(
+    /**
+     * The harmonies that illustrate a concept, in the corpus that concept is taught from.
+     *
+     * <p>Every numeral here was checked against the ingested corpora: a concept mapped to a
+     * label nothing uses shows a learner an empty section, which reads as "there are no
+     * examples of this in real music" and is a different claim from the truth. The classical
+     * corpora and the jazz treebank do not share a vocabulary -- the treebank writes IM7 and
+     * IVM7 where the scores write I and IV7 -- so the jazz concepts are listed in its terms.
+     *
+     * <p>What is deliberately absent is as considered as what is here. Notes, intervals,
+     * scales and key signatures are not harmonic annotations, and counterpoint and altered
+     * dominants are not labelled distinctly by any corpus we hold. Mapping them to the
+     * nearest thing would put a bar under a heading it does not illustrate.
+     */
+    static final Map<String, List<String>> NUMERALS = Map.ofEntries(
             Map.entry("secondary-dominant", List.of("V7/V", "V/V", "V7/ii", "V/ii", "V7/IV", "V/IV", "V65/V")),
             Map.entry("dominant-seventh", List.of("V7", "V65", "V43", "V42")),
             Map.entry("dominant-function", List.of("V", "V7")),
@@ -50,10 +64,33 @@ public class ConceptExamples {
             Map.entry("chord-inversion", List.of("I6", "V6", "V65", "I64")),
             Map.entry("seventh-chord", List.of("V7", "ii7", "vii°7")),
             Map.entry("modal-interchange", List.of("bVI", "bIII", "bVII", "iv")),
-            Map.entry("chord-progression", List.of("V7", "IV")));
+            // A triad in root position, which is what the concept is.
+            Map.entry("triad", List.of("I", "IV", "V", "vi")),
+            // Figured bass is these figures. Showing them is showing the notation itself.
+            Map.entry("figured-bass", List.of("I6", "V65", "V43", "I64", "ii65")),
+            Map.entry("harmonic-function", List.of("I", "IV", "V")),
+            // Chords with a note above the seventh, in the treebank's spelling.
+            Map.entry("extended-chord", List.of("IM7", "IVM7", "ii7", "vi7", "iii7")),
+            // A voicing is built from these; the lead sheet names the chord and leaves the
+            // rest to the player, which is the concept.
+            Map.entry("jazz-voicing", List.of("IM7", "ii7", "V7", "vi7")),
+            Map.entry("chord-symbol", List.of("IM7", "ii7", "V7", "I7")),
+            // The same chord under two labels: the scores write bII7, the treebank bII.
+            Map.entry("tritone-substitution", List.of("bII7", "bII")),
+            Map.entry("chord-scale-theory", List.of("ii7", "V7", "IM7")));
 
     /** Concepts best shown by a cadence rather than a chord. */
-    private static final Map<String, String> CADENCES = Map.of(
+    /**
+     * Concepts that are a sequence of chords, not a chord.
+     *
+     * <p>For these there is no falling back to a single numeral: one chord out of the middle
+     * of a progression is not an example of the progression, and showing it under the
+     * concept's name says it is.
+     */
+    static final Set<String> IS_A_PROGRESSION = Set.of(
+            "two-five-one", "turnaround", "chord-progression", "voice-leading");
+
+    static final Map<String, String> CADENCES = Map.of(
             "cadence", "PAC",
             "modulation", "PAC");
 
@@ -64,12 +101,17 @@ public class ConceptExamples {
      * two-five-one would be a different claim from the one being taught. These are matched
      * as consecutive runs instead, and the first chord of each run is cited.
      */
-    private static final Map<String, List<List<String>>> PROGRESSIONS = Map.of(
+    static final Map<String, List<List<String>>> PROGRESSIONS = Map.of(
             "two-five-one", List.of(List.of("ii", "V", "I"), List.of("ii7", "V7", "I"),
                     List.of("ii6", "V", "I"), List.of("ii", "V7", "I")),
-            "turnaround", List.of(List.of("I", "vi", "ii", "V"), List.of("I", "vi", "IV", "V")),
+            "turnaround", List.of(List.of("I", "vi", "ii", "V"), List.of("I", "vi", "IV", "V"),
+                    List.of("iii7", "vi7", "ii7", "V7"), List.of("IM7", "vi7", "ii7", "V7")),
             "chord-progression", List.of(List.of("I", "IV", "V"), List.of("IV", "V", "I")),
-            "dominant-function", List.of(List.of("V", "I"), List.of("V7", "I")));
+            "dominant-function", List.of(List.of("V", "I"), List.of("V7", "I")),
+            "harmonic-function", List.of(List.of("I", "IV", "V"), List.of("I", "ii", "V")),
+            // The whole of voice leading in two chords: the leading tone rises and the
+            // seventh falls. Seeing it happen in a score is the lesson.
+            "voice-leading", List.of(List.of("V7", "I"), List.of("V", "I"), List.of("V7", "i")));
 
     @Inject
     HarmonySearchService harmonySearch;
@@ -92,24 +134,41 @@ public class ConceptExamples {
                 .orElse(false);
         String corpus = jazz ? JAZZ_CORPUS : SCORE_CORPORA;
 
+        // More than are shown, so the ones chosen can be spread across different pieces.
+        int wanted = Math.min(limit * CANDIDATES_PER_RESULT, MOST_CANDIDATES);
         List<MusicalExample> found = new ArrayList<>();
-        // A progression first, when the concept is one: it is the more faithful answer.
+        // Progressions are asked for narrowly. Each candidate costs a second query to check
+        // what follows it, so asking for a wide pool of them turns a page load into half a
+        // minute -- and unlike single chords they are already spread across pieces.
+        int patternsWanted = limit * 3;
         for (List<String> pattern : PROGRESSIONS.getOrDefault(conceptId, List.of())) {
-            if (found.size() >= limit) {
+            if (found.size() >= patternsWanted) {
                 break;
             }
-            found.addAll(harmonySearch.findProgressions(pattern, null, corpus, limit - found.size()));
+            found.addAll(harmonySearch.findProgressions(pattern, null, corpus,
+                    patternsWanted - found.size()));
         }
-        for (String numeral : NUMERALS.getOrDefault(conceptId, List.of())) {
-            if (found.size() >= limit) {
-                break;
+        // A concept that *is* a progression is shown as one or not at all. Falling back to a
+        // single chord from the middle of it puts a lone iii7 under "Turnarounds" and a V7
+        // from an unrelated tune under "The twelve-bar blues", which illustrates neither.
+        if (!IS_A_PROGRESSION.contains(conceptId)) {
+            // A slice from each numeral rather than filling up on the first. One numeral's
+            // matches tend to come from one piece, so taking them all gives two bars of the
+            // same movement where the concept has four different chords to show.
+            List<String> numerals = NUMERALS.getOrDefault(conceptId, List.of());
+            for (String numeral : numerals) {
+                if (found.size() >= MOST_CANDIDATES) {
+                    break;
+                }
+                found.addAll(harmonySearch.findExamplesAcrossWorks(numeral, corpus, limit + 2));
             }
-            found.addAll(harmonySearch.findExamples(numeral, null, null, corpus, limit - found.size()));
         }
         if (found.isEmpty() && CADENCES.containsKey(conceptId)) {
-            found.addAll(harmonySearch.findCadences(CADENCES.get(conceptId), null, limit));
+            found.addAll(harmonySearch.findCadences(CADENCES.get(conceptId), null, wanted));
         }
-        return found.stream().limit(limit).map(this::engrave).toList();
+        return preferringTheOnesWeCanDraw(found.stream()
+                .filter(distinctBy(MusicalExample::sourceReference))
+                .toList(), limit);
     }
 
     /**
@@ -171,33 +230,39 @@ public class ConceptExamples {
      * an example that can be drawn wins; one that cannot still beats an empty answer.
      */
     private List<MusicalExample> preferringTheOnesWeCanDraw(List<MusicalExample> candidates, int limit) {
-        List<MusicalExample> drawn = new ArrayList<>();
-        List<MusicalExample> sameWorkAgain = new ArrayList<>();
-        List<MusicalExample> undrawn = new ArrayList<>();
-        Set<String> worksShown = new LinkedHashSet<>();
-
+        // Choose before engraving. Reading a note table is the expensive part, so the order
+        // is decided first and only the examples actually shown are read.
+        //
+        // The ordering matters as much as the preference: matches for one harmony arrive
+        // clustered by piece, so taking them as they come gives two bars of one movement
+        // where the same harmony is available in three different hands.
+        List<MusicalExample> firstOfItsWork = new ArrayList<>();
+        List<MusicalExample> aWorkAlreadySeen = new ArrayList<>();
+        Set<String> works = new LinkedHashSet<>();
         for (MusicalExample candidate : candidates) {
+            (works.add(workOf(candidate)) ? firstOfItsWork : aWorkAlreadySeen).add(candidate);
+        }
+        List<MusicalExample> ordered = new ArrayList<>(firstOfItsWork);
+        ordered.addAll(aWorkAlreadySeen);
+
+        List<MusicalExample> drawn = new ArrayList<>();
+        List<MusicalExample> undrawn = new ArrayList<>();
+        for (MusicalExample candidate : ordered) {
             if (drawn.size() >= limit) {
                 break;      // enough to show; no need to read any more note tables
             }
             MusicalExample engraved = engrave(candidate);
             if (engraved.abc() == null || engraved.abc().isBlank()) {
                 undrawn.add(engraved);
-            } else if (worksShown.add(workOf(engraved))) {
-                drawn.add(engraved);
             } else {
-                // A second bar of a piece already shown. Kept, but behind anything new:
-                // three bars of one piece teach less than the same harmony in three hands.
-                sameWorkAgain.add(engraved);
+                drawn.add(engraved);
             }
         }
-        for (List<MusicalExample> rest : List.of(sameWorkAgain, undrawn)) {
-            for (MusicalExample example : rest) {
-                if (drawn.size() >= limit) {
-                    break;
-                }
-                drawn.add(example);
+        for (MusicalExample rest : undrawn) {
+            if (drawn.size() >= limit) {
+                break;      // an example without bars still beats an empty answer
             }
+            drawn.add(rest);
         }
         return List.copyOf(drawn);
     }

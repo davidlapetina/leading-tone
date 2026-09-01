@@ -127,7 +127,7 @@ library are inside it.
 From source:
 
 ```bash
-make test     # 405 tests: no Docker, no database, no network, no model
+make test     # 409 tests: no Docker, no database, no network, no model
 make test-e2e # 14 more in the browser, against a running stack
 make run
 ```
@@ -153,6 +153,15 @@ somebody is trying it for the first time.
 
 Found by running the packaged jar and looking at what it drew, not by running tests.
 
+
+- **Most lessons had no real example.** Only 14 of 36 concepts were mapped to a harmony the
+  corpora could be searched for; 24 are now, including triads, figured bass, voice leading,
+  extended chords, chord symbols, tritone substitution and turnarounds. The remaining eleven
+  are not harmonic annotations — notes, intervals, scales, key signatures, counterpoint — and
+  say so rather than showing something that does not illustrate them.
+- **Two examples of one harmony were two bars of the same piece.** Matches arrive clustered,
+  because one movement can hold fifty tonic chords. They are now chosen one per piece, before
+  any is engraved, so only what is shown has its note table read.
 
 - **A table of examples was quoted as if it were prose.** Every cell of an eight-column
   table arrived on its own line, so a row of composers and bar numbers read as a column of

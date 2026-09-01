@@ -82,3 +82,25 @@ be engraved beats one that cannot. Not every corpus has note tables — the jazz
 annotates chords over lead sheets — and those sort early alphabetically, so a query for V7/V
 came back as lead sheets with engraved Beethoven behind them. Showing the music is the point,
 so the annotated scores are searched first and the results spread across different works.
+
+## Which examples a lesson gets
+
+A concept is mapped to the harmonies that illustrate it, and every label in that mapping was
+checked against the ingested corpora. A concept mapped to a label nothing uses shows an empty
+section, which reads as "there are no examples of this in real music" — a different claim
+from the truth. The corpora do not share a vocabulary: the treebank writes `bII` and `IM7`
+where the annotated scores write `bII7` and `I`, so the jazz concepts are listed in its
+terms.
+
+A concept that *is* a progression — the ii-V-I, a turnaround, voice leading — is shown as one
+or not at all. Falling back to a single chord from the middle of it put a lone `iii7` under
+"Turnarounds", which illustrates nothing.
+
+Matches for one harmony arrive clustered by piece, because one movement can hold fifty tonic
+chords. Examples are chosen one per piece before any of them is engraved, so two examples of
+a triad are two different pieces rather than two bars of the same Dvořák — and only the ones
+actually shown have their note tables read.
+
+Eleven concepts have no examples and say so: notes, intervals, scales and key signatures are
+not harmonic annotations, and neither counterpoint, altered dominants nor the twelve-bar form
+is labelled distinctly by any corpus here.
