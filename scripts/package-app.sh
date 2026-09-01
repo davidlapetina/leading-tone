@@ -17,9 +17,16 @@ WORK=backend/target/packaging
 
 [ -f "$JAR" ] || { echo "no jar: run 'make package' first"; exit 1; }
 
+case "$(uname -s)" in
+    Darwin)  TYPE=dmg;  ICON=packaging/icons/leading-tone.icns; EXE= ;;
+    Linux)   TYPE=deb;  ICON=packaging/icons/leading-tone.png;  EXE= ;;
+    MINGW*|MSYS*|CYGWIN*) TYPE=msi; ICON=packaging/icons/leading-tone.ico; EXE=.exe ;;
+    *) echo "unknown system: $(uname -s)"; exit 1 ;;
+esac
+
 JAVA_HOME_DIR="${JAVA_HOME:-$(dirname "$(dirname "$(command -v java)")")}"
-JLINK="$JAVA_HOME_DIR/bin/jlink"
-JPACKAGE="$JAVA_HOME_DIR/bin/jpackage"
+JLINK="$JAVA_HOME_DIR/bin/jlink$EXE"
+JPACKAGE="$JAVA_HOME_DIR/bin/jpackage$EXE"
 for tool in "$JLINK" "$JPACKAGE"; do
     [ -x "$tool" ] || { echo "missing $tool — a full JDK is needed, not a JRE"; exit 1; }
 done
@@ -42,13 +49,6 @@ echo "==> trimming a runtime"
     --strip-debug --no-header-files --no-man-pages --compress=zip-6 \
     --output "$WORK/runtime"
 du -sh "$WORK/runtime" | awk '{print "    " $1}'
-
-case "$(uname -s)" in
-    Darwin)  TYPE=dmg;  ICON=packaging/icons/leading-tone.icns ;;
-    Linux)   TYPE=deb;  ICON=packaging/icons/leading-tone.png ;;
-    MINGW*|MSYS*|CYGWIN*) TYPE=msi; ICON=packaging/icons/leading-tone.ico ;;
-    *) echo "unknown system: $(uname -s)"; exit 1 ;;
-esac
 
 # --java-options is how the packaged application says it is packaged. It is the only
 # difference from running the jar by hand, and it turns on exactly two things: a data

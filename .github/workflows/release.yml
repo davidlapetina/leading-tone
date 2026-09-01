@@ -3,6 +3,9 @@
 # jpackage cannot cross-compile, so each installer is built on the system it is for. The
 # three jobs are otherwise identical, which is the point: whatever goes wrong goes wrong on
 # one platform only, and the other two still produce something.
+#
+# Deliberately no `make`: it is not on the path on the Windows runner, and the two commands
+# it would run are one line each.
 name: Installers
 
 on:
@@ -12,6 +15,10 @@ on:
 
 permissions:
   contents: write
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   installer:
@@ -36,28 +43,44 @@ jobs:
           java-version: "21"
           cache: maven
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
       - uses: pnpm/action-setup@v4
         with:
           version: 9
 
-      - name: Build the interface and the jar
-        run: make package
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Build the interface
+        run: |
+          cd frontend
+          pnpm install --frozen-lockfile
+          pnpm build
+
+      - name: Build the jar
+        run: |
+          cd backend
+          ./mvnw --batch-mode package -DskipTests
 
       - name: Check the jar before wrapping it
-        # Cheap, and it catches the failure that only appears in a packaged build: Lucene
+        # Cheap, and it catches the failure that appears only in a packaged build: Lucene
         # resolves its codecs through META-INF/services, which an uber-jar has to merge.
         if: runner.os != 'Windows'
-        run: make verify-jar
+        run: ./scripts/verify-jar.sh
 
       - name: Build the installer
-        shell: bash
-        run: ./scripts/package-app.sh
-        env:
-          APP_VERSION: ${{ github.ref_type == 'tag' && replace(github.ref_name, 'v', '') || '1.0.0' }}
+        # The tag is the version, without its leading v. Stripping it in the shell rather
+        # than in an expression: GitHub Actions has no replace() function, and using one
+        # stops the whole workflow from parsing, so nothing runs and nothing says why.
+        run: |
+          VERSION="1.0.0"
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          echo "Building version $VERSION"
+          APP_VERSION="$VERSION" ./scripts/package-app.sh
 
       - uses: actions/upload-artifact@v4
         with:
@@ -74,6 +97,7 @@ jobs:
         with:
           path: installers
           merge-multiple: true
+
       - uses: softprops/action-gh-release@v2
         with:
           files: installers/*
@@ -84,4 +108,4 @@ jobs:
 
             macOS and Windows will warn that the developer is unidentified, because these
             builds are not yet signed. On macOS, open System Settings → Privacy & Security
-            and choose Open Anyway.
+            and choose Open Anyway; on Windows, choose More info → Run anyway.
