@@ -10,7 +10,7 @@ working on the backend.
 
 ```shell
 ./mvnw quarkus:dev          # live reload, http://localhost:8088
-./mvnw test                 # 378 tests, no network, no model, no Docker
+./mvnw test                 # 382 tests, no network, no model, no Docker
 ```
 
 `make backend` from the repo root does the same thing. The port is `MUSIC_HTTP_PORT`,
@@ -26,7 +26,10 @@ directory and you have a clean install; there is nothing else to reset.
 ./mvnw package              # backend/target/leading-tone-runner.jar
 ```
 
-One uber-jar, around 134 MB, and `java -jar` is the whole install. It is large because the
+One uber-jar, around 134 MB, and `java -jar` is the whole install. `make app` from the root
+wraps it with a trimmed runtime into a `.dmg`, `.msi` or `.deb` — see
+[`scripts/package-app.sh`](../scripts/package-app.sh) for the module list, which was cut down
+until it broke and then repaired: `java.rmi` is the one nobody expects, and H2 needs it. It is large because the
 embedding model and the ONNX runtime that executes it are inside it — that is the price of
 not asking anyone to run a Python service or an embedding API. `make package` from the root
 builds the frontend first and bundles it into the same jar.

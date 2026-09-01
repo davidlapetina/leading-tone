@@ -46,19 +46,44 @@ its licence where you decide.
 
 ---
 
-## Run it
+## Install it
 
-One file. Java 21 is the only requirement.
+Download the build for your machine, open it, and it starts. **Nothing else to install** —
+no Java, no database, no Docker, no configuration file, no Python and no vector database.
+The search index and the embedding model run inside the application itself.
+
+| | |
+|---|---|
+| macOS | `Leading Tone-1.0.0.dmg` |
+| Windows | `Leading Tone-1.0.0.msi` |
+| Linux | `leading-tone_1.0.0_amd64.deb` |
+
+It opens your browser onto the interface when it starts, preferring Chrome, Edge or Firefox
+if you have one — those are the browsers that can talk to a MIDI keyboard, and Safari cannot.
+Everything else works in any browser.
+
+Your progress lives in one folder, which you can copy or delete:
+
+| | |
+|---|---|
+| macOS | `~/Library/Application Support/Leading Tone` |
+| Windows | `%APPDATA%\Leading Tone` |
+| Linux | `~/.local/share/leading-tone` |
+
+> These builds are not yet signed, so macOS and Windows will say the developer is
+> unidentified. On macOS, open **System Settings → Privacy & Security** and choose **Open
+> Anyway**; on Windows, choose **More info → Run anyway**.
+
+### Or run the jar
+
+Java 21, one file, and it behaves exactly as it always has — `data/` beside the jar, and no
+browser opened for you.
 
 ```bash
 java -jar leading-tone-runner.jar
 ```
 
 Then open **http://localhost:8088**.
-
-That is the whole installation. No database to install, no Docker, no configuration file,
-no Python, and no vector database — the search index and the embedding model both run
-inside the same process. Your progress is kept in a `data/` folder next to the jar.
 
 ### Bring in the sources (optional)
 
@@ -151,7 +176,16 @@ make test-e2e    # browser, against a running backend
 make check       # all of the above, plus lint, typecheck and the jar
 ```
 
-**409 tests, and 14 more in the browser. None of them need Docker, a database, a network or
+An installer for the machine you are on:
+
+```bash
+make app         # a .dmg, .msi or .deb, with a trimmed Java runtime inside
+```
+
+jpackage cannot cross-compile, so each one is built on its own system; the
+[release workflow](.github/workflows/release.yml) does all three.
+
+**413 tests, and 14 more in the browser. None of them need Docker, a database, a network or
 a language model.** The backend runs against an in-memory database; ingestion is tested
 against recorded copies of the real publisher responses; the browser tests switch the model
 off, so they test the tutor rather than a model's wording.

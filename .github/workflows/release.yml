@@ -1,0 +1,87 @@
+# Builds the installers people download.
+#
+# jpackage cannot cross-compile, so each installer is built on the system it is for. The
+# three jobs are otherwise identical, which is the point: whatever goes wrong goes wrong on
+# one platform only, and the other two still produce something.
+name: Installers
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  installer:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            artifact: dmg
+          - os: windows-latest
+            artifact: msi
+          - os: ubuntu-latest
+            artifact: deb
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          # A full JDK, not a JRE: the build needs jlink and jpackage, which only ship with one.
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Build the interface and the jar
+        run: make package
+
+      - name: Check the jar before wrapping it
+        # Cheap, and it catches the failure that only appears in a packaged build: Lucene
+        # resolves its codecs through META-INF/services, which an uber-jar has to merge.
+        if: runner.os != 'Windows'
+        run: make verify-jar
+
+      - name: Build the installer
+        shell: bash
+        run: ./scripts/package-app.sh
+        env:
+          APP_VERSION: ${{ github.ref_type == 'tag' && replace(github.ref_name, 'v', '') || '1.0.0' }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: leading-tone-${{ matrix.artifact }}
+          path: dist/*
+          if-no-files-found: error
+
+  publish:
+    needs: installer
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: installers
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: installers/*
+          draft: true
+          body: |
+            Download the one for your machine. Nothing else to install — no Java, no Docker,
+            no database. See RELEASE_NOTES.md for what is in this version.
+
+            macOS and Windows will warn that the developer is unidentified, because these
+            builds are not yet signed. On macOS, open System Settings → Privacy & Security
+            and choose Open Anyway.

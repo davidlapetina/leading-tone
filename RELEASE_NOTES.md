@@ -127,10 +127,37 @@ library are inside it.
 From source:
 
 ```bash
-make test     # 409 tests: no Docker, no database, no network, no model
+make test     # 413 tests: no Docker, no database, no network, no model
 make test-e2e # 14 more in the browser, against a running stack
 make run
 ```
+
+---
+
+## Builds you can double-click
+
+Installers for macOS, Windows and Linux, each carrying its own trimmed Java runtime — about
+188 MB installed, and nothing else to install. `make app` builds one for the machine you are
+on; the release workflow builds all three, because jpackage cannot cross-compile.
+
+They start the application and open your browser onto it, preferring Chrome, Edge or Firefox
+over the system default. That is not a favourite: those are the browsers that implement Web
+MIDI, and on a Mac the default is usually Safari, which does not — so opening the default
+browser would be quietly choosing the one where a piano cannot be plugged in.
+
+Two things had to change to make a launched application work at all, and neither is visible
+from a terminal:
+
+- **A launched application's working directory is the root of the disk.** The default
+  `./data` therefore sent the database to `/data`, and it died on startup before drawing
+  anything. A packaged build now keeps its data where each system expects it, and running
+  the jar by hand is unchanged.
+- **`java.awt.Desktop` cannot open a browser here.** The server runs headless, and under
+  `java.awt.headless=true` `Desktop.isDesktopSupported()` is false, so the obvious three
+  lines do nothing at all. The operating system is asked directly instead.
+
+The builds are not yet signed, so macOS and Windows will warn that the developer is
+unidentified.
 
 ---
 
