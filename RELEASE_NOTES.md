@@ -128,6 +128,7 @@ From source:
 
 ```bash
 make test     # 405 tests: no Docker, no database, no network, no model
+make test-e2e # 14 more in the browser, against a running stack
 make run
 ```
 
