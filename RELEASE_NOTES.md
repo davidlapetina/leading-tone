@@ -127,7 +127,7 @@ library are inside it.
 From source:
 
 ```bash
-make test     # 393 tests: no Docker, no database, no network, no model
+make test     # 397 tests: no Docker, no database, no network, no model
 make run
 ```
 
@@ -137,6 +137,14 @@ make run
 
 Found by running the packaged jar and looking at what it drew, not by running tests.
 
+
+- **Wrong answers were being marked correct.** An answer counts wherever the expected words
+  appear inside it, so that "it's G major" passes — but that also marked "F G A Bb C D E"
+  correct for an answer of "G", accepted "A minor" on a question asking for the root and the
+  quality, and accepted "D natural minor" where the form matched and nothing checked the note
+  in front of it. Of 41,411 deliberately wrong answers, 1,407 were accepted; that is now 270,
+  and what remains are the alternatives each exercise actually declares. Evidence of mastery
+  that was never demonstrated had been going into the learner model.
 
 - **One note in ten was engraved as the wrong pitch.** A key signature alters every note
   on its letters, so in F minor a plain D is D flat; a D natural written with no sign is a

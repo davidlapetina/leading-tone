@@ -107,4 +107,60 @@ class ExerciseEvaluatorTest {
         assertEquals("F# minor", ExerciseEvaluator.parseKey("F# minor").name());
         org.junit.jupiter.api.Assertions.assertNull(ExerciseEvaluator.parseKey(null));
     }
+
+    @Test
+    @DisplayName("a longer answer that names something else is not the expected one padded with words")
+    void doesNotAcceptADifferentAnswerThatContainsTheRightWords() {
+        // An answer counts wherever the expected words appear inside it, so that "it's G major"
+        // passes. The same leniency marked a different scale correct because the letter G was
+        // somewhere in it.
+        ExpectedAnswer scale = ExpectedAnswer.text("G major", "G major", "G");
+
+        assertEquals(EvidenceResult.INCORRECT,
+                evaluator.evaluateText(scale, "F G A Bb C D E", null).result(),
+                "a different scale entirely");
+        assertEquals(EvidenceResult.INCORRECT,
+                evaluator.evaluateText(scale, "G harmonic minor", null).result(),
+                "the right tonic with the wrong form");
+
+        // What the leniency is for, and must keep doing.
+        assertEquals(EvidenceResult.CORRECT, evaluator.evaluateText(scale, "G major", null).result());
+        assertEquals(EvidenceResult.CORRECT, evaluator.evaluateText(scale, "it's G major", null).result());
+        assertEquals(EvidenceResult.CORRECT, evaluator.evaluateText(scale, "G", null).result(),
+                "the bare tonic is offered as acceptable");
+    }
+
+    @Test
+    @DisplayName("getting the quality wrong is wrong, even when the root is right")
+    void doesNotAcceptTheWrongQuality() {
+        // "A" is the lead-sheet symbol for an A major triad, and is acceptable. It also sits
+        // inside "A minor", which is a different chord.
+        ExpectedAnswer triad = ExpectedAnswer.text("A major", "A major", "A");
+
+        assertEquals(EvidenceResult.INCORRECT, evaluator.evaluateText(triad, "A minor", null).result());
+        assertEquals(EvidenceResult.INCORRECT, evaluator.evaluateText(triad, "A diminished", null).result());
+        assertEquals(EvidenceResult.CORRECT, evaluator.evaluateText(triad, "A major", null).result());
+        assertEquals(EvidenceResult.CORRECT, evaluator.evaluateText(triad, "A major triad", null).result());
+    }
+
+    @Test
+    @DisplayName("a tonic the expected answer does not name makes it a different scale")
+    void doesNotAcceptTheWrongTonic() {
+        // The form matched on its own, and nothing checked the note in front of it.
+        ExpectedAnswer minor = ExpectedAnswer.text("A natural minor", "A natural minor", "natural minor");
+
+        assertEquals(EvidenceResult.INCORRECT, evaluator.evaluateText(minor, "D natural minor", null).result());
+        assertEquals(EvidenceResult.CORRECT, evaluator.evaluateText(minor, "A natural minor", null).result());
+    }
+
+    @Test
+    @DisplayName("an alternative spelling stays acceptable")
+    void keepsTheAlternativeSpelling() {
+        // An alternative exists to allow a spelling the canonical does not use, so a note that
+        // appears only in the alternative must not read as naming something else.
+        ExpectedAnswer either = ExpectedAnswer.text("F#", "F#", "Gb");
+
+        assertEquals(EvidenceResult.CORRECT, evaluator.evaluateText(either, "Gb", null).result());
+        assertEquals(EvidenceResult.CORRECT, evaluator.evaluateText(either, "F#", null).result());
+    }
 }

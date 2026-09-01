@@ -421,7 +421,7 @@ public class ExerciseGenerator {
         return switch (shape.kind()) {
             case IDENTIFY -> spec("major-scale", ExerciseType.SPELL_SCALE, shape, EvidenceType.TEXT_RECALL,
                     "Which major scale is this: %s?".formatted(String.join(" ", spelled)),
-                    ExpectedAnswer.text(key.tonic().name(), key.tonic().name(), key.name()),
+                    ExpectedAnswer.text(key.name(), key.name(), key.tonic().name()),
                     AbcNotation.scale(scale, 4), key.name(), difficulty);
             case ANALYSE -> spec("major-scale", ExerciseType.NAME_SCALE_DEGREE, shape, EvidenceType.TEXT_RECALL,
                     "In %s, between which two degrees does the upper semitone fall? Name the two notes."

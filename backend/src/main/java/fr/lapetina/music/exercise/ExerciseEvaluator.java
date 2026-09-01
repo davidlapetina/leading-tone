@@ -108,7 +108,8 @@ public class ExerciseEvaluator {
         candidates.add(expected.canonical());
         candidates.addAll(expected.acceptable());
         for (String candidate : candidates) {
-            if (candidate != null && !candidate.isBlank() && AnswerNormalizer.matches(answer, candidate)) {
+            if (candidate != null && !candidate.isBlank() && AnswerNormalizer.matches(answer, candidate)
+                    && saysNothingTheAnswerDoesNot(expected.canonical(), candidate, answer)) {
                 return EvaluationOutcome.correct("Correct.");
             }
         }
@@ -116,6 +117,51 @@ public class ExerciseEvaluator {
         Optional<EvaluationOutcome> enharmonic = enharmonicNearMiss(expected.canonical(), answer);
         return enharmonic.orElseGet(() -> EvaluationOutcome.incorrect(
                 "Expected %s.".formatted(expected.canonical())));
+    }
+
+    /**
+     * Whether the answer is the expected one with words around it, rather than a different one.
+     *
+     * <p>An answer counts wherever the expected words appear inside it, so that "it's G" and
+     * "G major, I think" both pass. That same leniency marked "F G A Bb C D E" correct for an
+     * answer of "G", and "A minor" correct on a question asking for the root and the quality,
+     * because the accepted words were somewhere inside a longer answer that said something
+     * else. Naming a note or a quality that neither the canonical answer nor the alternative
+     * matched allows for makes it a different answer.
+     *
+     * <p>Both are allowed for, not just the one that matched: an alternative exists precisely
+     * to permit a spelling the canonical does not use.
+     */
+    private static boolean saysNothingTheAnswerDoesNot(String canonical, String candidate, String answer) {
+        List<PitchClass> notes = new ArrayList<>(AnswerNormalizer.notesIn(canonical));
+        notes.addAll(AnswerNormalizer.notesIn(candidate));
+        if (!notes.isEmpty() && !AnswerNormalizer.notesIn(answer).stream().allMatch(notes::contains)) {
+            return false;
+        }
+        Set<String> qualities = new java.util.HashSet<>(qualityWordsIn(canonical));
+        qualities.addAll(qualityWordsIn(candidate));
+        // Where the expected answer names no quality, the question was not asking for one.
+        return qualities.isEmpty() || qualities.containsAll(qualityWordsIn(answer));
+    }
+
+    /** Words that commit an answer to a particular quality, mode or kind of scale. */
+    private static final Set<String> QUALITY_WORDS = Set.of(
+            "major", "minor", "diminished", "augmented", "dominant", "perfect",
+            "natural", "harmonic", "melodic", "whole", "blues", "pentatonic", "altered",
+            "ionian", "dorian", "phrygian", "lydian", "mixolydian", "aeolian", "locrian",
+            "authentic", "plagal", "deceptive", "half");
+
+    private static Set<String> qualityWordsIn(String text) {
+        if (text == null || text.isBlank()) {
+            return Set.of();
+        }
+        Set<String> found = new java.util.HashSet<>();
+        for (String word : text.toLowerCase(java.util.Locale.ROOT).split("[^a-z]+")) {
+            if (QUALITY_WORDS.contains(word)) {
+                found.add(word);
+            }
+        }
+        return found;
     }
 
     private Optional<EvaluationOutcome> enharmonicNearMiss(String canonical, String answer) {
