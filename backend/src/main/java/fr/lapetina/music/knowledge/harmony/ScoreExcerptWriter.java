@@ -177,13 +177,33 @@ public final class ScoreExcerptWriter {
         return clefs;
     }
 
+    /** The staff, in MIDI numbers: bottom line to top line. */
+    private static final int TREBLE_LOW = 64;      // E4
+    private static final int TREBLE_HIGH = 77;     // F5
+    private static final int BASS_LOW = 43;        // G2
+    private static final int BASS_HIGH = 57;       // A3
+
+    /**
+     * The clef that puts the most of this music on the staff.
+     *
+     * <p>Deciding by average pitch reads a left hand that spans two octaves as a high part and
+     * draws it in treble, where its lower notes end up four ledger lines down. What matters is
+     * not where the music sits on average but how much of it lands off the staff, so that is
+     * what is counted.
+     */
     private static String clefFor(List<NoteEvent> notes) {
-        double average = notes.stream()
-                .map(note -> Note.parse(note.name()))
-                .mapToInt(Note::midi)
-                .average()
-                .orElse(60);
-        return average < 58 ? " clef=bass" : " clef=treble";
+        int trebleStrain = 0;
+        int bassStrain = 0;
+        for (NoteEvent note : notes) {
+            int midi = Note.parse(note.name()).midi();
+            trebleStrain += distanceOutside(midi, TREBLE_LOW, TREBLE_HIGH);
+            bassStrain += distanceOutside(midi, BASS_LOW, BASS_HIGH);
+        }
+        return bassStrain < trebleStrain ? " clef=bass" : " clef=treble";
+    }
+
+    private static int distanceOutside(int midi, int low, int high) {
+        return midi < low ? low - midi : Math.max(0, midi - high);
     }
 
     private static String writeVoice(List<NoteEvent> notes, int fromMeasure, int toMeasure,
