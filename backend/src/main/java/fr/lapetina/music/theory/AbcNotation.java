@@ -38,6 +38,30 @@ public final class AbcNotation {
         return builder.toString();
     }
 
+    /**
+     * The same, but written against what is already in force.
+     *
+     * <p>Without this a natural on a letter the key signature alters is drawn with no sign at
+     * all, and read as the altered note -- a different pitch from the one asked for.
+     */
+    public static String pitch(Note note, AccidentalState state) {
+        return state.accidentalFor(note) + letterAndOctave(note);
+    }
+
+    private static String letterAndOctave(Note note) {
+        StringBuilder builder = new StringBuilder();
+        String letter = note.pitchClass().letter().name();
+        int octave = note.octave();
+        if (octave >= 5) {
+            builder.append(letter.toLowerCase());
+            builder.append("'".repeat(octave - 5));
+        } else {
+            builder.append(letter);
+            builder.append(",".repeat(Math.max(0, 4 - octave)));
+        }
+        return builder.toString();
+    }
+
     private static String accidental(Accidental accidental) {
         return switch (accidental) {
             case DOUBLE_FLAT -> "__";
@@ -76,14 +100,14 @@ public final class AbcNotation {
 
     /** A single chord as an ABC chord group, labelled with its lead-sheet symbol. */
     public static String chord(Chord chord, int bassOctave, Key key) {
-        String body = chordGroup(chord, bassOctave);
+        String body = chordGroup(chord, bassOctave, new AccidentalState(key));
         return header(chord.describe(), key, "1/1") + "\"" + chord.symbol() + "\"" + body + "|]\n";
     }
 
-    private static String chordGroup(Chord chord, int bassOctave) {
+    private static String chordGroup(Chord chord, int bassOctave, AccidentalState state) {
         StringBuilder builder = new StringBuilder("[");
         for (Note note : chord.notes(bassOctave)) {
-            builder.append(pitch(note));
+            builder.append(pitch(note, state));
         }
         return builder.append(']').toString();
     }
@@ -97,12 +121,14 @@ public final class AbcNotation {
                 ? new Key(scale.tonic(), scale.type() == ScaleType.MAJOR ? Mode.MAJOR : Mode.MINOR)
                 : Key.major("C");
         StringBuilder body = new StringBuilder();
+        AccidentalState state = new AccidentalState(key);
         List<Note> notes = scale.notes(octave);
         for (int i = 0; i < notes.size(); i++) {
             if (i > 0 && i % 4 == 0) {
                 body.append('|');
+                state.barLine();
             }
-            body.append(pitch(notes.get(i)));
+            body.append(pitch(notes.get(i), state));
         }
         return header(scale.name(), key, "1/4", "none") + body + "|]\n";
     }
@@ -110,9 +136,11 @@ public final class AbcNotation {
     /** A chord progression, one chord per bar, labelled with symbols above the staff. */
     public static String progression(List<Chord> chords, Key key, int bassOctave) {
         StringBuilder body = new StringBuilder();
+        AccidentalState state = new AccidentalState(key);
         for (Chord chord : chords) {
             body.append('"').append(chord.symbol()).append('"')
-                    .append(chordGroup(chord, bassOctave)).append('|');
+                    .append(chordGroup(chord, bassOctave, state)).append('|');
+            state.barLine();
         }
         if (body.length() > 0) {
             body.setLength(body.length() - 1);
@@ -123,11 +151,13 @@ public final class AbcNotation {
     /** A bare sequence of notes, for melodic and interval work. */
     public static String melody(List<Note> notes, Key key, String title) {
         StringBuilder body = new StringBuilder();
+        AccidentalState state = new AccidentalState(key);
         for (int i = 0; i < notes.size(); i++) {
             if (i > 0 && i % 4 == 0) {
                 body.append('|');
+                state.barLine();
             }
-            body.append(pitch(notes.get(i)));
+            body.append(pitch(notes.get(i), state));
         }
         return header(title, key, "1/4") + body + "|]\n";
     }
@@ -137,7 +167,8 @@ public final class AbcNotation {
         Note upper = new Note(lower.pitchClass().transpose(interval),
                 lower.octave() + (lower.pitchClass().semitone() + interval.semitones()) / 12);
         List<Note> notes = new ArrayList<>(List.of(lower, upper));
+        AccidentalState state = new AccidentalState(key);
         return header(interval.symbol() + " above " + lower.name(), key, "1/1")
-                + "[" + pitch(notes.get(0)) + pitch(notes.get(1)) + "]|]\n";
+                + "[" + pitch(notes.get(0), state) + pitch(notes.get(1), state) + "]|]\n";
     }
 }

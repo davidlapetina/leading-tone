@@ -127,7 +127,7 @@ library are inside it.
 From source:
 
 ```bash
-make test     # 391 tests: no Docker, no database, no network, no model
+make test     # 393 tests: no Docker, no database, no network, no model
 make run
 ```
 
@@ -137,6 +137,14 @@ make run
 
 Found by running the packaged jar and looking at what it drew, not by running tests.
 
+
+- **One note in ten was engraved as the wrong pitch.** A key signature alters every note
+  on its letters, so in F minor a plain D is D flat; a D natural written with no sign is a
+  different note from the one in the score. 1,507 of 14,339 notes across the corpus excerpts
+  were affected, and G Dorian was drawn as G Aeolian because its natural sixth silently
+  became a flat. Accidentals are now tracked against the key signature and against what has
+  already been written in the bar, which also removes the redundant sign that used to sit on
+  every altered note.
 
 - **Some exercises printed their own answer above the staff.** "Which minor scale is this:
   B C# D E F# G A#?" was drawn under a staff titled "B harmonic minor", and "In C major,

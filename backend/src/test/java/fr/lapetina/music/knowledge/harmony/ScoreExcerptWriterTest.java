@@ -57,9 +57,30 @@ class ScoreExcerptWriterTest {
     @DisplayName("spelling survives: the sharp that makes this an applied dominant is written")
     void keepsTheSpelling() {
         String abc = abc();
-        assertTrue(abc.contains("^G"), "G sharp, not A flat: " + abc);
+        // D sharp is not in A major's signature, so it has to be written, and it is what
+        // makes this an applied dominant rather than a plain subdominant.
         assertTrue(abc.contains("^D"), "D sharp, the third of V7/V: " + abc);
-        assertFalse(abc.contains("_A"), abc);
+        assertFalse(abc.contains("_A"), "an A flat here would be the wrong spelling: " + abc);
+        // G sharp is in the signature. Writing it again would be a courtesy accidental on
+        // every note of the key, which is not how music is engraved.
+        assertFalse(abc.contains("^G"), "the key signature already sharpens G: " + abc);
+    }
+
+    @Test
+    @DisplayName("a natural on a letter the key signature alters is written as a natural")
+    void cancelsTheKeySignatureWhenTheNoteIsNatural() {
+        // In F minor the signature flattens D. A D natural written with no sign is read as
+        // D flat -- a different note from the one in the score.
+        List<NoteEvent> both = List.of(
+                new NoteEvent(1, 0.0, 0.25, 1, 1, "Db4", false, "2/4"),
+                new NoteEvent(1, 0.25, 0.25, 1, 1, "D4", false, "2/4"));
+
+        String abc = ScoreExcerptWriter.toAbc(both, null, "fm", "2/4", 1, 1, null);
+
+        // The flat needs no sign -- the signature supplies it -- but the natural must have one,
+        // or the two notes are drawn identically and one of them is the wrong pitch.
+        assertTrue(abc.contains("=D"), "the natural has to cancel the signature: " + abc);
+        assertTrue(abc.contains("K:Fm"), abc);
     }
 
     @Test

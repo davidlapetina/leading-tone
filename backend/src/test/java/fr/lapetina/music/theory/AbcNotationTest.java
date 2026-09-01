@@ -1,9 +1,11 @@
 package fr.lapetina.music.theory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class AbcNotationTest {
@@ -36,8 +38,23 @@ class AbcNotationTest {
     void rendersAScale() {
         String abc = AbcNotation.scale(Scale.of("D", ScaleType.MAJOR), 4);
         assertTrue(abc.contains("K:D"));
-        assertTrue(abc.contains("^F"));
+        // F sharp comes from the key signature; writing it again on every F is not engraving.
+        assertFalse(abc.contains("^F"), abc);
         assertTrue(abc.trim().endsWith("|]"));
+    }
+
+    @Test
+    @DisplayName("an accidental the key signature does not supply is written")
+    void writesWhatTheSignatureDoesNot() {
+        // A harmonic minor has no sharps in its signature, so its raised seventh is written.
+        String harmonic = AbcNotation.scale(Scale.of("A", ScaleType.HARMONIC_MINOR), 4);
+        assertTrue(harmonic.contains("^g"), "the raised seventh sits in the octave above: " + harmonic);
+
+        // G Dorian was drawn as G Aeolian: under a two-flat signature the E natural was
+        // written with no sign at all, and read as E flat -- a different mode.
+        String dorian = AbcNotation.scale(Scale.of("G", ScaleType.DORIAN), 4);
+        assertTrue(dorian.contains("=e"), "the natural sixth is what makes it Dorian: " + dorian);
+        assertFalse(dorian.contains("_B"), "the flat second comes from the signature: " + dorian);
     }
 
     @Test

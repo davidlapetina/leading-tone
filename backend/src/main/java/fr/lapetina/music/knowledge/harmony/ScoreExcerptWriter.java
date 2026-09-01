@@ -1,5 +1,7 @@
 package fr.lapetina.music.knowledge.harmony;
 
+import fr.lapetina.music.theory.AccidentalState;
+import fr.lapetina.music.theory.Key;
 import fr.lapetina.music.theory.Note;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -67,7 +69,10 @@ public final class ScoreExcerptWriter {
             // per voice, which is four staves for a piano and not what the music looks like.
             abc.append("%%score ").append(staffGrouping(voices.keySet())).append('\n');
         }
-        abc.append("K:").append(keyField(keySignature)).append('\n');
+        // The written key, parsed back so notes can be checked against what it alters.
+        String written = keyField(keySignature);
+        Key key = Key.tryParse(written).orElseGet(() -> Key.major("C"));
+        abc.append("K:").append(written).append('\n');
 
         Map<String, String> clefs = clefsByStaff(voices);
         for (Map.Entry<String, List<NoteEvent>> voice : voices.entrySet()) {
@@ -75,7 +80,7 @@ public final class ScoreExcerptWriter {
                     .append(clefs.get(voice.getKey().substring(0, voice.getKey().indexOf('V'))))
                     .append('\n');
             abc.append(writeVoice(voice.getValue(), fromMeasure, toMeasure, metre,
-                    firstVoice(voices, voice.getKey()) ? target : null)).append("|]\n");
+                    firstVoice(voices, voice.getKey()) ? target : null, key)).append("|]\n");
         }
         return abc.toString();
     }
@@ -182,8 +187,10 @@ public final class ScoreExcerptWriter {
     }
 
     private static String writeVoice(List<NoteEvent> notes, int fromMeasure, int toMeasure,
-                                     String metre, Target target) {
+                                     String metre, Target target, Key key) {
         StringBuilder body = new StringBuilder();
+        // One per voice: what is in force on one staff says nothing about another.
+        AccidentalState state = new AccidentalState(key);
         for (int measure = fromMeasure; measure <= toMeasure; measure++) {
             if (target != null && target.measure() == measure && target.label() != null) {
                 // An annotation, not a chord symbol. Without the leading caret, ABC reads
@@ -191,15 +198,18 @@ public final class ScoreExcerptWriter {
                 // the one being taught. The caret means "this text, above the staff".
                 body.append('"').append('^').append(target.label().replace("\"", "")).append('"');
             }
-            body.append(writeMeasure(notes, measure, metre));
+            body.append(writeMeasure(notes, measure, metre, state));
             if (measure < toMeasure) {
                 body.append('|');
             }
+            // A bar line cancels the accidentals written in the bar, but not the signature.
+            state.barLine();
         }
         return body.toString();
     }
 
-    private static String writeMeasure(List<NoteEvent> notes, int measure, String metre) {
+    private static String writeMeasure(List<NoteEvent> notes, int measure, String metre,
+                                       AccidentalState state) {
         List<NoteEvent> inBar = notes.stream().filter(note -> note.measure() == measure).toList();
         if (inBar.isEmpty()) {
             // A bar's rest is as long as the bar. Assuming eight eighths writes a whole note
@@ -252,7 +262,7 @@ public final class ScoreExcerptWriter {
             List<NoteEvent> ornaments = graces.stream()
                     .filter(note -> Math.abs(note.onset() - onset) < 1e-9)
                     .toList();
-            events.add(new Event(graceOf(ornaments) + chord(starting), written / UNIT));
+            events.add(new Event(graceOf(ornaments, state) + chord(starting, state), written / UNIT));
             cursor = onset + written;
         }
         if (cursor < barLength - 1e-9) {
@@ -432,31 +442,31 @@ public final class ScoreExcerptWriter {
     }
 
     /** ABC writes grace notes in braces before the note they decorate. */
-    private static String graceOf(List<NoteEvent> ornaments) {
+    private static String graceOf(List<NoteEvent> ornaments, AccidentalState state) {
         if (ornaments.isEmpty()) {
             return "";
         }
         StringBuilder grace = new StringBuilder("{");
         ornaments.stream()
                 .sorted(Comparator.comparingInt(note -> Note.parse(note.name()).midi()))
-                .forEach(note -> grace.append(pitch(note)));
+                .forEach(note -> grace.append(pitch(note, state)));
         return grace.append('}').toString();
     }
 
-    private static String chord(List<NoteEvent> starting) {
+    private static String chord(List<NoteEvent> starting, AccidentalState state) {
         if (starting.size() == 1) {
-            return pitch(starting.get(0));
+            return pitch(starting.get(0), state);
         }
         StringBuilder chord = new StringBuilder("[");
         starting.stream()
                 .sorted(Comparator.comparingInt(note -> Note.parse(note.name()).midi()))
-                .forEach(note -> chord.append(pitch(note)));
+                .forEach(note -> chord.append(pitch(note, state)));
         return chord.append(']').toString();
     }
 
     /** Reuses the engine's own ABC spelling, so an F sharp is written as one. */
-    private static String pitch(NoteEvent note) {
-        return fr.lapetina.music.theory.AbcNotation.pitch(Note.parse(note.name()));
+    private static String pitch(NoteEvent note, AccidentalState state) {
+        return fr.lapetina.music.theory.AbcNotation.pitch(Note.parse(note.name()), state);
     }
 
     /**
