@@ -127,7 +127,7 @@ library are inside it.
 From source:
 
 ```bash
-make test     # 380 tests: no Docker, no database, no network, no model
+make test     # 387 tests: no Docker, no database, no network, no model
 make run
 ```
 
@@ -137,6 +137,24 @@ make run
 
 Found by running the packaged jar and looking at what it drew, not by running tests.
 
+
+- **Every minor-key excerpt was drawn with no key signature.** ABC needs an upper-case
+  tonic, and the corpora write minor in lower case, so `K:fm` was rejected outright and 171
+  of 470 excerpts appeared in C major with every flat missing.
+- **Bars did not add up.** A voice falling silent before the end left the bar short, a note
+  held across the barline left it long, and either one draws every following bar in the wrong
+  place. Bar length is now an invariant with a test that reads the notation back independently.
+- **Rhythms with no notation were being approximated.** There is no five-eighth rest; a
+  reader given one draws nothing. Durations are now split into real note values, unequal
+  tuplets included, and an excerpt whose rhythm cannot be written exactly keeps its citation
+  and shows no score rather than an invented one.
+- **Beams ran the whole width of the bar** instead of grouping by beat, which is what makes
+  a metre readable.
+- **Grace notes collapsed the bar they were in**, having a duration of zero. They are now
+  written as grace notes.
+- **The tutor opened by referring to a turn that never happened** — "You just wrote another
+  name for Ab" on the first screen a learner sees. The model cannot tell that a session is
+  new, so it is now told.
 
 - **Note durations were wrong in every engraved excerpt.** A sixteenth was written as a
   sixty-fourth and dotted rhythms as triplets, because the fraction was computed inside out.

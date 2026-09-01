@@ -2,7 +2,7 @@
 MUSIC_HTTP_PORT ?= 8088
 
 .PHONY: help backend backend-offline frontend test test-backend test-frontend \
-        test-e2e typecheck lint package run build check clean wipe
+        test-e2e typecheck lint package verify-jar run build check clean wipe
 
 help:
 	@echo "make backend       run the API on $(MUSIC_HTTP_PORT)"
@@ -12,6 +12,7 @@ help:
 	@echo "make test-e2e      Playwright, against a running stack"
 	@echo "make package       build the single self-contained jar"
 	@echo "make run           build it and run it"
+	@echo "make verify-jar    check the built jar starts and opens its index"
 	@echo "make check         test, lint, typecheck and production build"
 	@echo "make wipe          throw the learner model away and start again"
 
@@ -57,6 +58,11 @@ package:
 	@echo "  backend/target/leading-tone-runner.jar"
 	@echo "  cd backend && java -jar target/leading-tone-runner.jar   →  http://localhost:8088"
 	@echo "  (progress and ingested sources live in the data/ directory beside where you run it)"
+
+# Checks the built jar does what unit tests cannot see it do: open a Lucene index whose
+# codecs are resolved through META-INF/services, which an uber-jar has to merge correctly.
+verify-jar:
+	./scripts/verify-jar.sh
 
 # Runs the packaged jar the way someone given the file would.
 #

@@ -1,3 +1,5 @@
+import { TrebleClef } from './TrebleClef'
+
 export type View = 'learn' | 'practise' | 'progress' | 'settings'
 
 const ITEMS: { id: View; label: string; glyph: string; hint: string }[] = [
@@ -11,7 +13,9 @@ export function Sidebar({ view, onChange }: { view: View; onChange: (view: View)
   return (
     <nav className="sidebar" aria-label="Sections">
       <div className="brand">
-        <span className="brand-mark">♮</span>
+        <span className="brand-mark">
+          <TrebleClef />
+        </span>
         <span className="brand-name">Leading Tone</span>
       </div>
       <ul>

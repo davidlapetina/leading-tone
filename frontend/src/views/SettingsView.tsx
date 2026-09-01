@@ -81,7 +81,7 @@ export function SettingsView() {
           this. Turn the model off entirely and the tutor still works — plainer, and instant.
         </p>
 
-        <Field label="Use a language model" hint="Off gives short, deterministic teaching with no wait.">
+        <Field label="Use a language model" hint="When off, the tutor teaches from the theory engine alone.">
           <Toggle value={draft.llmEnabled} onChange={(v) => set('llmEnabled', v)} />
         </Field>
 
@@ -103,13 +103,13 @@ export function SettingsView() {
           <input value={draft.baseUrl} onChange={(event) => set('baseUrl', event.target.value)} />
         </Field>
 
-        <Field label="Theory tools" hint="Lets the model look chords up. Small models type the call out as text instead.">
+        <Field label="Theory tools" hint="Lets the model call the theory engine to look chords and scales up.">
           <Toggle value={draft.toolsEnabled} onChange={(v) => set('toolsEnabled', v)} />
         </Field>
 
         <Field
           label="Reasoning"
-          hint="Qwen3 thinks before answering. Measured here: three times slower, and the teaching was worse."
+          hint="The model works through its answer before replying, which takes longer."
         >
           <Toggle value={draft.think} onChange={(v) => set('think', v)} />
         </Field>
@@ -117,7 +117,7 @@ export function SettingsView() {
 
       <section className="panel-card">
         <h2>Tuning</h2>
-        <Field label="Temperature" hint="Lower is more predictable; too low and it repeats itself.">
+        <Field label="Temperature" hint="How much the model varies its wording. Lower is more predictable.">
           <input
             type="number"
             step="0.1"
@@ -127,7 +127,7 @@ export function SettingsView() {
             onChange={(event) => set('temperature', Number(event.target.value))}
           />
         </Field>
-        <Field label="Context window" hint="Too small and each turn is slower than the last.">
+        <Field label="Context window" hint="How much of the conversation the model can hold at once.">
           <input
             type="number"
             step="1024"

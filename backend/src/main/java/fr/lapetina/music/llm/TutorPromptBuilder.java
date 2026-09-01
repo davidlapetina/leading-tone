@@ -201,12 +201,25 @@ public class TutorPromptBuilder {
     }
 
     public String exerciseBlock(String prompt, String answerMode, String taskKind) {
+        return exerciseBlock(prompt, answerMode, taskKind, false);
+    }
+
+    /**
+     * @param opening whether this is the first thing the learner sees this session, which the
+     *     model cannot tell from an empty conversation and will otherwise guess wrongly --
+     *     it opens with "you just wrote", referring to a turn that never happened
+     */
+    public String exerciseBlock(String prompt, String answerMode, String taskKind, boolean opening) {
+        String start = opening
+                ? "This is the first thing the learner sees this session. Nothing has been said "
+                        + "yet, so do not refer to anything they have just done or just answered.\n"
+                : "";
         if (prompt == null) {
-            return "No exercise this turn. Do not invent one that expects a specific answer.\n";
+            return start + "No exercise this turn. Do not invent one that expects a specific answer.\n";
         }
         String framing = taskKind == null ? "" :
                 "This turn asks the learner to %s.%n".formatted(taskKind);
-        return """
+        return start + """
                 Work this question into your turn. Reword it so it reads as part of what you are \
                 saying, but do not change what is being asked and do not answer it yourself:
                 "%s"

@@ -148,11 +148,22 @@ public class RoutingTutorModel implements TutorModel {
     }
 
     private String exerciseBlock(TutorRequest request) {
+        boolean opening = isBlank(request.learnerMessage()) && isBlank(request.evaluationFeedback());
         if (request.exercise() == null) {
-            return promptBuilder.exerciseBlock(null, null);
+            return promptBuilder.exerciseBlock(null, null, null, opening);
         }
         return promptBuilder.exerciseBlock(request.exercise().prompt, request.exercise().answerMode.name(),
-                request.exercise().taskKind.describe());
+                request.exercise().taskKind.describe(), opening);
+    }
+
+    /**
+     * Nothing said and nothing marked means nothing has happened yet.
+     *
+     * <p>The model keeps its own conversation memory and cannot report on it, so this is what
+     * the orchestrator knows: an empty turn is the first one.
+     */
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     private static String learnerMessage(TutorRequest request) {

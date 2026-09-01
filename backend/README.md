@@ -1,64 +1,86 @@
-# music-teacher-backend
+# Backend
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+The tutor itself: the theory engine, the learner model, the teaching policy, the knowledge
+subsystem, and the HTTP API the browser talks to. Java 21 on Quarkus 3.39.1.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+For what the application *is*, read the [root README](../README.md). This file is about
+working on the backend.
 
-## Running the application in dev mode
+## Running it
 
-You can run your application in dev mode that enables live coding using:
-
-```shell script
-./mvnw quarkus:dev
+```shell
+./mvnw quarkus:dev          # live reload, http://localhost:8088
+./mvnw test                 # 353 tests, no network, no model, no Docker
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+`make backend` from the repo root does the same thing. The port is `MUSIC_HTTP_PORT`,
+default 8088.
 
-## Packaging and running the application
+State lives in one directory, `MUSIC_DATA_DIR` (default `./data`): an H2 file database and,
+once you have brought sources in, the Lucene index and the downloaded corpora. Delete the
+directory and you have a clean install; there is nothing else to reset.
 
-The application can be packaged using:
+## Packaging
 
-```shell script
-./mvnw package
+```shell
+./mvnw package              # backend/target/leading-tone-runner.jar
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+One uber-jar, around 134 MB, and `java -jar` is the whole install. It is large because the
+embedding model and the ONNX runtime that executes it are inside it — that is the price of
+not asking anyone to run a Python service or an embedding API. `make package` from the root
+builds the frontend first and bundles it into the same jar.
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+Two things about that jar are load-bearing and easy to break:
 
-If you want to build an _über-jar_, execute the following command:
+- **Lucene resolves its codecs through `META-INF/services`.** An uber-jar has to merge those
+  files, not overwrite them. Overwrite them and everything compiles, every test passes, and
+  opening an index throws in front of a user — so `make verify-jar` runs the built jar and
+  asks it to open the index for real.
+- **The ONNX runtime ships a 304 MB debug-symbol file** that exceeds the jar entry limit.
+  It is excluded in `application.properties`; all ten native libraries are kept.
 
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
-```
+## Layout
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+Package `fr.lapetina.music`:
 
-## Creating a native executable
+| Package | What lives there |
+|---|---|
+| `theory` | Pitch, interval, scale, chord, Roman numeral, cadence. Pure records and enums — **no framework**, enforced by `TheoryPackageIsFrameworkFreeTest` |
+| `theoryservice` | The injectable façade over `theory` |
+| `concept` | The concept graph, lessons, prerequisites |
+| `learner` | Mastery, evidence, review scheduling |
+| `exercise` | Generating questions and marking answers, including played ones |
+| `tutor` | The teaching policy: what to do next, and why |
+| `knowledge` | Sources, licences, ingestion, chunking, embedding, Lucene, retrieval, structured harmony, provenance |
+| `llm` | The optional language model. **Deletable** — everything above still works without it |
+| `midi`, `settings`, `store`, `api`, `infrastructure` | Input, configuration, persistence, HTTP, plumbing |
 
-You can create a native executable using:
+The dependency runs one way: `theory` knows nothing about anything else, and `llm` is a leaf.
+That is what lets the tutor teach with the model switched off, which is a design rule rather
+than a fallback.
 
-```shell script
-./mvnw package -Dnative
-```
+## Conventions
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+These are followed everywhere; match them rather than introducing a second style.
 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
+- Panache **active-record** entities: public fields, manual `UUID` ids, `@Transactional` on
+  writes. No repositories.
+- Services are `@ApplicationScoped` with `@Inject` on package-private fields.
+- Tests are plain JUnit 5 with prose `@DisplayName`s that state the behaviour, not the method
+  name. They run offline: no network, no model, no container.
+- The schema is one Flyway migration, `db/migration/V1__schema.sql`, with Hibernate set to
+  `validate`. The schema is not generated from the entities.
 
-You can then execute your native executable with: `./target/music-teacher-backend-1.0.0-SNAPSHOT-runner`
+## Knowledge subsystem
 
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
+Nothing downloads on its own. A source is declared in `knowledge-sources.yaml` — which is
+authoritative, so a source the manifest does not name cannot be fetched at all — and brought
+in from the Settings screen or `POST /api/knowledge/sources/{id}/ingest`.
 
-## Related Guides
+Licensing is enforced in code rather than documented and hoped for. `LicensePolicyService` is
+the single gate: a source whose licence is unknown can never become active, and everything
+retrievable is filtered through it on every route. Our code is MIT; retrieved material keeps
+its own licence, and the two are never conflated. See [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md).
 
-- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplified JPA/Hibernate data access layer with active record and repository patterns
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-- SmallRye Health ([guide](https://quarkus.io/guides/smallrye-health)): Monitor service health
-- Hibernate Validator ([guide](https://quarkus.io/guides/validation)): Bean validation using Hibernate Validator and Jakarta Validation annotations
-- Flyway ([guide](https://quarkus.io/guides/flyway)): Handle your database schema migrations
-- SmallRye OpenAPI ([guide](https://quarkus.io/guides/openapi-swaggerui)): Generate OpenAPI schemas and serve Swagger UI for REST API documentation
-- JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
+Deeper notes are in [`docs/knowledge/`](../docs/knowledge/).

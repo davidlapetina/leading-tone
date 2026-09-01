@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -140,7 +141,9 @@ class ScoreExcerptWriterTest {
 
         String abc = ScoreExcerptWriter.toAbc(triplet, null, "C", "2/4", 1, 1, null);
 
-        assertTrue(abc.contains("(3G,CG"), "expected a triplet group: " + abc);
+        // (p:q:r — three in the time of two, for three notes. Written out rather than left to
+        // ABC's bare (3, whose meaning for other tuplet sizes depends on the metre.
+        assertTrue(abc.contains("(3:2:3G,CG"), "expected a triplet group: " + abc);
         assertFalse(abc.contains("2/3"),
                 "a two-thirds length is arithmetically right and engraves as a dotted note");
     }
@@ -193,5 +196,174 @@ class ScoreExcerptWriterTest {
                 new ScoreExcerptWriter.Target(17, 0.0, "V7/V"));
 
         assertEquals(plain.replace("|]", ""), marked.replace("\"^V7/V\"", "").replace("|]", ""));
+    }
+
+    @Test
+    @DisplayName("every bar it writes is exactly as long as the metre says")
+    void barsAreAlwaysTheRightLength() {
+        // The invariant that matters most, and the one that is invisible in a passing test:
+        // a bar that is short or long engraves every bar after it in the wrong place. These
+        // are the shapes that broke it -- a voice falling silent, a note held over the
+        // barline, an ornament with no duration, and tuplets that are not thirds.
+        record Case(String name, String metre, List<NoteEvent> notes) {}
+        List<Case> cases = List.of(
+                new Case("a voice that stops early", "2/4",
+                        List.of(note(1, 0.0, 0.125, 1, 1, "C4"))),
+                new Case("a note held across the barline", "2/4",
+                        List.of(note(1, 0.25, 0.75, 1, 1, "C4"))),
+                new Case("a grace note, which has no duration", "3/4",
+                        List.of(note(1, 0.0, 0.0, 1, 1, "B4"),
+                                note(1, 0.0, 0.75, 1, 1, "C5"))),
+                new Case("a quintuplet", "2/4",
+                        List.of(note(1, 0.0, 0.025, 1, 1, "C4"),
+                                note(1, 0.025, 0.025, 1, 1, "D4"),
+                                note(1, 0.05, 0.025, 1, 1, "E4"),
+                                note(1, 0.075, 0.025, 1, 1, "F4"),
+                                note(1, 0.1, 0.025, 1, 1, "G4"),
+                                note(1, 0.125, 0.375, 1, 1, "C5"))),
+                new Case("a bar of rests", "4/4", List.of(note(1, 0.0, 1.0, 1, 1, "C4"))));
+
+        for (Case each : cases) {
+            String abc = ScoreExcerptWriter.toAbc(each.notes(), null, "C", each.metre(), 1, 1, null);
+            for (String bar : musicBarsOf(abc)) {
+                assertEquals(unitsPerBar(each.metre()), unitsIn(bar), 1e-6,
+                        each.name() + " should fill its bar exactly: " + abc);
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("a minor key is written with an upper-case tonic, or the key signature is dropped")
+    void capitalisesTheKey() {
+        List<NoteEvent> notes = List.of(note(1, 0.0, 1.0, 1, 1, "C4"));
+
+        assertTrue(ScoreExcerptWriter.toAbc(notes, null, "fm", "4/4", 1, 1, null).contains("K:Fm"),
+                "K:fm is a parse error, and the staff then has no accidentals at all");
+        assertTrue(ScoreExcerptWriter.toAbc(notes, null, "c#m", "4/4", 1, 1, null).contains("K:C#m"),
+                "an accidental in the tonic must survive capitalisation");
+        assertTrue(ScoreExcerptWriter.toAbc(notes, null, "eb", "4/4", 1, 1, null).contains("K:Ebm"),
+                "the corpora write minor in lower case, so the case carries the mode too");
+        assertTrue(ScoreExcerptWriter.toAbc(notes, null, "Bb", "4/4", 1, 1, null).contains("K:Bb"),
+                "a major key is already correct and must be left alone");
+    }
+
+    @Test
+    @DisplayName("a long-short triplet is one tuplet, not two notes with impossible lengths")
+    void groupsUnequalTuplets() {
+        // A quarter and an eighth in the time of two eighths: the members are not equal, and
+        // reading them as anything but a triplet writes a rhythm the composer did not.
+        double third = 1.0 / 12;
+        List<NoteEvent> longShort = List.of(
+                note(1, 0.0, 2 * third, 1, 1, "C4"),
+                note(1, 2 * third, third, 1, 1, "D4"));
+
+        String abc = ScoreExcerptWriter.toAbc(longShort, null, "C", "2/4", 1, 1, null);
+
+        assertTrue(abc.contains("(3:2:2"), "three in the time of two, for two notes: " + abc);
+        assertFalse(abc.contains("/12"), "a twelfth is not a note value: " + abc);
+    }
+
+    @Test
+    @DisplayName("a rhythm with no notation is left without a score rather than approximated")
+    void refusesToApproximateAnUnwritableRhythm() {
+        // A lone seventh of a whole note. As one of seven it would be a septuplet, but on its
+        // own no tuplet explains it and no sum of note values reaches it, and rounding it
+        // would print a rhythm nobody wrote.
+        List<NoteEvent> unwritable = List.of(note(1, 0.0, 1.0 / 7, 1, 1, "C4"));
+
+        assertEquals("", ScoreExcerptWriter.toAbc(unwritable, null, "C", "2/4", 1, 1, null),
+                "an excerpt that cannot be engraved honestly keeps its citation and loses its score");
+    }
+
+    private static double unitsPerBar(String metre) {
+        String[] parts = metre.split("/");
+        return Integer.parseInt(parts[0]) * 8.0 / Integer.parseInt(parts[1]);
+    }
+
+    /** The bars of the music lines, ignoring the ABC header and any trailing double bar. */
+    private static List<String> musicBarsOf(String abc) {
+        List<String> bars = new ArrayList<>();
+        for (String line : abc.split("\\n")) {
+            if (line.isBlank() || (line.length() > 1 && line.charAt(1) == ':') || line.startsWith("%")) {
+                continue;
+            }
+            for (String bar : line.replace("|]", "|").split("\\|")) {
+                if (!bar.isBlank()) {
+                    bars.add(bar);
+                }
+            }
+        }
+        return bars;
+    }
+
+    /**
+     * The length of one bar in eighth-note units, read back out of the ABC.
+     *
+     * <p>Deliberately a separate reading of the notation rather than a call back into the
+     * writer: a bug shared by both would cancel out and the test would pass regardless.
+     */
+    private static double unitsIn(String bar) {
+        double total = 0;
+        int i = 0;
+        int tupletLeft = 0;
+        double tupletRatio = 1;
+        while (i < bar.length()) {
+            char c = bar.charAt(i);
+            if (c == '"') {                       // a chord symbol or annotation
+                i = bar.indexOf('"', i + 1) + 1;
+            } else if (c == '{') {                // grace notes, which have no duration
+                i = bar.indexOf('}', i) + 1;
+            } else if (c == '(' && i + 1 < bar.length() && Character.isDigit(bar.charAt(i + 1))) {
+                java.util.regex.Matcher tuplet = java.util.regex.Pattern
+                        .compile("\\((\\d+):(\\d+):(\\d+)").matcher(bar.substring(i));
+                assertTrue(tuplet.lookingAt(), "tuplets are written in full (p:q:r): " + bar);
+                tupletRatio = Integer.parseInt(tuplet.group(2)) / (double) Integer.parseInt(tuplet.group(1));
+                tupletLeft = Integer.parseInt(tuplet.group(3));
+                i += tuplet.end();
+            } else if (c == '[' || Character.isLetter(c) || c == '^' || c == '_' || c == '=') {
+                int start = i;
+                if (c == '[') {                   // a chord sounds once, however many notes
+                    i = bar.indexOf(']', i) + 1;
+                } else {
+                    while (i < bar.length() && "^_=".indexOf(bar.charAt(i)) >= 0) {
+                        i++;
+                    }
+                    i++;                          // the note letter
+                }
+                while (i < bar.length() && ",'".indexOf(bar.charAt(i)) >= 0) {
+                    i++;                          // octave marks
+                }
+                int lengthAt = i;
+                while (i < bar.length() && (Character.isDigit(bar.charAt(i)) || bar.charAt(i) == '/')) {
+                    i++;
+                }
+                double units = lengthOf(bar.substring(lengthAt, i));
+                assertTrue(start < i, "made no progress reading: " + bar);
+                total += tupletLeft > 0 ? units * tupletRatio : units;
+                if (tupletLeft > 0) {
+                    tupletLeft--;
+                }
+            } else {
+                i++;                              // ties, spaces, anything without duration
+            }
+        }
+        return total;
+    }
+
+    /** An ABC length suffix: "" is one unit, "3" is three, "/4" is a quarter, "3/2" is one and a half. */
+    private static double lengthOf(String suffix) {
+        if (suffix.isEmpty()) {
+            return 1;
+        }
+        if (suffix.equals("/")) {
+            return 0.5;
+        }
+        int slash = suffix.indexOf('/');
+        if (slash < 0) {
+            return Integer.parseInt(suffix);
+        }
+        double numerator = slash == 0 ? 1 : Integer.parseInt(suffix.substring(0, slash));
+        String denominator = suffix.substring(slash + 1);
+        return numerator / (denominator.isEmpty() ? 2.0 : Integer.parseInt(denominator));
     }
 }
