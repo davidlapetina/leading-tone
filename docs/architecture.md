@@ -1,13 +1,12 @@
 # Architecture
 
-## The claim this application is trying to test
+## What it is for
 
-> Can an AI keep an accurate model of what I know about music theory, and continuously
-> teach me the right next thing, through conversation, notation and the piano, without
-> following a predetermined course?
+> Keep an accurate model of what someone knows about music theory, and continuously teach
+> them the right next thing — through conversation, notation and the piano — without
+> following a predetermined course.
 
-Everything here exists to make that testable. Anything that does not serve it is out of
-scope for V1.
+Everything here serves that. Anything that does not is not here.
 
 ## The loop
 
@@ -157,7 +156,7 @@ this stack can run beside another one. Override with `MUSIC_HTTP_PORT` and `MUSI
 
 ## One learner, one identity
 
-V1 teaches one person, and that person has a fixed primary key
+The application teaches one person, and that person has a fixed primary key
 (`Learner.SINGLETON_ID`). Find-or-create run concurrently produces two learners, after
 which the interface reads one and writes to the other; a React effect running twice on
 mount was enough to do it. The learner is seeded at startup and the request path only

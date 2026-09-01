@@ -183,8 +183,8 @@ That is why turning it off changes the wording and nothing else.
   you.
 
 More in [docs/](docs/): the [architecture](docs/architecture.md), the
-[learner model](docs/learner-model.md), the [teaching policy](docs/tutoring-policy.md), the
-[concept graph](docs/concept-model.md) and the [plan](docs/v2-plan.md).
+[learner model](docs/learner-model.md), the [teaching policy](docs/tutoring-policy.md) and
+the [concept graph](docs/concept-model.md).
 
 The knowledge layer — published sources, licensing, retrieval and the theory engine — has
 its own notes in [docs/knowledge/](docs/knowledge/README.md).
