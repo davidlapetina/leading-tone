@@ -5,7 +5,7 @@ is a test that walks the package and fails if a `jakarta.`, `io.quarkus`, `dev.l
 or `org.apache.lucene` import appears in it.
 
 That is worth enforcing because this is the part that marks a learner's answers. It should
-be reasonable about, testable and trustworthy on its own, with no opinion about HTTP,
+be easy to reason about, testable and trustworthy on its own, with no opinion about HTTP,
 persistence or language models. The CDI façade, `MusicTheoryService`, sits in a sibling
 package so the claim stays literally true.
 

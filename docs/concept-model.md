@@ -23,7 +23,8 @@ produced by `TeachingPolicy` from what the learner has actually demonstrated, an
 different for every learner.
 
 There is no `Course`, no `Chapter`, no `Lesson` and no `Exercise 1` anywhere in this
-codebase, and adding one would break the thing being tested.
+codebase. Adding one would replace the route through the graph with a fixed order, which is
+the one thing the application is built not to do.
 
 ## The graph
 

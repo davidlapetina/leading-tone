@@ -132,7 +132,7 @@ and
 
 ## Data
 
-Flyway owns the schema (`V1__initial_schema.sql`); Hibernate is set to `validate`, so a
+Flyway owns the schema (`V1__schema.sql`); Hibernate is set to `validate`, so a
 mapping that drifts from the schema fails at boot rather than at runtime.
 
 `evidence` is append-only. Every mastery value in the application can be traced back to
@@ -151,10 +151,15 @@ narrator is answering and why.
 Nothing about a model failure touches the learner model. Mastery only ever moves through
 `EvidenceService`, from a deterministic verdict.
 
-## Ports
+## Ports and state
 
-The backend listens on **8088** and Postgres on **5433**, both off their usual defaults so
-this stack can run beside another one. Override with `MUSIC_HTTP_PORT` and `MUSIC_DB_PORT`.
+The backend listens on **8088**, off the usual default so this stack can run beside another
+one. Override with `MUSIC_HTTP_PORT`.
+
+There is no database port, because there is no database process: H2 runs inside the same JVM
+and keeps everything in one directory, `MUSIC_DATA_DIR` (default `./data`). Delete that
+directory and you have a clean install; copy it and you have moved the learner, the settings
+and every ingested source somewhere else.
 
 ## One learner, one identity
 
