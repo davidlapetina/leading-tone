@@ -10,7 +10,7 @@ working on the backend.
 
 ```shell
 ./mvnw quarkus:dev          # live reload, http://localhost:8088
-./mvnw test                 # 359 tests, no network, no model, no Docker
+./mvnw test                 # 360 tests, no network, no model, no Docker
 ```
 
 `make backend` from the repo root does the same thing. The port is `MUSIC_HTTP_PORT`,

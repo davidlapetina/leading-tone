@@ -141,7 +141,7 @@ make test-e2e    # browser, against a running backend
 make check       # all of the above, plus lint, typecheck and the jar
 ```
 
-**390 tests, and none of them need Docker, a database, a network or a language model.** The
+**391 tests, and none of them need Docker, a database, a network or a language model.** The
 backend runs against an in-memory database; ingestion is tested against recorded copies of
 the real publisher responses; the browser tests switch the model off so they test the tutor
 rather than a model's wording.

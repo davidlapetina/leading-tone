@@ -53,13 +53,25 @@ public final class AbcNotation {
     }
 
     private static String header(String title, Key key, String noteLength) {
+        return header(title, key, noteLength, "4/4");
+    }
+
+    /**
+     * @param metre {@code none} for something that has no metre, such as a scale. A scale of
+     *     six notes barred every four leaves a bar three beats long, which is not a bar of
+     *     anything; without a metre there is no bar to be short.
+     */
+    private static String header(String title, Key key, String noteLength, String metre) {
+        // No T: line. Wherever notation is shown it already has a label -- a lesson caption, an
+        // exercise prompt, a citation -- and a title that names what it draws is worse than
+        // redundant when the exercise is "which scale is this": it prints the answer above the
+        // staff. The title is kept as a parameter because it reads as the caller's intent.
         return """
                 X:1
-                T:%s
-                M:4/4
+                M:%s
                 L:%s
                 K:%s
-                """.formatted(title, noteLength, keyField(key));
+                """.formatted(metre, noteLength, keyField(key));
     }
 
     /** A single chord as an ABC chord group, labelled with its lead-sheet symbol. */
@@ -92,7 +104,7 @@ public final class AbcNotation {
             }
             body.append(pitch(notes.get(i)));
         }
-        return header(scale.name(), key, "1/4") + body + "|]\n";
+        return header(scale.name(), key, "1/4", "none") + body + "|]\n";
     }
 
     /** A chord progression, one chord per bar, labelled with symbols above the staff. */

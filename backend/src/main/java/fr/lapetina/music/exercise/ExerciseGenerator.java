@@ -727,10 +727,12 @@ public class ExerciseGenerator {
                     ExpectedAnswer.midiChord(chord.symbol(), chord.describe()), null, key.name(), difficulty);
         }
         return switch (shape.kind()) {
+            // No notation: the question is which chord the numeral means, and drawing that
+            // chord answers it. Recall is the point here, not reading it off a staff.
             case BUILD -> spec("roman-numeral", ExerciseType.ROMAN_NUMERAL, shape, EvidenceType.TEXT_RECALL,
                     "In %s, which chord is %s?".formatted(key.name(), analysis.romanNumeralSymbol()),
                     ExpectedAnswer.text(chord.symbol(), chord.symbol(), chord.root().name()),
-                    AbcNotation.chord(chord, AbcNotation.CHORD_OCTAVE, key), key.name(), difficulty);
+                    null, key.name(), difficulty);
             case ANALYSE -> {
                 Progression progression = progression(key, pick(List.of(
                         List.of(1, 4, 5, 1), List.of(1, 6, 4, 5), List.of(1, 2, 5, 1), List.of(6, 4, 1, 5))));

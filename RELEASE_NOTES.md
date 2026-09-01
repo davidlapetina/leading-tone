@@ -127,7 +127,7 @@ library are inside it.
 From source:
 
 ```bash
-make test     # 390 tests: no Docker, no database, no network, no model
+make test     # 391 tests: no Docker, no database, no network, no model
 make run
 ```
 
@@ -137,6 +137,15 @@ make run
 
 Found by running the packaged jar and looking at what it drew, not by running tests.
 
+
+- **Some exercises printed their own answer above the staff.** "Which minor scale is this:
+  B C# D E F# G A#?" was drawn under a staff titled "B harmonic minor", and "In C major,
+  which chord is V?" drew the chord with "G" written over it. Both marked correct, both
+  taught nothing, and both fed the learner model evidence that was never earned. Notation
+  carries no title at all now, and an exercise that would have to draw its answer draws
+  nothing.
+- **A scale was written in 4/4 and barred every four notes**, so a six-note blues scale
+  ended in a bar three beats long. A scale has no metre, and is now written without one.
 
 - **An unknown knowledge source answered 400 where an unknown concept answered 404**, so
   the same mistake looked like two different kinds of failure depending on what you asked for.
