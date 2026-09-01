@@ -46,7 +46,7 @@ export function CorpusExample({ conceptId, limit = 2 }: { conceptId: string; lim
   )
 }
 
-function ExampleCard({ example }: { example: MusicalExample }) {
+export function ExampleCard({ example }: { example: MusicalExample }) {
   const verified = example.origin === 'VERIFIED_CORPUS'
   return (
     <figure className="example-card" data-origin={example.origin}>

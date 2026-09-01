@@ -51,6 +51,13 @@ The third is why they are kept apart all the way into the prompt rather than mer
 one context. A model handed all three undifferentiated will treat a plausible sentence as
 equal to a measure number.
 
+The same three kinds answer a question asked directly, through `POST /api/ask`. There are
+two differences. A teaching turn retrieves only when the policy decided the learner needed
+prose; a question typed into a box **is** the request, so retrieval always runs. And the
+three kinds are not only kept apart in the prompt but shown apart in the answer, so a reader
+can see which part of it was computed, which was quoted and from where, and which bars are
+real. An answer you can check is worth more than one you have to trust.
+
 ## Trust order in the prompt
 
 Computed facts, then verified examples, then quoted prose — in that order, labelled, with

@@ -34,6 +34,11 @@ jazz musician meets it.
 
 ![The jazz path](docs/images/jazz.png)
 
+Ask it something directly, and see what the answer was built from — computed here, quoted
+from a source, or found in a score.
+
+![Asking a question](docs/images/ask.png)
+
 Sources are brought in from Settings. Nothing downloads until you ask, and each one shows
 its licence where you decide.
 
@@ -101,6 +106,11 @@ before anything is asked: what it is, the facts, and worked examples in notation
 and it tells you if something needs groundwork first. Answer by typing or at the piano. Ask
 it anything at any time; asking is never marked wrong.
 
+**Ask** — a question box, for the question you have now rather than the one the tutor
+chose. The answer comes back with the material it was built from: what the theory engine
+computed, the passages quoted and who published them, and any real bars that were found. If
+nothing was found it says so. It answers with the model switched off too, more plainly.
+
 **Progress** — what it believes you know, and the evidence behind every bit of it. Naming a
 chord counts for less than playing one, which counts for less than explaining it. Nothing
 here can be raised by guessing.
@@ -141,7 +151,7 @@ make test-e2e    # browser, against a running backend
 make check       # all of the above, plus lint, typecheck and the jar
 ```
 
-**400 tests, and none of them need Docker, a database, a network or a language model.** The
+**405 tests, and none of them need Docker, a database, a network or a language model.** The
 backend runs against an in-memory database; ingestion is tested against recorded copies of
 the real publisher responses; the browser tests switch the model off so they test the tutor
 rather than a model's wording.

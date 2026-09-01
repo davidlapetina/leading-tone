@@ -35,7 +35,12 @@ public final class HtmlText {
 
     /** Plain text, with block structure preserved as blank lines and list items as "- ". */
     public static String toText(String html) {
-        return collapse(unLatex(decode(strip(html))));
+        return tidyRowEnds(collapse(unLatex(decode(strip(html)))));
+    }
+
+    /** The cell separator is written after every cell, including the last one in its row. */
+    private static String tidyRowEnds(String text) {
+        return text.replaceAll("\\s*\u00b7\\s*(\n|$)", "$1");
     }
 
     private static String strip(String html) {
@@ -44,10 +49,17 @@ public final class HtmlText {
         }
         StringBuilder out = new StringBuilder(html.length());
         int i = 0;
+        // A table is one thing per row, not one thing per cell. Cells hold paragraphs, and a
+        // paragraph break inside a cell turns a row of eight columns into eight orphaned
+        // lines -- which is how a table of examples came to be quoted as if it were prose.
+        int insideTable = 0;
         while (i < html.length()) {
             char c = html.charAt(i);
             if (c != '<') {
-                out.append(c);
+                // The published HTML is pretty-printed, so there are real newlines between
+                // cells. Copied through, they break a row apart again however the tags are
+                // spaced, which is what left a table reading one word per line.
+                out.append(insideTable > 0 && (c == '\n' || c == '\r') ? ' ' : c);
                 i++;
                 continue;
             }
@@ -63,7 +75,11 @@ public final class HtmlText {
                 i = end;
                 continue;
             }
-            out.append(spacingFor(name, tag));
+            if (name.equals("table")) {
+                insideTable += tag.startsWith("/") ? -1 : 1;
+                insideTable = Math.max(0, insideTable);
+            }
+            out.append(insideTable > 0 ? spacingInTable(name, tag) : spacingFor(name, tag));
             i = close + 1;
         }
         return out.toString();
@@ -106,6 +122,19 @@ public final class HtmlText {
                     "ul", "ol", "table", "blockquote", "section" -> "\n\n";
             case "li" -> tag.startsWith("/") ? "\n" : "\n- ";
             case "td", "th" -> " ";
+            case "img" -> altText(tag);
+            default -> "";
+        };
+    }
+
+    /** Inside a table: a row is a line, a cell is a column, and nothing else breaks either. */
+    private static String spacingInTable(String name, String tag) {
+        return switch (name) {
+            case "table" -> "\n\n";
+            case "tr" -> "\n";
+            case "td", "th" -> tag.startsWith("/") ? " \u00b7 " : "";
+            case "p", "div" -> " ";
+            case "br" -> " ";
             case "img" -> altText(tag);
             default -> "";
         };

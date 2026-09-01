@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import {
+  askAnswer,
   availableModels,
   evidenceRow,
   exampleSet,
@@ -12,6 +13,7 @@ import {
   teachingDecision,
   tutorStatus,
   tutorTurn,
+  type AskAnswer,
   type EvidenceRow,
   type ExampleSet,
   type IngestReport,
@@ -121,6 +123,13 @@ export const api = {
   // never something that happens on its own at startup.
   ingestSource: (id: string): Promise<IngestReport> =>
     request(`/knowledge/sources/${id}/ingest`, ingestReport, { method: 'POST' }),
+
+  // A question asked directly, answered with the material it was answered from.
+  ask: (question: string, conversationId?: string): Promise<AskAnswer> =>
+    request('/ask', askAnswer, {
+      method: 'POST',
+      body: JSON.stringify({ question, conversationId }),
+    }),
 
   // Real examples from annotated scores. An empty list is a real answer, and the UI says so
   // rather than hiding it: nothing is generated to fill the gap.

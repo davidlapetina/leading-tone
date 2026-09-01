@@ -264,5 +264,43 @@ export const exampleSet = z.object({
   note: z.string().nullable(),
 })
 
+export const computedFact = z.object({
+  operation: z.string(),
+  statement: z.string(),
+  answer: z.string().nullable(),
+})
+
+export const passage = z.object({
+  chunkId: z.string(),
+  citation: z.string(),
+  attribution: z.string().nullable(),
+  license: z.string().nullable(),
+  url: z.string().nullable(),
+  excerpt: z.string(),
+})
+
+/** An answer, and everything it was built from, so a reader can check it rather than trust it. */
+export const askAnswer = z.object({
+  question: z.string(),
+  answer: z.string(),
+  conversationId: z.string(),
+  answeredWithoutAModel: z.boolean(),
+  computed: z.array(computedFact),
+  passages: z.array(passage),
+  examples: z.array(musicalExample),
+  sources: z.array(z.object({
+    sourceId: z.string().nullable().optional(),
+    name: z.string().nullable().optional(),
+    citation: z.string().nullable().optional(),
+    licenseName: z.string().nullable().optional(),
+    licenseUrl: z.string().nullable().optional(),
+    url: z.string().nullable().optional(),
+  }).passthrough()),
+  corpusSearchedAndEmpty: z.boolean(),
+})
+
+export type ComputedFact = z.infer<typeof computedFact>
+export type Passage = z.infer<typeof passage>
+export type AskAnswer = z.infer<typeof askAnswer>
 export type MusicalExample = z.infer<typeof musicalExample>
 export type ExampleSet = z.infer<typeof exampleSet>

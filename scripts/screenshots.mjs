@@ -65,8 +65,16 @@ await page.waitForTimeout(400)
 await shot('practise')
 await page.setViewportSize({ width: 1280, height: 980 })
 
+// A question asked directly, with the material the answer was built from.
+await page.locator('.nav-item', { hasText: 'Ask' }).click()
+await page.waitForTimeout(600)
+await page.getByRole('button', { name: 'What is V7/V in C major?' }).click()
+await page.waitForSelector('.ask-entry', { timeout: 180000 })
+await page.waitForTimeout(2500)
+await shot('ask')
+
 // Where sources are brought in, each showing its licence.
-await page.getByRole('button', { name: /settings/i }).first().click()
+await page.locator('.nav-item', { hasText: 'Settings' }).click()
 await page.waitForTimeout(1200)
 const sources = page.locator('.panel-card').filter({ hasText: 'Published sources' })
 if (await sources.count()) {

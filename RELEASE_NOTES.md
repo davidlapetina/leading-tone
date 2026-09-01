@@ -127,9 +127,24 @@ library are inside it.
 From source:
 
 ```bash
-make test     # 400 tests: no Docker, no database, no network, no model
+make test     # 405 tests: no Docker, no database, no network, no model
 make run
 ```
+
+---
+
+## Ask
+
+A question box, for the question you have now rather than the one the tutor chose.
+
+The answer comes back with the material it was built from, shown separately: what the theory
+engine computed, the passages quoted with their publisher and licence, and any real bars
+found in the annotated scores. When nothing was found it says so. It answers with the model
+switched off as well — computed facts first, then the top passage quoted — because an
+application that only answers questions when Ollama is running would fail exactly when
+somebody is trying it for the first time.
+
+![Asking a question](docs/images/ask.png)
 
 ---
 
@@ -137,6 +152,18 @@ make run
 
 Found by running the packaged jar and looking at what it drew, not by running tests.
 
+
+- **A table of examples was quoted as if it were prose.** Every cell of an eight-column
+  table arrived on its own line, so a row of composers and bar numbers read as a column of
+  orphaned words. Cells are wrapped in paragraphs and the published HTML is pretty-printed;
+  both were being treated as paragraph breaks inside a table.
+- **A query for a common harmony returned only lead sheets.** The jazz treebank annotates
+  chords over lead sheets and has no note tables, and it sorts early alphabetically, so
+  "V7/V" came back with nothing that could be engraved while Dvořák and Corelli sat behind
+  it. The annotated scores are searched first now, and the examples are spread across
+  different works rather than three bars of one movement.
+- **The lower staff took its clef from the average pitch**, which reads a left hand spanning
+  two octaves as a high part and puts its lower notes four ledger lines down.
 
 - **The tutor could open by agreeing with an answer that was wrong.** The model is told the
   verdict and asked to acknowledge it, and usually does; when it did not, a learner read

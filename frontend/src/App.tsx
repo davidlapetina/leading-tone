@@ -4,6 +4,7 @@ import { api } from './api/client'
 import { Sidebar, type View } from './components/Sidebar'
 import { useMidi } from './midi/useMidi'
 import { useTutorStore } from './state/tutorStore'
+import { AskView } from './views/AskView'
 import { LearnView } from './views/LearnView'
 import { LessonView } from './views/LessonView'
 import { PractiseView } from './views/PractiseView'
@@ -89,9 +90,11 @@ export default function App() {
                 ? 'Topics'
                 : view === 'practise'
                   ? 'With the tutor'
-                  : view === 'progress'
-                    ? 'Your progress'
-                    : 'Settings'}
+                  : view === 'ask'
+                    ? 'Ask anything'
+                    : view === 'progress'
+                      ? 'Your progress'
+                      : 'Settings'}
           </span>
           <div className="topbar-right">
             {status && (
@@ -125,6 +128,7 @@ export default function App() {
               onOpen={openLesson}
             />
           )}
+          {view === 'ask' && <AskView />}
           {view === 'practise' && (
             <PractiseView
               entries={entries}

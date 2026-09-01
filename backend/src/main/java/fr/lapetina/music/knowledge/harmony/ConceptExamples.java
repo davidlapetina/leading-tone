@@ -3,7 +3,9 @@ package fr.lapetina.music.knowledge.harmony;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 import org.jboss.logging.Logger;
 
@@ -117,29 +119,96 @@ public class ConceptExamples {
      * V/V" and being shown whatever illustrates the concept currently being taught is not
      * an answer to the question, and looking like one is worse than admitting the gap.
      */
+    /**
+     * How many matches to look at before choosing. More than are returned, because the ones
+     * that can be engraved are worth finding and they are not necessarily the first.
+     */
+    private static final int CANDIDATES_PER_RESULT = 12;
+    private static final int MOST_CANDIDATES = 60;
+
     public List<MusicalExample> forQuery(String romanNumeral, String cadence, String composer, int limit) {
+        int wanted = Math.min(limit * CANDIDATES_PER_RESULT, MOST_CANDIDATES);
         List<MusicalExample> found = new ArrayList<>();
         if (cadence != null) {
-            found.addAll(harmonySearch.findCadences(cadence, composer, limit));
+            found.addAll(harmonySearch.findCadences(cadence, composer, wanted));
         } else if (romanNumeral != null) {
-            found.addAll(harmonySearch.findExamples(romanNumeral, composer, null, limit));
-            // "V/V" and "V7/V" are the same request to a learner, and the corpus writes both.
-            // These are the same harmony, not a loosening of the question.
-            for (String variant : variantsOf(romanNumeral)) {
-                if (found.size() >= limit) {
+            // The annotated scores first, then the lead sheets. Both are real, but only the
+            // scores come with bars, and the treebank is large enough and sorts early enough
+            // that searching everything at once returned nothing else -- a query for V7/V
+            // answered entirely with lead sheets while engraved Beethoven sat behind them.
+            for (String corpus : List.of(SCORE_CORPORA, JAZZ_CORPUS)) {
+                if (found.size() >= wanted) {
                     break;
                 }
-                found.addAll(harmonySearch.findExamples(variant, composer, null, limit - found.size()));
+                found.addAll(harmonySearch.findExamples(
+                        romanNumeral, composer, null, corpus, wanted - found.size()));
+                // "V/V" and "V7/V" are the same request to a learner, and the corpus writes
+                // both. These are the same harmony, not a loosening of the question.
+                for (String variant : variantsOf(romanNumeral)) {
+                    if (found.size() >= wanted) {
+                        break;
+                    }
+                    found.addAll(harmonySearch.findExamples(
+                            variant, composer, null, corpus, wanted - found.size()));
+                }
             }
         }
         // Never widen further. If the harmony they named is not in the corpora, the answer is
         // that it is not there -- not the nearest thing by the same composer, which reads as
         // an answer and is not one.
-        return found.stream()
+        return preferringTheOnesWeCanDraw(found.stream()
                 .filter(distinctBy(MusicalExample::sourceReference))
-                .limit(limit)
-                .map(this::engrave)
-                .toList();
+                .toList(), limit);
+    }
+
+    /**
+     * The best {@code limit} of these, with the ones that come with bars first.
+     *
+     * <p>Not every corpus has note tables: the jazz treebank annotates chords over lead
+     * sheets, so its examples are real but cannot be engraved. They also sort first
+     * alphabetically, which meant a query for V7/V returned nothing but lead sheets while
+     * engraved Beethoven sat behind them. Showing the music is the point of the feature, so
+     * an example that can be drawn wins; one that cannot still beats an empty answer.
+     */
+    private List<MusicalExample> preferringTheOnesWeCanDraw(List<MusicalExample> candidates, int limit) {
+        List<MusicalExample> drawn = new ArrayList<>();
+        List<MusicalExample> sameWorkAgain = new ArrayList<>();
+        List<MusicalExample> undrawn = new ArrayList<>();
+        Set<String> worksShown = new LinkedHashSet<>();
+
+        for (MusicalExample candidate : candidates) {
+            if (drawn.size() >= limit) {
+                break;      // enough to show; no need to read any more note tables
+            }
+            MusicalExample engraved = engrave(candidate);
+            if (engraved.abc() == null || engraved.abc().isBlank()) {
+                undrawn.add(engraved);
+            } else if (worksShown.add(workOf(engraved))) {
+                drawn.add(engraved);
+            } else {
+                // A second bar of a piece already shown. Kept, but behind anything new:
+                // three bars of one piece teach less than the same harmony in three hands.
+                sameWorkAgain.add(engraved);
+            }
+        }
+        for (List<MusicalExample> rest : List.of(sameWorkAgain, undrawn)) {
+            for (MusicalExample example : rest) {
+                if (drawn.size() >= limit) {
+                    break;
+                }
+                drawn.add(example);
+            }
+        }
+        return List.copyOf(drawn);
+    }
+
+    private static String workOf(MusicalExample example) {
+        String reference = example.sourceReference();
+        if (reference == null) {
+            return String.valueOf(example.work());
+        }
+        int comma = reference.indexOf(',');
+        return comma < 0 ? reference : reference.substring(0, comma);
     }
 
     /** The same harmony written the other way. Not a different harmony. */

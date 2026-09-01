@@ -29,7 +29,7 @@ npm run lint                # oxlint
 | Path | What lives there |
 |---|---|
 | `api/` | The HTTP client and the **Zod schemas** every response is parsed through |
-| `views/` | One file per screen: tutor, learn, lesson, settings |
+| `views/` | One file per screen: tutor, learn, lesson, ask, settings |
 | `components/` | `Score` (engraved notation), `CorpusExample`, `VirtualKeyboard`, `Conversation`, and the rest |
 | `state/` | Zustand stores for session and UI state |
 | `midi/` | Web MIDI input, and the fallback when no device is attached |

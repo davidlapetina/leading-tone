@@ -1,10 +1,11 @@
 import { TrebleClef } from './TrebleClef'
 
-export type View = 'learn' | 'practise' | 'progress' | 'settings'
+export type View = 'learn' | 'practise' | 'ask' | 'progress' | 'settings'
 
 const ITEMS: { id: View; label: string; glyph: string; hint: string }[] = [
   { id: 'learn', label: 'Learn', glyph: '◳', hint: 'Read a topic before you are asked about it' },
   { id: 'practise', label: 'Practise', glyph: '◑', hint: 'Work with the tutor' },
+  { id: 'ask', label: 'Ask', glyph: '◇', hint: 'A question, answered from the sources' },
   { id: 'progress', label: 'Progress', glyph: '◔', hint: 'What the tutor believes you know' },
   { id: 'settings', label: 'Settings', glyph: '⚙', hint: 'The model, and how it is tuned' },
 ]

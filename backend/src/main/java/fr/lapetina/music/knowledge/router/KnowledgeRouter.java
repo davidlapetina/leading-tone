@@ -77,6 +77,42 @@ public class KnowledgeRouter {
         }
     }
 
+    /**
+     * Everything the application can find about a question somebody asked directly.
+     *
+     * <p>Unlike a teaching turn, this always searches. A turn retrieves only when the policy
+     * decided the learner needed prose; a question typed into a box is the request, so the
+     * only reason to come back with nothing is that there is nothing.
+     */
+    public TutorKnowledge forQuestion(String question) {
+        try {
+            Set<RetrievalIntent> intents = intentClassifier.classify(question);
+
+            List<TheoryAnswer> computed = new ArrayList<>();
+            TheoryQuestion.answer(question).ifPresent(computed::add);
+
+            if (!settingsService.current().knowledgeEnabled) {
+                return new TutorKnowledge(intents, computed, List.of(), List.of(), List.of(), false);
+            }
+
+            ExampleRequest request = ExampleRequest.from(question);
+            List<MusicalExample> examples = request.namesAHarmony()
+                    ? conceptExamples.forQuery(request.romanNumeral(), request.cadence(),
+                            request.composer(), exampleLimit)
+                    : List.of();
+            boolean corpusEmpty = request.namesAHarmony() && examples.isEmpty();
+
+            List<RetrievedChunk> retrieved =
+                    retriever.retrieve(new RetrievalQuery(question, null, topK)).chunks();
+
+            return new TutorKnowledge(intents, computed, retrieved, examples,
+                    creditsFor(retrieved, examples), corpusEmpty);
+        } catch (RuntimeException e) {
+            LOG.warnf("Could not gather anything for the question: %s", e.toString());
+            return TutorKnowledge.EMPTY;
+        }
+    }
+
     private TutorKnowledge route(String conceptId, String conceptName, String conceptDescription,
                                  String learnerMessage) {
         Set<RetrievalIntent> intents = intentClassifier.classify(learnerMessage);

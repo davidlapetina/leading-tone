@@ -48,4 +48,24 @@ class HtmlTextTest {
         assertTrue(HtmlText.toText("<img alt=\"a cadence\" src=\"x.png\">").contains("[figure: a cadence]"));
         assertEquals("", HtmlText.toText("<img src=\"x.png\">"));
     }
+
+    @Test
+    @DisplayName("a table row reads as a row, not as a column of orphaned words")
+    void keepsTableRowsTogether() {
+        // Pressbooks wraps every cell in a paragraph. Treating that paragraph as a paragraph
+        // turned an eight-column row of examples into eight separate lines, which retrieved
+        // badly and read as nonsense when quoted back.
+        String html = """
+                <table><thead><tr><th><p>Composer</p></th><th><p>Measure</p></th></tr></thead>
+                <tbody><tr><td><p>Chaminade</p></td><td><p>23</p></td></tr>
+                <tr><td><p>Burleigh</p></td><td><p>78</p></td></tr></tbody></table>
+                """;
+
+        String text = HtmlText.toText(html);
+
+        assertTrue(text.contains("Chaminade \u00b7 23"), "a row on one line: " + text);
+        assertTrue(text.contains("Burleigh \u00b7 78"), text);
+        assertFalse(text.contains("Chaminade\n\n23"), "a cell is not a paragraph: " + text);
+        assertFalse(text.contains("23 \u00b7\n"), "no separator dangling at the end of a row: " + text);
+    }
 }

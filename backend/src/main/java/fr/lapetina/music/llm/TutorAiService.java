@@ -25,4 +25,8 @@ public interface TutorAiService {
     @UserMessage(TutorPrompts.USER)
     String teach(@MemoryId UUID sessionId, String learnerState, String instruction, String exerciseBlock,
                  String learnerMessage);
+
+    @SystemMessage(TutorPrompts.SYSTEM_ASK)
+    @UserMessage(TutorPrompts.ASK_USER)
+    String answer(@MemoryId UUID conversationId, String question, String material);
 }

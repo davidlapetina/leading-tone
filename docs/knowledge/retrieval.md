@@ -68,3 +68,17 @@ body so a passage cannot close its own fence and start speaking as the system.
 Fencing is mitigation, not proof. The protection that actually holds is structural and
 retrieval does not weaken it: **the model cannot write mastery, choose the concept, set the
 difficulty or mark an answer.** Retrieval adds no new write path.
+
+## Asking directly
+
+`POST /api/ask` runs the same retrieval, with the question as the whole query rather than a
+concept name steered by the learner's words. It returns the passages themselves — citation,
+licence, link and the quoted text — alongside the answer, because the material is the reason
+to believe the answer. With no model, the answer is written from that material instead:
+computed facts first, then the top passage quoted. Plainer, and still attributed.
+
+Corpus examples asked for this way are chosen with one extra preference: an example that can
+be engraved beats one that cannot. Not every corpus has note tables — the jazz treebank
+annotates chords over lead sheets — and those sort early alphabetically, so a query for V7/V
+came back as lead sheets with engraved Beethoven behind them. Showing the music is the point,
+so the annotated scores are searched first and the results spread across different works.

@@ -10,7 +10,7 @@ working on the backend.
 
 ```shell
 ./mvnw quarkus:dev          # live reload, http://localhost:8088
-./mvnw test                 # 369 tests, no network, no model, no Docker
+./mvnw test                 # 374 tests, no network, no model, no Docker
 ```
 
 `make backend` from the repo root does the same thing. The port is `MUSIC_HTTP_PORT`,
@@ -82,5 +82,10 @@ Licensing is enforced in code rather than documented and hoped for. `LicensePoli
 the single gate: a source whose licence is unknown can never become active, and everything
 retrievable is filtered through it on every route. Our code is MIT; retrieved material keeps
 its own licence, and the two are never conflated. See [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md).
+
+`POST /api/ask` answers a question asked directly, returning the answer together with what
+it was built from — computed facts, quoted passages with their licences, and engraved bars.
+It is the same routing the tutor uses, with one difference: a question typed into a box is
+itself the request, so retrieval always runs.
 
 Deeper notes are in [`docs/knowledge/`](../docs/knowledge/).
