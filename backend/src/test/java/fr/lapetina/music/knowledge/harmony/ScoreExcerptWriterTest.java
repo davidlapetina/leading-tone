@@ -108,6 +108,55 @@ class ScoreExcerptWriterTest {
     }
 
     @Test
+    @DisplayName("a bar's rest is as long as the bar, whatever the metre")
+    void restsFillExactlyTheBar() {
+        assertEquals(8, ScoreExcerptWriter.unitsPerBar("4/4"));
+        assertEquals(4, ScoreExcerptWriter.unitsPerBar("2/4"), "a 2/4 bar is four eighths");
+        assertEquals(6, ScoreExcerptWriter.unitsPerBar("3/4"));
+        assertEquals(6, ScoreExcerptWriter.unitsPerBar("6/8"));
+        assertEquals(8, ScoreExcerptWriter.unitsPerBar(null), "a sane default, not a guess");
+        assertEquals(8, ScoreExcerptWriter.unitsPerBar("nonsense"));
+
+        // A voice silent through the second bar of a 2/4 excerpt.
+        List<NoteEvent> onlyInBarOne = List.of(
+                new NoteEvent(1, 0.0, 0.25, 1, 1, "C4", false, "2/4"),
+                new NoteEvent(1, 0.25, 0.25, 1, 1, "D4", false, "2/4"));
+
+        String abc = ScoreExcerptWriter.toAbc(onlyInBarOne, null, "C", null, 1, 2, null);
+
+        assertTrue(abc.contains("z4"), "an empty 2/4 bar rests for four eighths: " + abc);
+        assertFalse(abc.contains("z8"), "z8 would be twice the bar");
+    }
+
+    @Test
+    @DisplayName("three notes in the time of two are engraved as a triplet, not as dotted notes")
+    void groupsTriplets() {
+        // Eighth-note triplets: three notes of a twelfth of a whole note each.
+        double twelfth = 1.0 / 12;
+        List<NoteEvent> triplet = List.of(
+                note(1, 0.0, twelfth, 1, 1, "G3"),
+                note(1, twelfth, twelfth, 1, 1, "C4"),
+                note(1, 2 * twelfth, twelfth, 1, 1, "G4"));
+
+        String abc = ScoreExcerptWriter.toAbc(triplet, null, "C", "2/4", 1, 1, null);
+
+        assertTrue(abc.contains("(3G,CG"), "expected a triplet group: " + abc);
+        assertFalse(abc.contains("2/3"),
+                "a two-thirds length is arithmetically right and engraves as a dotted note");
+    }
+
+    @Test
+    @DisplayName("ordinary rhythms are left alone")
+    void doesNotInventTriplets() {
+        List<NoteEvent> plain = List.of(
+                note(1, 0.0, 0.125, 1, 1, "C4"),
+                note(1, 0.125, 0.125, 1, 1, "D4"),
+                note(1, 0.25, 0.125, 1, 1, "E4"));
+
+        assertFalse(ScoreExcerptWriter.toAbc(plain, null, "C", "2/4", 1, 1, null).contains("(3"));
+    }
+
+    @Test
     void producesNothingFromNothing() {
         assertEquals("", ScoreExcerptWriter.toAbc(List.of(), "x", "C", "4/4", 1, 1, null));
     }

@@ -45,7 +45,8 @@ public final class ScoreExcerptWriter {
         }
         // The metre comes from the notes themselves. Assuming 4/4 silently misbars a piece
         // in 3/4 or 6/8, which makes an excerpt look wrong to anybody who can read it.
-        abc.append("M:").append(metreOf(notes, timeSignature)).append('\n');
+        String metre = metreOf(notes, timeSignature);
+        abc.append("M:").append(metre).append('\n');
         abc.append("L:1/8\n");
         if (voices.size() > 1) {
             // Voices are bracketed by the staff they belong to, so a piano is engraved on
@@ -60,7 +61,7 @@ public final class ScoreExcerptWriter {
             abc.append("V:").append(voice.getKey())
                     .append(clefs.get(voice.getKey().substring(0, voice.getKey().indexOf('V'))))
                     .append('\n');
-            abc.append(writeVoice(voice.getValue(), fromMeasure, toMeasure,
+            abc.append(writeVoice(voice.getValue(), fromMeasure, toMeasure, metre,
                     firstVoice(voices, voice.getKey()) ? target : null)).append("|]\n");
         }
         return abc.toString();
@@ -81,6 +82,22 @@ public final class ScoreExcerptWriter {
                     .append(staff.size() == 1 ? staff.get(0) : "(" + String.join(" ", staff) + ")");
         }
         return grouping.toString();
+    }
+
+    /** How many eighth-note units a bar of this metre holds. */
+    static int unitsPerBar(String metre) {
+        if (metre == null || !metre.contains("/")) {
+            return 8;
+        }
+        try {
+            int slash = metre.indexOf('/');
+            int beats = Integer.parseInt(metre.substring(0, slash).trim());
+            int unit = Integer.parseInt(metre.substring(slash + 1).trim());
+            int units = beats * 8 / unit;
+            return units > 0 ? units : 8;
+        } catch (NumberFormatException notAMetre) {
+            return 8;
+        }
     }
 
     /** What is being pointed at, and what to call it. */
@@ -133,7 +150,8 @@ public final class ScoreExcerptWriter {
         return average < 58 ? " clef=bass" : " clef=treble";
     }
 
-    private static String writeVoice(List<NoteEvent> notes, int fromMeasure, int toMeasure, Target target) {
+    private static String writeVoice(List<NoteEvent> notes, int fromMeasure, int toMeasure,
+                                     String metre, Target target) {
         StringBuilder body = new StringBuilder();
         for (int measure = fromMeasure; measure <= toMeasure; measure++) {
             if (target != null && target.measure() == measure && target.label() != null) {
@@ -142,7 +160,7 @@ public final class ScoreExcerptWriter {
                 // the one being taught. The caret means "this text, above the staff".
                 body.append('"').append('^').append(target.label().replace("\"", "")).append('"');
             }
-            body.append(writeMeasure(notes, measure));
+            body.append(writeMeasure(notes, measure, metre));
             if (measure < toMeasure) {
                 body.append('|');
             }
@@ -150,21 +168,26 @@ public final class ScoreExcerptWriter {
         return body.toString();
     }
 
-    private static String writeMeasure(List<NoteEvent> notes, int measure) {
+    private static String writeMeasure(List<NoteEvent> notes, int measure, String metre) {
         List<NoteEvent> inBar = notes.stream().filter(note -> note.measure() == measure).toList();
         if (inBar.isEmpty()) {
-            return "z8";
+            // A bar's rest is as long as the bar. Assuming eight eighths writes a whole note
+            // into a 2/4 bar, which is twice the music.
+            return "z" + unitsPerBar(metre);
         }
         TreeSet<Double> onsets = new TreeSet<>();
         inBar.forEach(note -> onsets.add(note.onset()));
 
-        StringBuilder bar = new StringBuilder();
+        // Built as events first, so runs of three can be recognised as tuplets afterwards.
+        // Written straight out, a triplet eighth becomes a two-thirds length that engravers
+        // draw as a dotted note -- a different rhythm from the one in the score.
+        List<Event> events = new ArrayList<>();
         double cursor = 0.0;
         List<Double> ordered = new ArrayList<>(onsets);
         for (int i = 0; i < ordered.size(); i++) {
             double onset = ordered.get(i);
             if (onset > cursor + 1e-9) {
-                bar.append('z').append(length(onset - cursor));
+                events.add(new Event("z", (onset - cursor) / UNIT));
             }
             List<NoteEvent> starting = inBar.stream()
                     .filter(note -> Math.abs(note.onset() - onset) < 1e-9)
@@ -173,10 +196,57 @@ public final class ScoreExcerptWriter {
             double untilNext = i + 1 < ordered.size() ? ordered.get(i + 1) - onset : shortest;
             double written = Math.min(shortest, untilNext <= 0 ? shortest : untilNext);
 
-            bar.append(chord(starting)).append(length(written));
+            events.add(new Event(chord(starting), written / UNIT));
             cursor = onset + written;
         }
+        return render(events);
+    }
+
+    /** One thing to write, and how long it lasts in eighth-note units. */
+    private record Event(String text, double units) {}
+
+    /**
+     * Writes the bar, marking triplets as triplets.
+     *
+     * <p>Three equal notes filling the time of two are written {@code (3} followed by the
+     * three at their notated value. Emitting them at two-thirds length instead is
+     * arithmetically the same and engraves as dotted notes, which reads as a different
+     * rhythm to anybody playing from it.
+     */
+    private static String render(List<Event> events) {
+        StringBuilder bar = new StringBuilder();
+        int i = 0;
+        while (i < events.size()) {
+            if (i + 2 < events.size() && isTripletRun(events, i)) {
+                double notated = events.get(i).units() * 1.5;
+                bar.append("(3");
+                for (int n = i; n < i + 3; n++) {
+                    bar.append(events.get(n).text()).append(lengthOfUnits(notated));
+                }
+                i += 3;
+                continue;
+            }
+            bar.append(events.get(i).text()).append(lengthOfUnits(events.get(i).units()));
+            i++;
+        }
         return bar.toString();
+    }
+
+    /** Three equal events whose written length would need a denominator of three. */
+    private static boolean isTripletRun(List<Event> events, int at) {
+        double units = events.get(at).units();
+        if (units <= 0 || Math.abs(units * 3 - Math.round(units * 3)) > 1e-6) {
+            return false;
+        }
+        if (Math.abs(units * 2 - Math.round(units * 2)) < 1e-6) {
+            return false;   // already a plain note length; nothing to group
+        }
+        for (int n = at + 1; n < at + 3; n++) {
+            if (Math.abs(events.get(n).units() - units) > 1e-6) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static String chord(List<NoteEvent> starting) {
@@ -204,7 +274,11 @@ public final class ScoreExcerptWriter {
      * is what these corpora contain.
      */
     static String length(double duration) {
-        double units = duration / UNIT;
+        return lengthOfUnits(duration / UNIT);
+    }
+
+    /** The same, for a length already expressed in eighth-note units. */
+    static String lengthOfUnits(double units) {
         if (units <= 0) {
             return "";
         }

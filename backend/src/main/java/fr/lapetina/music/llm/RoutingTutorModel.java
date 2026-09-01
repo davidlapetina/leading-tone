@@ -59,6 +59,10 @@ public class RoutingTutorModel implements TutorModel {
                         trimmed.length() > 120 ? trimmed.substring(0, 120) + "…" : trimmed);
                 return fallback.respond(request);
             }
+            if (asksADifferentQuestion(trimmed, request)) {
+                LOG.warnf("The model asked for a different note than the exercise; using the template turn instead.");
+                return fallback.respond(request);
+            }
             return trimmed;
         } catch (RuntimeException modelFailure) {
             failures.recordFailure(Instant.now(), modelFailure.getMessage());
@@ -94,6 +98,44 @@ public class RoutingTutorModel implements TutorModel {
      * A teacher's turn is prose. A reply that opens as JSON or a tag is a model failing at
      * tool calling, and reading it aloud to the learner would be worse than saying nothing.
      */
+    /** Pitches with an octave: the specific things a "play this" question is about. */
+    private static final java.util.regex.Pattern SPECIFIC_PITCH =
+            java.util.regex.Pattern.compile("\\b([A-G][#b]?[0-9])\\b");
+
+    /**
+     * Whether the model has asked for a different note than the one on screen.
+     *
+     * <p>Models do this: told to ask for A3, they write "now play F#3" while the exercise
+     * underneath still says A3. Whichever the learner plays, one of the two is wrong, and
+     * the learner has no way to know which — so the turn falls back to the template, which
+     * asks the question that was actually set.
+     *
+     * <p>Narrow on purpose. It only fires when the exercise names specific pitches and the
+     * prose names a different specific pitch. An explanation that mentions C or the key of
+     * G is untouched, because those are how teaching is done.
+     */
+    static boolean asksADifferentQuestion(String answer, TutorRequest request) {
+        if (request.exercise() == null || request.exercise().prompt == null) {
+            return false;
+        }
+        java.util.Set<String> asked = pitchesIn(request.exercise().prompt);
+        if (asked.isEmpty()) {
+            return false;
+        }
+        java.util.Set<String> said = pitchesIn(answer);
+        said.removeAll(asked);
+        return !said.isEmpty();
+    }
+
+    private static java.util.Set<String> pitchesIn(String text) {
+        java.util.Set<String> pitches = new java.util.LinkedHashSet<>();
+        java.util.regex.Matcher matcher = SPECIFIC_PITCH.matcher(text);
+        while (matcher.find()) {
+            pitches.add(matcher.group(1));
+        }
+        return pitches;
+    }
+
     static boolean looksLikeMarkupRatherThanTeaching(String answer) {
         char first = answer.charAt(0);
         if (first == '{' || first == '[') {

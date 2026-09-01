@@ -64,8 +64,11 @@ class ExerciseVarietyTest {
     @Test
     @DisplayName("a run covers several kinds of thinking, not one repeated")
     void drawsOnTheWholeMenu() {
+        // Forty rather than twelve. The choice is random and weighted by the learner's
+        // channel preference, so a short sample can miss a kind by luck -- and a test that
+        // fails by luck teaches everyone to re-run the suite instead of reading it.
         Set<TaskKind> kinds = new java.util.HashSet<>();
-        shapesOver(12, "roman-numeral").forEach(shape -> kinds.add(shape.kind()));
+        shapesOver(40, "roman-numeral").forEach(shape -> kinds.add(shape.kind()));
         assertTrue(kinds.size() >= 3, "only exercised " + kinds);
     }
 

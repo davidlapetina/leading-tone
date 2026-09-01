@@ -127,13 +127,16 @@ library are inside it.
 From source:
 
 ```bash
-make test     # 373 tests: no Docker, no database, no network, no model
+make test     # 380 tests: no Docker, no database, no network, no model
 make run
 ```
 
 ---
 
 ## Fixed during final review
+
+Found by running the packaged jar and looking at what it drew, not by running tests.
+
 
 - **Note durations were wrong in every engraved excerpt.** A sixteenth was written as a
   sixty-fourth and dotted rhythms as triplets, because the fraction was computed inside out.
@@ -146,6 +149,15 @@ make run
 - **Fifteen of thirty-six concepts had no written lesson**, including secondary dominants.
   All are written now, and a test fails the build if a concept in the catalogue opens to an
   empty page.
+- **Triplets were engraved as dotted notes.** Writing them at two-thirds length is
+  arithmetically right and reads as a different rhythm; they are grouped as tuplets now.
+- **A bar's rest was always a whole note**, which is twice the bar in 2/4.
+- **The tutor asked for a different note than the exercise on screen** — "now play F#3"
+  under a question asking for A3 — in about a third of turns. The reply falls back to the
+  template when it contradicts the question that was actually set.
+- **A flaky test.** Exercise variety was sampled over twelve random draws and could miss a
+  kind by luck. A suite that fails at random teaches people to re-run it rather than read
+  it.
 
 ## Notes
 
